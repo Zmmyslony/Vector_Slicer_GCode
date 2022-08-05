@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <fstream>
 #include "Hyrel.h"
 #include "ValarrayOperations.h"
 #include "Exporting.h"
@@ -120,7 +121,7 @@ void Hyrel::clean(double cleanLength, int numberOfLines, double nozzleWidth) {
 }
 
 void Hyrel::init(int hotendTemperature, int bedTemperature, double cleanLength, double nozzleWidth,
-                 double layerHeight, int toolNumber, double zOffset, double xOffset, double yOffset) {
+                 double layerHeight, int toolNumber, std::vector<double> toolOffset) {
     const int POSITION_OFFSET_REGISTER = 0;
     const int KRA2_PULSES_PER_MICROLITRE = 1297;
     const int CLEANING_LINES = 4;
@@ -131,7 +132,7 @@ void Hyrel::init(int hotendTemperature, int bedTemperature, double cleanLength, 
 
     autoHome();
     addBreak();
-    defineToolOffset(toolNumber, {xOffset, yOffset, zOffset}, POSITION_OFFSET_REGISTER);
+    defineToolOffset(toolNumber, toolOffset, POSITION_OFFSET_REGISTER);
     addBreak();
 
     selectTool(toolNumber);
@@ -193,17 +194,25 @@ void testHeaderAndFooter() {
 }
 
 
-void generateGCodeHyrel(const std::string &baseDirectory, int temperature, double cleaningDistance,
-                        const std::valarray<double> &positionOffset, double gridDistance, int moveSpeed, int printSpeed,
-                        double extrusionCoefficient, double nozzleWidth, double layerHeight, int toolNumber,
-                        double xOffset, double yOffset, double zOffset) {
+void Hyrel::exportToFile(const std::string &path) {
+    std::string filename = path + R"(\results\patternHyrel.gcode)";
+    std::ofstream file(filename);
+
+    file << getText();
+    file.close();
+}
+
+void generateGCodeHyrel(const std::string &baseDirectory, double cleaningDistance, int toolNumber, int temperature,
+                        int moveSpeed, int printSpeed, double nozzleDiameter, double layerHeight,
+                        double extrusionMultiplier, double gridSpacing, const std::valarray<double> &patternOffset,
+                        std::vector<double> toolOffset) {
     std::cout << std::endl;
     std::string directoryPath = baseDirectory + R"(\results)";
     std::vector<std::vector<std::valarray<int>>> sortedPaths = read3DVectorFromFile(directoryPath, "best_paths");
-    Hyrel hyrel(moveSpeed, printSpeed, extrusionCoefficient);
-    hyrel.init(temperature, 0, cleaningDistance, nozzleWidth,
+    Hyrel hyrel(moveSpeed, printSpeed, extrusionMultiplier);
+    hyrel.init(temperature, 0, cleaningDistance, nozzleDiameter,
                layerHeight, toolNumber, zOffset, xOffset, yOffset);
-    hyrel.printPattern(sortedPaths, positionOffset, gridDistance);
+    hyrel.printPattern(sortedPaths, patternOffset, gridSpacing);
     hyrel.shutDown();
 
     hyrel.exportToFile(baseDirectory);
