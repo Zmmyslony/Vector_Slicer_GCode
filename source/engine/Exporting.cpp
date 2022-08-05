@@ -15,7 +15,7 @@ std::string readRowToString(const std::vector<int> &row) {
     }
     rowString.pop_back();
     rowString += "\n";
-    return rowString;\
+    return rowString;
 }
 
 
