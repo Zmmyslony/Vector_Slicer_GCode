@@ -78,7 +78,7 @@ void Hyrel::extrude(const std::valarray<double> &xy) {
     positions[1] = xy[1];
 //    bodyStream << "G1 X" << xy[0] << " Y" << xy[1] << " F" << printSpeed << " E1" << "\n";
     generalCommand({'G', 'X', 'Y', 'F', 'E'}, {true, false, false, true, true},
-                   {0, xy[0], xy[1], (double) moveSpeed, 1});
+                   {0, xy[0], xy[1], (double) printSpeed, 1});
 }
 
 void Hyrel::configureFlow(double nozzleWidth, double layerHeight, double flowMultiplier, int pulses, int tool) {
