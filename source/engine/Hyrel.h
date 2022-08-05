@@ -30,7 +30,7 @@ class Hyrel : public GCodeFile {
 
 public:
     void init(int hotendTemperature, int bedTemperature, double cleanLength, double nozzleWidth, double layerHeight,
-              int toolNumber, std::vector<double> toolOffset);
+              int toolNumber, std::vector<double> &toolOffset);
 
     void shutDown();
 
@@ -51,6 +51,6 @@ void testHeaderAndFooter();
 void generateGCodeHyrel(const std::string &baseDirectory, double cleaningDistance, int toolNumber, int temperature,
                         int moveSpeed, int printSpeed, double nozzleDiameter, double layerHeight,
                         double extrusionMultiplier, double gridSpacing, const std::valarray<double> &patternOffset,
-                        std::vector<double> toolOffset);
+                        std::vector<double> &toolOffset);
 
 #endif //VECTOR_SLICER_HYREL_H

@@ -9,7 +9,7 @@
 #include "Exporting.h"
 
 
-int toolNumberVariable(unsigned int toolNumber) {
+unsigned int toolNumberVariable(unsigned int toolNumber) {
     const unsigned int numberOfTools = 4;
     if (toolNumber > numberOfTools) {
         std::cout << "Gcode writing -> tool number: max value: "
@@ -121,7 +121,7 @@ void Hyrel::clean(double cleanLength, int numberOfLines, double nozzleWidth) {
 }
 
 void Hyrel::init(int hotendTemperature, int bedTemperature, double cleanLength, double nozzleWidth,
-                 double layerHeight, int toolNumber, std::vector<double> toolOffset) {
+                 double layerHeight, int toolNumber, std::vector<double> &toolOffset) {
     const int POSITION_OFFSET_REGISTER = 0;
     const int KRA2_PULSES_PER_MICROLITRE = 1297;
     const int CLEANING_LINES = 4;
@@ -188,7 +188,8 @@ void Hyrel::printPattern(const std::vector<std::vector<std::valarray<int>>> &sor
 
 void testHeaderAndFooter() {
     Hyrel hyrel(600, 100, 1);
-    hyrel.init(20, 0, 30, 0.335, 0.16, 1, 50, 30, 30);
+    std::vector<double> toolOffset = {50, 30, 30};
+    hyrel.init(20, 0, 30, 0.335, 0.16, 1, toolOffset);
     hyrel.shutDown();
     std::cout << hyrel.getText();
 }
@@ -205,13 +206,13 @@ void Hyrel::exportToFile(const std::string &path) {
 void generateGCodeHyrel(const std::string &baseDirectory, double cleaningDistance, int toolNumber, int temperature,
                         int moveSpeed, int printSpeed, double nozzleDiameter, double layerHeight,
                         double extrusionMultiplier, double gridSpacing, const std::valarray<double> &patternOffset,
-                        std::vector<double> toolOffset) {
+                        std::vector<double> &toolOffset) {
     std::cout << std::endl;
     std::string directoryPath = baseDirectory + R"(\results)";
     std::vector<std::vector<std::valarray<int>>> sortedPaths = read3DVectorFromFile(directoryPath, "best_paths");
     Hyrel hyrel(moveSpeed, printSpeed, extrusionMultiplier);
     hyrel.init(temperature, 0, cleaningDistance, nozzleDiameter,
-               layerHeight, toolNumber, zOffset, xOffset, yOffset);
+               layerHeight, toolNumber, toolOffset);
     hyrel.printPattern(sortedPaths, patternOffset, gridSpacing);
     hyrel.shutDown();
 
