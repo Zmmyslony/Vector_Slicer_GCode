@@ -28,14 +28,13 @@ void GCodeFile::generalCommand(const std::vector<char> &commands, const std::vec
             }
         }
         bodyStream << "\n";
-    }
-    else {
+    } else {
         addComment("\t\tSYNTAX ERROR");
     }
 }
 
 void GCodeFile::generalCommand(const std::vector<char> &commands, const std::vector<bool> &isInt,
-                               const std::vector<double> &values, const std::string& comment) {
+                               const std::vector<double> &values, const std::string &comment) {
     if (commands.size() == values.size() && commands.size() == isInt.size()) {
         for (int i = 0; i < commands.size(); i++) {
             if (isInt[i]) {
@@ -71,7 +70,9 @@ void GCodeFile::autoHome() {
     setRelativePositioning();
     moveVertical(10);
     setAbsolutePositioning();
-    generalCommand('G', 28);
+    generalCommand({'G', 'X', 'Y', 'Z'},
+                   {true, false, false, false},
+                   {28, 0, 0, 0});
     positions = {0, 0, 0};
 }
 
@@ -131,7 +132,6 @@ void GCodeFile::extrude(const std::valarray<double> &xy) {
 }
 
 
-
 void GCodeFile::setCurrentCoordinatesToZero() {
     addComment("Setting current coordinates as new zero");
     generalCommand({'G', 'X', 'Y', 'Z'}, {true, false, false, false}, {92, 0, 0, 0});
@@ -188,7 +188,7 @@ std::string GCodeFile::getText() {
     return bodyStream.str();
 }
 
-void GCodeFile::printPath(const std::vector<std::valarray<int>>& path, const std::valarray<double> &positionOffset,
+void GCodeFile::printPath(const std::vector<std::valarray<int>> &path, const std::valarray<double> &positionOffset,
                           double gridDistance) {
 
     addComment("Moving up.");

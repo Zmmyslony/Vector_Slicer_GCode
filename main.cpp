@@ -10,26 +10,26 @@ std::string getSourceDirectory() {
 
 int main() {
     std::string sourceDirectory = getSourceDirectory();
-    std::string printDirectory = sourceDirectory + R"(\patterns\radial, r = 1 cm)";
-    std::cout << "\nGenerating GCode for the files contained in" << std::endl << '\t' << printDirectory << std::endl;
+    std::string patternDirectory = sourceDirectory + R"(\patterns\radial, r = 1 cm)";
+    std::cout << "\nGenerating GCode for the files contained in" << std::endl << '\t' << patternDirectory << std::endl;
     // All units are in mm
-    double cleaningDistance = 20; // Also allows the material to start flowing so that we are in the shear thinning regime
+    double cleaningDistance = 20; // Also allows the material to start flowing until we are in the shear thinning regime
     int toolNumber = 1;
     int printingTemperature = 20;
-    int moveSpeed = 600;
-    int printSpeed = 200;
-    double nozzleDiameter = 0.335;
+    int moveSpeed = 1800;
+    int printSpeed = 600;
+    double nozzleDiameter = 0.490;
     double nozzleDiameterAssumed = 0.3; // Nozzle diameter which was assumed for generation of the director pattern
-    double layerHeight = 0.16;
+    double layerHeight = 0.2;
 
     double extrusionMultiplier = 1;
     double gridSpacingAssumed = 0.02; // Spacing which was used for slicing the pattern, can be scaled for different nozzle diameters
     double gridSpacing = gridSpacingAssumed * nozzleDiameter / nozzleDiameterAssumed;
-    std::vector<double> toolOffset = {30, 120, 40};
+    std::vector<double> toolOffset = {120, 30, 56};
     std::valarray<double> patternOffset = {0, 5};
 
 
-    generateGCodeHyrel(printDirectory, cleaningDistance, toolNumber, printingTemperature, moveSpeed, printSpeed,
+    generateGCodeHyrel(patternDirectory, cleaningDistance, toolNumber, printingTemperature, moveSpeed, printSpeed,
                        nozzleDiameter, layerHeight, extrusionMultiplier, gridSpacing, patternOffset, toolOffset);
     std::cout << "Generation complete." << std::endl;
     return 0;

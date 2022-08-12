@@ -8,28 +8,8 @@
 #include "ValarrayOperations.h"
 #include "Exporting.h"
 
-
-unsigned int toolNumberVariable(unsigned int toolNumber) {
-    const unsigned int numberOfTools = 4;
-    if (toolNumber > numberOfTools) {
-        std::cout << "Gcode writing -> tool number: max value: "
-                  << numberOfTools - 1 << ", used value: " << toolNumber << "\n";
-        return -1;
-    } else {
-        return toolNumber;
-    }
-}
-
-
-std::string toolNumberString(unsigned int toolNumber) {
-    const unsigned int numberOfTools = 4;
-    if (toolNumber > numberOfTools) {
-        std::cout << "Gcode writing -> tool number: max value: "
-                  << numberOfTools - 1 << ", used value: " << toolNumber << "\n";
-        return "";
-    } else {
-        return "T" + std::to_string(toolNumberVariable(toolNumber));
-    }
+int mCommandToolNumber(int toolNumber) {
+    return toolNumber + 11;
 }
 
 void Hyrel::selectTool(unsigned int toolNumber) {
@@ -51,7 +31,8 @@ void Hyrel::defineHeightOffset(unsigned int registerNumber, double height) {
     }
 }
 
-void Hyrel::defineToolOffset(unsigned int toolNumber, const std::vector<double> &xyz, unsigned int offsetRegister) {
+void
+Hyrel::defineToolOffset(unsigned int toolNumber, const std::vector<double> &xyz, unsigned int heightRegisterOffset) {
     const double X_MAX = 200;
     const double Y_MAX = 200;
     const double Z_MAX = 120;
@@ -66,25 +47,63 @@ void Hyrel::defineToolOffset(unsigned int toolNumber, const std::vector<double> 
                   << Z_MAX << ", used value " << xyz[2] << "\n";
     } else {
         addComment("Defining tool offset");
+//        generalCommand(
+//                {'M', 'T', 'O', 'X', 'Y', 'I'},
+//                {true, true, true, false, false, true},
+//                {6, (double) mCommandToolNumber(toolNumber), (double) (toolNumber + 1), xyz[0], xyz[1], 1});
+//        generalCommand({'M', 'H', 'Z'},
+//                       {true, true, false},
+//                       {660, (double) heightRegisterOffset, xyz[2]});
         generalCommand(
                 {'M', 'T', 'O', 'X', 'Y', 'Z'},
                 {true, true, true, false, false, false},
-                {6, (double) toolNumberVariable(toolNumber), (double) offsetRegister, xyz[0], xyz[1], xyz[2]});
+                {6, (double) mCommandToolNumber(toolNumber), (double) (toolNumber + 1), xyz[0], xyz[1], xyz[2]});
     }
 }
+
+void Hyrel::configurePrime(int toolNumber, double pulseRate, double numberOfPulses, double dwellTime,
+                           bool isExecutedImmediately) {
+    addComment("Configure priming");
+    generalCommand({'M', 'T', 'S', 'E', 'P', 'I'},
+                   {true, true, false, false, false, true},
+                   {722, (double) mCommandToolNumber(toolNumber), pulseRate, numberOfPulses, dwellTime,
+                    (double) isExecutedImmediately});
+}
+
+
+void Hyrel::configureUnprime(int toolNumber, double pulseRate, double numberOfPulses, double dwellTime,
+                             bool isExecutedImmediately) {
+    addComment("Configure priming");
+    generalCommand({'M', 'T', 'S', 'E', 'P', 'I'},
+                   {true, true, false, false, false, true},
+                   {721, (double) mCommandToolNumber(toolNumber), pulseRate, numberOfPulses, dwellTime,
+                    (double) isExecutedImmediately});
+}
+
+void Hyrel::disablePriming(int toolNumber) {
+    configureUnprime(toolNumber, 0, 0, 0, false);
+    configurePrime(toolNumber, 0, 0, 0, false);
+}
+
 
 void Hyrel::extrude(const std::valarray<double> &xy) {
     positions[0] = xy[0];
     positions[1] = xy[1];
 //    bodyStream << "G1 X" << xy[0] << " Y" << xy[1] << " F" << printSpeed << " E1" << "\n";
     generalCommand({'G', 'X', 'Y', 'F', 'E'}, {true, false, false, true, true},
-                   {0, xy[0], xy[1], (double) printSpeed, 1});
+                   {1, xy[0], xy[1], (double) printSpeed, 1});
 }
 
 void Hyrel::configureFlow(double nozzleWidth, double layerHeight, double flowMultiplier, int pulses, int tool) {
     addComment("Configuring flow");
-    generalCommand({'G', 'W', 'Z', 'S', 'P', 'T'}, {true, false, false, false, true, true},
-                   {221, nozzleWidth, layerHeight, flowMultiplier, (double) pulses, (double) tool});
+    generalCommand({'M', 'T', 'W', 'Z', 'S', 'P'}, {true, true, false, false, false, true},
+                   {221, (double) mCommandToolNumber(tool), nozzleWidth, layerHeight, flowMultiplier, (double) pulses});
+}
+
+void Hyrel::setTemperatureHotend(int temperature, int toolNumber) {
+    addComment("Setting hotend temperature");
+    generalCommand({'M', 'T', 'S'}, {true, true, true},
+                   {109, (double) mCommandToolNumber(toolNumber), (double) temperature});
 }
 
 void Hyrel::setUnitsToMillimetres() {
@@ -107,7 +126,17 @@ void Hyrel::clearOffsets() {
     generalCommand('G', 53);
 }
 
-void Hyrel::clean(double cleanLength, int numberOfLines, double nozzleWidth) {
+void Hyrel::clean(double cleanLength, int numberOfLines, double nozzleWidth, int HEIGHT_OFFSET_REGISTER) {
+    addComment("Invoking offsets");
+    generalCommand({'G', 'X', 'Y'},
+                   {true, false, false},
+                   {0, 0, 0});
+    generalCommand({'G', 'Z', 'H'},
+                   {true, false, true},
+                   {0, 0, (double) HEIGHT_OFFSET_REGISTER});
+
+    addBreak();
+    addComment("Starting cleaning");
     for (int i = 0; i < numberOfLines; i++) {
         if (i % 2 == 0) {
             movePlanar({0, i * nozzleWidth});
@@ -122,7 +151,7 @@ void Hyrel::clean(double cleanLength, int numberOfLines, double nozzleWidth) {
 
 void Hyrel::init(int hotendTemperature, int bedTemperature, double cleanLength, double nozzleWidth,
                  double layerHeight, int toolNumber, std::vector<double> &toolOffset) {
-    const int POSITION_OFFSET_REGISTER = 0;
+    const int HEIGHT_OFFSET_REGISTER = 2;
     const int KRA2_PULSES_PER_MICROLITRE = 1297;
     const int CLEANING_LINES = 4;
 
@@ -132,23 +161,26 @@ void Hyrel::init(int hotendTemperature, int bedTemperature, double cleanLength, 
 
     autoHome();
     addBreak();
-    defineToolOffset(toolNumber, toolOffset, POSITION_OFFSET_REGISTER);
+    defineToolOffset(toolNumber, toolOffset, HEIGHT_OFFSET_REGISTER);
     addBreak();
 
-    selectTool(toolNumber);
-    setTemperatureHotend(hotendTemperature);
+    setTemperatureHotend(hotendTemperature, toolNumber);
     setTemperatureBed(bedTemperature);
     addBreak();
 
     configureFlow(nozzleWidth, layerHeight, extrusionCoefficient, KRA2_PULSES_PER_MICROLITRE, toolNumber);
+    disablePriming(toolNumber);
+
+    selectTool(toolNumber);
     addBreak();
-    clean(cleanLength, CLEANING_LINES, nozzleWidth);
+    clean(cleanLength, CLEANING_LINES, nozzleWidth, HEIGHT_OFFSET_REGISTER);
     addBreak();
+    addComment("Starting printing");
 }
 
 void Hyrel::shutDown() {
     setTemperatureBed(0);
-    setTemperatureHotend(0);
+    GCodeFile::setTemperatureHotend(0);
     addBreak();
 
     autoHome();

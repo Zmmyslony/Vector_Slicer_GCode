@@ -10,7 +10,7 @@
 class Hyrel : public GCodeFile {
     void defineHeightOffset(unsigned int toolNumber, double height);
 
-    void defineToolOffset(unsigned int toolNumber, const std::vector<double> &xyz, unsigned int offsetRegister);
+    void defineToolOffset(unsigned int toolNumber, const std::vector<double> &xyz, unsigned int heightRegisterOffset);
 
     void extrude(const std::valarray<double> &xy);
 
@@ -26,8 +26,19 @@ class Hyrel : public GCodeFile {
 
     void turnMotorsOff();
 
-    void clean(double cleanLength, int numberOfLines, double nozzleWidth);
+    void clean(double cleanLength, int numberOfLines, double nozzleWidth, int HEIGHT_OFFSET_REGISTER);
 
+    void
+    configurePrime(int toolNumber, double pulseRate, double numberOfPulses, double dwellTime,
+                   bool isExecutedImmediately);
+
+    void
+    configureUnprime(int toolNumber, double pulseRate, double numberOfPulses, double dwellTime,
+                     bool isExecutedImmediately);
+
+    void disablePriming(int toolNumber);
+
+    void setTemperatureHotend(int temperature, int toolNumber);
 public:
     void init(int hotendTemperature, int bedTemperature, double cleanLength, double nozzleWidth, double layerHeight,
               int toolNumber, std::vector<double> &toolOffset);
