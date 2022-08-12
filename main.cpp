@@ -1,5 +1,9 @@
 #include <iostream>
 #include "source/engine/Hyrel.h"
+#include <boost/filesystem.hpp>
+#include <boost/dll.hpp>
+
+namespace fs = boost::filesystem;
 
 
 std::string getSourceDirectory() {
@@ -9,9 +13,11 @@ std::string getSourceDirectory() {
 }
 
 int main() {
-    std::string sourceDirectory = getSourceDirectory();
-    std::string patternDirectory = sourceDirectory + R"(\patterns\radial, r = 1 cm)";
-    std::cout << "\nGenerating GCode for the files contained in" << std::endl << '\t' << patternDirectory << std::endl;
+    fs::path cwd = boost::dll::program_location().parent_path().parent_path();
+    fs::path patternsDirectory = cwd / "patterns";
+
+    std::vector<std::string> patternsToGenerate = {"radial, r = 1 cm", "radial, r = 0.5 cm", "diagonal, 1x0.5 cm"};
+    std::cout << "\nGenerating GCode for the files contained in" << std::endl << '\t' << patternsDirectory << std::endl;
     // All units are in mm
     double cleaningDistance = 20; // Also allows the material to start flowing until we are in the shear thinning regime
     int toolNumber = 1;
@@ -29,8 +35,11 @@ int main() {
     std::valarray<double> patternOffset = {0, 5};
 
 
-    generateGCodeHyrel(patternDirectory, cleaningDistance, toolNumber, printingTemperature, moveSpeed, printSpeed,
-                       nozzleDiameter, layerHeight, extrusionMultiplier, gridSpacing, patternOffset, toolOffset);
+    for (auto &pattern : patternsToGenerate) {
+        generateGCodeHyrel(patternsDirectory, pattern, cleaningDistance, toolNumber, printingTemperature, moveSpeed,
+                           printSpeed, nozzleDiameter, layerHeight, extrusionMultiplier, gridSpacing, patternOffset, toolOffset);
+    }
+
     std::cout << "Generation complete." << std::endl;
     return 0;
 }

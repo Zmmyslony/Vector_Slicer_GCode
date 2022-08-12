@@ -47,13 +47,6 @@ Hyrel::defineToolOffset(unsigned int toolNumber, const std::vector<double> &xyz,
                   << Z_MAX << ", used value " << xyz[2] << "\n";
     } else {
         addComment("Defining tool offset");
-//        generalCommand(
-//                {'M', 'T', 'O', 'X', 'Y', 'I'},
-//                {true, true, true, false, false, true},
-//                {6, (double) mCommandToolNumber(toolNumber), (double) (toolNumber + 1), xyz[0], xyz[1], 1});
-//        generalCommand({'M', 'H', 'Z'},
-//                       {true, true, false},
-//                       {660, (double) heightRegisterOffset, xyz[2]});
         generalCommand(
                 {'M', 'T', 'O', 'X', 'Y', 'Z'},
                 {true, true, true, false, false, false},
@@ -89,7 +82,6 @@ void Hyrel::disablePriming(int toolNumber) {
 void Hyrel::extrude(const std::valarray<double> &xy) {
     positions[0] = xy[0];
     positions[1] = xy[1];
-//    bodyStream << "G1 X" << xy[0] << " Y" << xy[1] << " F" << printSpeed << " E1" << "\n";
     generalCommand({'G', 'X', 'Y', 'F', 'E'}, {true, false, false, true, true},
                    {1, xy[0], xy[1], (double) printSpeed, 1});
 }
@@ -227,26 +219,27 @@ void testHeaderAndFooter() {
 }
 
 
-void Hyrel::exportToFile(const std::string &path) {
-    std::string filename = path + R"(\results\patternHyrel.gcode)";
-    std::ofstream file(filename);
+void Hyrel::exportToFile(const boost::filesystem::path &resultsPath, const std::string &patternName) {
+    boost::filesystem::path filename = resultsPath / (patternName + ".gcode");
+    std::ofstream file(filename.string());
 
     file << getText();
     file.close();
 }
 
-void generateGCodeHyrel(const std::string &baseDirectory, double cleaningDistance, int toolNumber, int temperature,
-                        int moveSpeed, int printSpeed, double nozzleDiameter, double layerHeight,
+void generateGCodeHyrel(const boost::filesystem::path &directory, const std::string &patternName, double cleaningDistance,
+                        int toolNumber, int temperature, int moveSpeed, int printSpeed, double nozzleDiameter, double layerHeight,
                         double extrusionMultiplier, double gridSpacing, const std::valarray<double> &patternOffset,
                         std::vector<double> &toolOffset) {
     std::cout << std::endl;
-    std::string directoryPath = baseDirectory + R"(\results)";
-    std::vector<std::vector<std::valarray<int>>> sortedPaths = read3DVectorFromFile(directoryPath, "best_paths");
+    boost::filesystem::path patternPath = directory / patternName;
+    boost::filesystem::path resultsPath = patternPath / "results";
+    std::vector<std::vector<std::valarray<int>>> sortedPaths = read3DVectorFromFile(resultsPath.string(), "best_paths");
     Hyrel hyrel(moveSpeed, printSpeed, extrusionMultiplier);
     hyrel.init(temperature, 0, cleaningDistance, nozzleDiameter,
                layerHeight, toolNumber, toolOffset);
     hyrel.printPattern(sortedPaths, patternOffset, gridSpacing);
     hyrel.shutDown();
 
-    hyrel.exportToFile(baseDirectory);
+    hyrel.exportToFile(resultsPath, patternName);
 }

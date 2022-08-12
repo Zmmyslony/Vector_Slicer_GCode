@@ -6,6 +6,7 @@
 #define VECTOR_SLICER_HYREL_H
 
 #include "GCodeFile.h"
+#include <boost/filesystem.hpp>
 
 class Hyrel : public GCodeFile {
     void defineHeightOffset(unsigned int toolNumber, double height);
@@ -39,6 +40,7 @@ class Hyrel : public GCodeFile {
     void disablePriming(int toolNumber);
 
     void setTemperatureHotend(int temperature, int toolNumber);
+
 public:
     void init(int hotendTemperature, int bedTemperature, double cleanLength, double nozzleWidth, double layerHeight,
               int toolNumber, std::vector<double> &toolOffset);
@@ -48,20 +50,21 @@ public:
     Hyrel(int moveSpeed, int printSpeed, double extrusionCoefficient);
 
     void
-    printPath(const std::vector<std::valarray<int>>& path, const std::valarray<double> &positionOffset,
+    printPath(const std::vector<std::valarray<int>> &path, const std::valarray<double> &positionOffset,
               double gridDistance);
 
     void printPattern(const std::vector<std::vector<std::valarray<int>>> &sortedSequenceOfPaths,
                       const std::valarray<double> &positionOffset, double gridDistance);
 
-    void exportToFile(const std::string &path);
+    void exportToFile(const boost::filesystem::path &resultsPath, const std::string &patternName);
 };
 
 void testHeaderAndFooter();
 
-void generateGCodeHyrel(const std::string &baseDirectory, double cleaningDistance, int toolNumber, int temperature,
-                        int moveSpeed, int printSpeed, double nozzleDiameter, double layerHeight,
-                        double extrusionMultiplier, double gridSpacing, const std::valarray<double> &patternOffset,
-                        std::vector<double> &toolOffset);
+void
+generateGCodeHyrel(const boost::filesystem::path &directory, const std::string &patternName, double cleaningDistance,
+                   int toolNumber, int temperature, int moveSpeed, int printSpeed, double nozzleDiameter, double layerHeight,
+                   double extrusionMultiplier, double gridSpacing, const std::valarray<double> &patternOffset,
+                   std::vector<double> &toolOffset);
 
 #endif //VECTOR_SLICER_HYREL_H
