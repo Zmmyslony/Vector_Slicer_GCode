@@ -241,5 +241,5 @@ void generateGCodeHyrel(const boost::filesystem::path &directory, const std::str
     hyrel.printPattern(sortedPaths, patternOffset, gridSpacing);
     hyrel.shutDown();
 
-    hyrel.exportToFile(resultsPath, patternName);
+    hyrel.exportToFile(directory / "gcode", patternName);
 }
