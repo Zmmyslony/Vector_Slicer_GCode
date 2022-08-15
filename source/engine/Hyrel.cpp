@@ -32,7 +32,7 @@ void Hyrel::defineHeightOffset(unsigned int registerNumber, double height) {
 }
 
 void
-Hyrel::defineToolOffset(unsigned int toolNumber, const std::vector<double> &xyz, unsigned int heightRegisterOffset) {
+Hyrel::defineToolOffset(int toolNumber, const std::vector<double> &xyz, unsigned int heightRegisterOffset) {
     const double X_MAX = 200;
     const double Y_MAX = 200;
     const double Z_MAX = 120;
@@ -176,9 +176,12 @@ void Hyrel::configureUVPen(int printHeadToolNumber, int penToolNumber, int dutyC
         generalCommand({'M', 'T', 'S'},
                        {true, true, true},
                        {703, (double)mCommandToolNumber(penToolNumber), (double)mCommandToolNumber(printHeadToolNumber)});
+        generalCommand({'M', 'T', 'E'},
+                       {true, true, true},
+                       {620, (double)mCommandToolNumber(penToolNumber), 1});
         generalCommand({'M', 'T', 'P'},
                        {true, true, true},
-                       {703, (double)mCommandToolNumber(penToolNumber), (double)dutyCycle});
+                       {621, (double)mCommandToolNumber(penToolNumber), (double)dutyCycle});
     }
 }
 
