@@ -88,6 +88,10 @@ std::vector<std::vector<int>> importTableInt(const std::string &filename) {
     std::string line;
     std::fstream file(filename);
 
+    if (!file) {
+        std::cout << filename << " does not exist" << std::endl;
+    }
+
     while (std::getline(file, line)) {
         std::string element;
         std::stringstream lineStream(line);

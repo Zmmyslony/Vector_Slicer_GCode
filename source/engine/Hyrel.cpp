@@ -170,6 +170,18 @@ void Hyrel::init(int hotendTemperature, int bedTemperature, double cleanLength, 
     addComment("Starting printing");
 }
 
+void Hyrel::configureUVPen(int printHeadToolNumber, int penToolNumber, int dutyCycle) {
+    if (dutyCycle >= 0 && dutyCycle <= 100) {
+        addComment("Linking pen to activate with the printing moves ");
+        generalCommand({'M', 'T', 'S'},
+                       {true, true, true},
+                       {703, (double)mCommandToolNumber(penToolNumber), (double)mCommandToolNumber(printHeadToolNumber)});
+        generalCommand({'M', 'T', 'P'},
+                       {true, true, true},
+                       {703, (double)mCommandToolNumber(penToolNumber), (double)dutyCycle});
+    }
+}
+
 void Hyrel::shutDown() {
     setTemperatureBed(0);
     GCodeFile::setTemperatureHotend(0);
@@ -189,13 +201,6 @@ Hyrel::Hyrel(int moveSpeed, int printSpeed, double extrusionCoefficient) : GCode
 
 void Hyrel::printPath(const std::vector<std::valarray<int>> &path, const std::valarray<double> &positionOffset,
                       double gridDistance) {
-    addComment("Moving up.");
-    moveVerticalRelative(1);
-    addComment("Moving to new starting point.");
-
-    movePlanar(itodArray(path[0]) * gridDistance + positionOffset);
-    addComment("Moving down.");
-    moveVerticalRelative(-1);
     addComment("Starting new path.");
     for (auto &position: path) {
         extrude(itodArray(position) * gridDistance + positionOffset);
@@ -203,9 +208,23 @@ void Hyrel::printPath(const std::vector<std::valarray<int>> &path, const std::va
 }
 
 void Hyrel::printPattern(const std::vector<std::vector<std::valarray<int>>> &sortedSequenceOfPaths,
-                         const std::valarray<double> &positionOffset, double gridDistance) {
+                         const std::valarray<double> &positionOffset, double gridSpacing, double liftOffDistance) {
+    std::valarray<int> currentCoordinates = {0, 0};
+    std::valarray<int> previousCoordinates = {0, 0};
     for (auto &path: sortedSequenceOfPaths) {
-        printPath(path, positionOffset, gridDistance);
+        currentCoordinates = path.front();
+        double currentDistance = norm(previousCoordinates - currentCoordinates) * gridSpacing;
+        if (currentDistance > liftOffDistance) {
+            addComment("Moving up.");
+            moveVerticalRelative(1);
+            addComment("Moving to new starting point.");
+
+            movePlanar(itodArray(path[0]) * gridSpacing + positionOffset);
+            addComment("Moving down.");
+            moveVerticalRelative(-1);
+        }
+        printPath(path, positionOffset, gridSpacing);
+        previousCoordinates = path.back();
     }
 }
 
@@ -230,16 +249,22 @@ void Hyrel::exportToFile(const boost::filesystem::path &resultsPath, const std::
 void generateGCodeHyrel(const boost::filesystem::path &directory, const std::string &patternName, double cleaningDistance,
                         int toolNumber, int temperature, int moveSpeed, int printSpeed, double nozzleDiameter, double layerHeight,
                         double extrusionMultiplier, double gridSpacing, const std::valarray<double> &patternOffset,
-                        std::vector<double> &toolOffset) {
-    std::cout << std::endl;
+                        std::vector<double> &toolOffset, int uvPenToolNumber, int curingDutyCycle) {
     boost::filesystem::path patternPath = directory / patternName;
     boost::filesystem::path resultsPath = patternPath / "results";
-    std::vector<std::vector<std::valarray<int>>> sortedPaths = read3DVectorFromFile(resultsPath.string(), "best_paths");
-    Hyrel hyrel(moveSpeed, printSpeed, extrusionMultiplier);
-    hyrel.init(temperature, 0, cleaningDistance, nozzleDiameter,
-               layerHeight, toolNumber, toolOffset);
-    hyrel.printPattern(sortedPaths, patternOffset, gridSpacing);
-    hyrel.shutDown();
+    if (boost::filesystem::exists(resultsPath)) {
+        std::vector<std::vector<std::valarray<int>>> sortedPaths = read3DVectorFromFile(resultsPath.string(),
+                                                                                        "best_paths");
+        Hyrel hyrel(moveSpeed, printSpeed, extrusionMultiplier);
+        hyrel.init(temperature, 0, cleaningDistance, nozzleDiameter,
+                   layerHeight, toolNumber, toolOffset);
+        hyrel.configureUVPen(toolNumber, uvPenToolNumber, curingDutyCycle);
+        hyrel.printPattern(sortedPaths, patternOffset, gridSpacing, 1);
+        hyrel.shutDown();
 
-    hyrel.exportToFile(directory / "gcode", patternName);
+        hyrel.exportToFile(directory / "gcode", patternName);
+    }
+    else {
+        std::cout << "ERROR: Directory \"" << resultsPath << "\" does not exist." << std::endl;
+    }
 }
