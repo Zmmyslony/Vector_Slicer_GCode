@@ -49,8 +49,6 @@ class GCodeFile {
 
     void movePlanar(const std::valarray<double> &xy);
 
-    void moveVertical(double z);
-
     void moveVerticalRelative(double deltaZ);
 
     void move(double x, double y, double z);
@@ -62,6 +60,8 @@ class GCodeFile {
                    const std::string &comment);
 
 public:
+
+    void moveVertical(double z);
     GCodeFile(int moveSpeed, int printSpeed, double extrusionCoefficient);
 
     explicit GCodeFile();

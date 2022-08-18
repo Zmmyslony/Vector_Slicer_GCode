@@ -48,11 +48,15 @@ void GCodeFile::generalCommand(const std::vector<char> &commands, const std::vec
 }
 
 void GCodeFile::generalCommand(const char &command, double value) {
-    generalCommand({command}, {false}, {value});
+    generalCommand({command},
+                   {false},
+                   {value});
 }
 
 void GCodeFile::generalCommand(const char &command, int value) {
-    generalCommand({command}, {true}, {(double) value});
+    generalCommand({command},
+                   {true},
+                   {(double) value});
 }
 
 void GCodeFile::setRelativePositioning() {
@@ -83,7 +87,9 @@ void GCodeFile::levelBed() {
 
 void GCodeFile::setTemperatureHotend(int temperature) {
     addComment("Setting hotend temperature");
-    generalCommand({'M', 'S'}, {true, true}, {109, (double) temperature});
+    generalCommand({'M', 'S'},
+                   {true, true},
+                   {109, (double) temperature});
 }
 
 void GCodeFile::setTemperatureHotendGradual(int temperature) {
@@ -94,7 +100,9 @@ void GCodeFile::setTemperatureHotendGradual(int temperature) {
 
 void GCodeFile::setTemperatureBed(int temperature) {
     addComment("Setting bed temperature");
-    generalCommand({'M', 'S'}, {true, true}, {190, (double) temperature});
+    generalCommand({'M', 'S'},
+                   {true, true},
+                   {190, (double) temperature});
 }
 
 void GCodeFile::turnMotorsOff() {
@@ -103,13 +111,17 @@ void GCodeFile::turnMotorsOff() {
 }
 
 void GCodeFile::movePlanar(const std::valarray<double> &xy) {
-    generalCommand({'G', 'X', 'Y', 'F'}, {true, false, false, true}, {0, xy[0], xy[1], (double) moveSpeed});
+    generalCommand({'G', 'X', 'Y', 'F'},
+                   {true, false, false, true},
+                   {0, xy[0], xy[1], (double) moveSpeed});
     positions[0] = xy[0];
     positions[1] = xy[1];
 }
 
 void GCodeFile::moveVertical(double z) {
-    generalCommand({'G', 'Z', 'F'}, {true, false, true}, {0, z, (double) moveSpeed / VERTICAL_MOVE_SLOWDOWN});
+    generalCommand({'G', 'Z', 'F'},
+                   {true, false, true},
+                   {0, z, (double) moveSpeed / VERTICAL_MOVE_SLOWDOWN});
     positions[2] = z;
 }
 
@@ -119,7 +131,9 @@ void GCodeFile::moveVerticalRelative(double deltaZ) {
 }
 
 void GCodeFile::move(double x, double y, double z) {
-    generalCommand({'G', 'X', 'Y', 'Z', 'F'}, {true, false, false, false, true}, {0, x, y, z, (double) moveSpeed});
+    generalCommand({'G', 'X', 'Y', 'Z', 'F'},
+                   {true, false, false, false, true},
+                   {0, x, y, z, (double) moveSpeed});
     positions = {x, y, z};
 }
 
@@ -134,7 +148,9 @@ void GCodeFile::extrude(const std::valarray<double> &xy) {
 
 void GCodeFile::setCurrentCoordinatesToZero() {
     addComment("Setting current coordinates as new zero");
-    generalCommand({'G', 'X', 'Y', 'Z'}, {true, false, false, false}, {92, 0, 0, 0});
+    generalCommand({'G', 'X', 'Y', 'Z'},
+                   {true, false, false, false},
+                   {92, 0, 0, 0});
 }
 
 void GCodeFile::resetPositionOfFilament() {
