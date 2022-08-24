@@ -26,7 +26,8 @@ class Hyrel : public GCodeFile {
 
     void turnMotorsOff();
 
-    void clean(double cleanLength, int numberOfLines, double nozzleWidth, int HEIGHT_OFFSET_REGISTER);
+    void
+    clean(double cleanLength, int numberOfLines, double nozzleWidth, int HEIGHT_OFFSET_REGISTER, double layerHeight);
 
     void
     configurePrime(int toolNumber, double pulseRate, double numberOfPulses, double dwellTime,
@@ -44,8 +45,9 @@ public:
 
     void configureFlow(double nozzleWidth, double layerHeight, double flowMultiplier, int pulses, int tool);
 
-    void init(int hotendTemperature, int bedTemperature, double cleanLength, double nozzleWidth, double layerHeight,
-              int toolNumber, std::vector<double> &toolOffset);
+    void
+    init(int hotendTemperature, int bedTemperature, double cleanLength, double nozzleWidth, double firstLayerHeight,
+         double layerHeight, int toolNumber, std::vector<double> &toolOffset);
 
     void shutDown();
 
@@ -70,17 +72,17 @@ public:
 void testHeaderAndFooter();
 
 void
-generateGCodeHyrel(const boost::filesystem::path &directory, const std::string &patternName, double cleaningDistance,
-                   int toolNumber, int temperature, int moveSpeed, int printSpeed, double nozzleDiameter,
-                   double layerHeight,
-                   double extrusionMultiplier, double gridSpacing, const std::valarray<double> &patternOffset,
-                   std::vector<double> &toolOffset, int uvPenToolNumber, int curingDutyCycle);
+hyrelSingleLayer(const boost::filesystem::path &directory, const std::string &patternName, double cleaningDistance,
+                 int toolNumber, int temperature, int moveSpeed, int printSpeed, double nozzleDiameter,
+                 double layerHeight,
+                 double extrusionMultiplier, double gridSpacing, const std::valarray<double> &patternOffset,
+                 std::vector<double> &toolOffset, int uvPenToolNumber, int curingDutyCycle);
 
 void
-hyrelOptimisation(const boost::filesystem::path &directory, const std::string &patternName, double cleaningDistance,
-                  int toolNumber, int temperature, int moveSpeed, int printSpeed, double nozzleDiameter,
-                  double layerHeight, double extrusionMultiplier, double gridSpacing,
-                  const std::valarray<double> &patternOffset, std::vector<double> &toolOffset, int uvPenToolNumber,
-                  int curingDutyCycle);
+hyrelMultiLayer(const boost::filesystem::path &directory, const std::string &patternName, double cleaningDistance,
+                int toolNumber, int temperature, int moveSpeed, int printSpeed, double nozzleDiameter,
+                double layerHeight, double extrusionMultiplier, double gridSpacing,
+                const std::valarray<double> &patternOffset, std::vector<double> &toolOffset, int uvPenToolNumber,
+                int curingDutyCycle, int layers, double firstLayerHeight);
 
 #endif //VECTOR_SLICER_HYREL_H

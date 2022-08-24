@@ -14,8 +14,9 @@
 class GCodeFile {
     std::ostringstream bodyStream;
     const int moveSpeed;
-    const int printSpeed;
+    int printSpeed;
     const double extrusionCoefficient;
+    double printTime = 0;
 
     std::valarray<double> positions = {0, 0, 0};
     double extrusionValue = 0;
@@ -60,6 +61,7 @@ class GCodeFile {
                    const std::string &comment);
 
 public:
+    void setPrintSpeed(int printSpeed);
 
     void moveVertical(double z);
     GCodeFile(int moveSpeed, int printSpeed, double extrusionCoefficient);

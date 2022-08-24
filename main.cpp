@@ -11,21 +11,23 @@ int main() {
     fs::path patternsDirectory = cwd / "patterns";
 
     std::vector<std::string> patternsToGenerate = {"radial, r = 1 cm", "radial, r = 0.5 cm", "diagonal, 1x0.5 cm",
-                                                   "diagonal, 2x1 cm", "linear, 2x1 cm", "symmetricPositive, 2x0.6 cm"};
-
-//    std::vector<std::string> patternsToGenerate = {"diagonal, 2x1 cm"};
+                                                   "diagonal, 2x1 cm", "linear, 2x1 cm", "symmetricPositive, 2x0.6 cm",
+                                                   "symmetric gauss curved rectangle", "linear, 1x0.5 cm"};
+//    patternsToGenerate = {"radial, r = 1 cm"};
+//    patternsToGenerate = {"linear, 2x1 cm"};
     std::cout << "\nGenerating GCode for the files contained in" << std::endl << '\t' << patternsDirectory << std::endl;
     // All units are in mm
     double cleaningDistance = 20; // Also allows the material to start flowing until we are in the shear thinning regime
     int printingTemperature = 20;
-    int moveSpeed = 1200;
-    int printSpeed = 300;
+    int moveSpeed = 1000;
+    int printSpeed = 100;
     int toolNumber = 1;
     int uvPenToolNumber = 3;
-    int uvDutyCycle = 10;
+    int uvDutyCycle = 15;
 
-    double nozzleDiameter = 0.300;
-    double layerHeight = 0.15;
+    double nozzleDiameter = 0.223;
+    double layerHeight = 0.150;
+    double firstLayerHeight = 0.250;
     double extrusionMultiplier = 1.;
 
     double nozzleDiameterAssumed = 0.3; // Nozzle diameter which was assumed for generation of the director pattern
@@ -36,13 +38,19 @@ int main() {
 
 
     for (auto &pattern: patternsToGenerate) {
-        generateGCodeHyrel(patternsDirectory, pattern, cleaningDistance, toolNumber, printingTemperature, moveSpeed,
-                           printSpeed, nozzleDiameter, layerHeight, extrusionMultiplier, gridSpacing, patternOffset,
-                           toolOffset, uvPenToolNumber, uvDutyCycle);
-        hyrelOptimisation(patternsDirectory, pattern, cleaningDistance, toolNumber, printingTemperature, moveSpeed,
-                           printSpeed, nozzleDiameter, layerHeight, extrusionMultiplier, gridSpacing, patternOffset,
-                           toolOffset, uvPenToolNumber, uvDutyCycle);
+//        hyrelSingleLayer(patternsDirectory, pattern, cleaningDistance, toolNumber, printingTemperature, moveSpeed,
+//                           printSpeed, nozzleDiameter, layerHeight, extrusionMultiplier, gridSpacing, patternOffset,
+//                           toolOffset, uvPenToolNumber, uvDutyCycle);
+        for (int layers = 1; layers <= 4; layers++) {
+            hyrelMultiLayer(patternsDirectory, pattern, cleaningDistance, toolNumber, printingTemperature, moveSpeed,
+                            printSpeed, nozzleDiameter, layerHeight, extrusionMultiplier, gridSpacing, patternOffset,
+                            toolOffset, uvPenToolNumber, uvDutyCycle, layers, firstLayerHeight);
+        }
     }
+
+//    hyrelMultiLayer(patternsDirectory, "linear, 1x0.5 cm", cleaningDistance, toolNumber, printingTemperature, moveSpeed,
+//                           printSpeed, nozzleDiameter, layerHeight, extrusionMultiplier, gridSpacing, patternOffset,
+//                           toolOffset, uvPenToolNumber, uvDutyCycle);
 
     std::cout << "Generation complete." << std::endl;
     return 0;

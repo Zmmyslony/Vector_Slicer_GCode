@@ -8,7 +8,7 @@
 #include "Exporting.h"
 #include <iostream>
 
-const double VERTICAL_MOVE_SLOWDOWN = 3;
+const double VERTICAL_MOVE_SLOWDOWN = 1;
 const std::valarray<double> ZERO_POSITION = {1, 1};
 
 void GCodeFile::generalCommand(int number, const std::string &suffix) {
@@ -114,19 +114,23 @@ void GCodeFile::movePlanar(const std::valarray<double> &xy) {
     generalCommand({'G', 'X', 'Y', 'F'},
                    {true, false, false, true},
                    {0, xy[0], xy[1], (double) moveSpeed});
-    positions[0] = xy[0];
-    positions[1] = xy[1];
+    std::valarray<double> newPositions = {xy[0], xy[1], positions[2]};
+    printTime += norm(newPositions - positions) / moveSpeed;
+    positions = newPositions;
 }
 
 void GCodeFile::moveVertical(double z) {
     generalCommand({'G', 'Z', 'F'},
                    {true, false, true},
                    {0, z, (double) moveSpeed / VERTICAL_MOVE_SLOWDOWN});
-    positions[2] = z;
+    std::valarray<double> newPositions = {positions[0], positions[1], z};
+    printTime += norm(newPositions - positions) / (moveSpeed / VERTICAL_MOVE_SLOWDOWN);
+    positions = newPositions;
 }
 
 void GCodeFile::moveVerticalRelative(double deltaZ) {
     positions[2] += deltaZ;
+    printTime += deltaZ / (moveSpeed / VERTICAL_MOVE_SLOWDOWN);
     bodyStream << "G0 Z" << positions[2] << " F" << moveSpeed / VERTICAL_MOVE_SLOWDOWN << "\n";
 }
 
@@ -134,13 +138,17 @@ void GCodeFile::move(double x, double y, double z) {
     generalCommand({'G', 'X', 'Y', 'Z', 'F'},
                    {true, false, false, false, true},
                    {0, x, y, z, (double) moveSpeed});
-    positions = {x, y, z};
+
+    std::valarray<double> newPositions = {x, y, z};
+    printTime += norm(newPositions - positions) / moveSpeed;
+    positions = newPositions;
 }
 
 void GCodeFile::extrude(const std::valarray<double> &xy) {
     std::valarray<double> newPositions = {xy[0], xy[1], positions[2]};
     double extrusion = extrusionCoefficient * norm(newPositions - positions);
     extrusionValue += extrusion;
+    printTime += norm(newPositions - positions) / printSpeed;
     positions = newPositions;
     bodyStream << "G1 X" << xy[0] << " Y" << xy[1] << " F" << printSpeed << " E" << extrusionValue << "\n";
 }
@@ -233,12 +241,17 @@ void GCodeFile::exportToFile(const std::string &path) {
     std::string filename = path + R"(\results\pattern.gcode)";
     std::ofstream file(filename);
 
+    file << "; Estimated print time: " << printTime << " min" << std::endl;
     file << getText();
     file.close();
 }
 
 void GCodeFile::addBreak() {
     bodyStream << "\n";
+}
+
+void GCodeFile::setPrintSpeed(int printSpeed) {
+    GCodeFile::printSpeed = printSpeed;
 }
 
 

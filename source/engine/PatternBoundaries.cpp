@@ -18,7 +18,6 @@ PatternBoundaries::PatternBoundaries(const std::vector<std::vector<std::valarray
     xMin -= xMin;
     yMax -= yMin;
     yMin -= yMin;
-//    print();
 }
 
 double PatternBoundaries::getXMin() const {
