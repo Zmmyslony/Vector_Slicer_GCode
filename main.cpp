@@ -27,13 +27,13 @@ int main() {
 
     double nozzleDiameter = 0.223;
     double layerHeight = 0.150;
-    double firstLayerHeight = 0.250;
+    double firstLayerHeight = 0.200;
     double extrusionMultiplier = 1.;
 
     double nozzleDiameterAssumed = 0.3; // Nozzle diameter which was assumed for generation of the director pattern
     double gridSpacingAssumed = 0.02; // Spacing which was used for slicing the pattern, can be scaled for different nozzle diameters
     double gridSpacing = gridSpacingAssumed * nozzleDiameter / nozzleDiameterAssumed;
-    std::vector<double> toolOffset = {115, 0, 56};
+    std::vector<double> toolOffset = {93, 3, 53.85};
     std::valarray<double> patternOffset = {0, 5};
 
 

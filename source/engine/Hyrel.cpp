@@ -329,7 +329,7 @@ hyrelMultiLayer(const boost::filesystem::path &directory, const std::string &pat
         hyrel.shutDown();
         std::ostringstream suffixStream;
 
-        suffixStream << std::fixed << std::setprecision(2);
+        suffixStream << std::fixed << std::setprecision(3);
         suffixStream << "_" << nozzleDiameter << "_um_" << layers << "_layers";
         hyrel.exportToFile(directory / "gcode", patternName, suffixStream.str());
     } else {
