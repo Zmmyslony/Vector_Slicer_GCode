@@ -30,15 +30,15 @@ public:
 
     void move(const std::valarray<double> &offset);
 
-    std::valarray<double> getBottomLeft();
+    std::valarray<double> getBottomLeftCorner();
 
-    std::valarray<double> getBottomRight();
+    std::valarray<double> getBottomRightCorner();
 
-    std::valarray<double> getTopLeft();
+    std::valarray<double> getTopLeftCorner();
 
-    std::valarray<double> getTopRight();
+    std::valarray<double> getTopRightCorner();
 
-    void print();
+    void print() const;
 };
 
 

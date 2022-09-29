@@ -50,22 +50,22 @@ void PatternBoundaries::move(const std::valarray<double> &offset) {
     yMax += offset[1];
 }
 
-std::valarray<double> PatternBoundaries::getBottomLeft() {
+std::valarray<double> PatternBoundaries::getBottomLeftCorner() {
     return std::valarray<double>({xMin, yMin});
 }
 
-std::valarray<double> PatternBoundaries::getBottomRight() {
+std::valarray<double> PatternBoundaries::getBottomRightCorner() {
     return std::valarray<double>({xMax, yMin});
 }
 
-std::valarray<double> PatternBoundaries::getTopLeft() {
+std::valarray<double> PatternBoundaries::getTopLeftCorner() {
     return std::valarray<double>({xMin, yMax});
 }
 
-std::valarray<double> PatternBoundaries::getTopRight() {
+std::valarray<double> PatternBoundaries::getTopRightCorner() {
     return std::valarray<double>({xMax, yMax});
 }
 
-void PatternBoundaries::print() {
+void PatternBoundaries::print() const {
     std::cout << "xMin = " << xMin << ", xMax = " << xMax << ", yMin = " << yMin << ", yMax = " << yMax << std::endl;
 }

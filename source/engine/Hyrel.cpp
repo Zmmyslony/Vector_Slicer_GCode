@@ -4,6 +4,8 @@
 
 #include <iostream>
 #include <fstream>
+#include <ctime>
+
 #include "Hyrel.h"
 #include "ValarrayOperations.h"
 #include "Exporting.h"
@@ -154,7 +156,14 @@ Hyrel::init(int hotendTemperature, int bedTemperature, double cleanLength, doubl
             double layerHeight, int toolNumber, std::vector<double> &toolOffset) {
     const int HEIGHT_OFFSET_REGISTER = 2;
     const int KRA2_PULSES_PER_MICROLITRE = 1297;
-    const int CLEANING_LINES = 4;
+    const int CLEANING_LINES = 6;
+
+    addBreak();
+    addComment("Tool selected: T" + std::to_string(toolNumber) + " / T" + std::to_string(mCommandToolNumber(toolNumber)));
+    addComment("Nozzle diameter: " + std::to_string(nozzleWidth) + " mm");
+    addComment("First layer height: " + std::to_string(firstLayerHeight) + " mm");
+    addComment("Layer height: " + std::to_string(layerHeight) + " mm");
+    addBreak();
 
     setUnitsToMillimetres();
     clearOffsets();
@@ -276,6 +285,11 @@ void Hyrel::exportToFile(const boost::filesystem::path &resultsPath, const std::
     boost::filesystem::path filename = resultsPath / (patternName + suffix + ".gcode");
     std::ofstream file(filename.string());
 
+    time_t ttime = time(0);
+
+    char* time = ctime(&ttime);
+
+    file << "; " << time;
     file << "; Estimated print time: " << printTime << " min" << std::endl;
     file << getText();
     file.close();
@@ -336,4 +350,3 @@ hyrelMultiLayer(const boost::filesystem::path &directory, const std::string &pat
         std::cout << "ERROR: Directory \"" << patternPath << "\" does not exist." << std::endl;
     }
 }
-

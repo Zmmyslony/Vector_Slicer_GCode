@@ -12,7 +12,8 @@ int main() {
 
     std::vector<std::string> patternsToGenerate = {"radial, r = 1 cm", "radial, r = 0.5 cm", "diagonal, 1x0.5 cm",
                                                    "diagonal, 2x1 cm", "linear, 2x1 cm", "symmetricPositive, 2x0.6 cm",
-                                                   "symmetric gauss curved rectangle", "linear, 1x0.5 cm"};
+                                                   "symmetric gauss curved rectangle", "linear, 1x0.5 cm",
+                                                   "azimuthal, r = 1 cm"};
 //    patternsToGenerate = {"radial, r = 1 cm"};
 //    patternsToGenerate = {"linear, 2x1 cm"};
     std::cout << "\nGenerating GCode for the files contained in" << std::endl << '\t' << patternsDirectory << std::endl;
@@ -26,15 +27,15 @@ int main() {
     int uvDutyCycle = 15;
 
     double nozzleDiameter = 0.223;
-    double layerHeight = 0.150;
+    double layerHeight = 0.200;
     double firstLayerHeight = 0.200;
     double extrusionMultiplier = 1.;
 
     double nozzleDiameterAssumed = 0.3; // Nozzle diameter which was assumed for generation of the director pattern
     double gridSpacingAssumed = 0.02; // Spacing which was used for slicing the pattern, can be scaled for different nozzle diameters
     double gridSpacing = gridSpacingAssumed * nozzleDiameter / nozzleDiameterAssumed;
-    std::vector<double> toolOffset = {93, 3, 53.85};
-    std::valarray<double> patternOffset = {0, 5};
+    std::vector<double> toolOffset = {93, 3, 52.85};
+    std::valarray<double> patternOffset = {0, 3};
 
 
     for (auto &pattern: patternsToGenerate) {
@@ -47,10 +48,6 @@ int main() {
                             toolOffset, uvPenToolNumber, uvDutyCycle, layers, firstLayerHeight);
         }
     }
-
-//    hyrelMultiLayer(patternsDirectory, "linear, 1x0.5 cm", cleaningDistance, toolNumber, printingTemperature, moveSpeed,
-//                           printSpeed, nozzleDiameter, layerHeight, extrusionMultiplier, gridSpacing, patternOffset,
-//                           toolOffset, uvPenToolNumber, uvDutyCycle);
 
     std::cout << "Generation complete." << std::endl;
     return 0;

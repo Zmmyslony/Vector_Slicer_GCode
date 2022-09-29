@@ -74,9 +74,9 @@ void testHeaderAndFooter();
 void
 hyrelSingleLayer(const boost::filesystem::path &directory, const std::string &patternName, double cleaningDistance,
                  int toolNumber, int temperature, int moveSpeed, int printSpeed, double nozzleDiameter,
-                 double layerHeight,
-                 double extrusionMultiplier, double gridSpacing, const std::valarray<double> &patternOffset,
-                 std::vector<double> &toolOffset, int uvPenToolNumber, int curingDutyCycle);
+                 double layerHeight, double extrusionMultiplier, double gridSpacing,
+                 const std::valarray<double> &patternOffset, std::vector<double> &toolOffset, int uvPenToolNumber,
+                 int curingDutyCycle);
 
 void
 hyrelMultiLayer(const boost::filesystem::path &directory, const std::string &patternName, double cleaningDistance,
