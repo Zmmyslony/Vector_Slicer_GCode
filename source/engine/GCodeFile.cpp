@@ -8,42 +8,42 @@
 #include "Exporting.h"
 #include <iostream>
 
-const double VERTICAL_MOVE_SLOWDOWN = 1;
-const std::valarray<double> ZERO_POSITION = {1, 1};
+const double vertical_move_slowdown = 1;
+const std::valarray<double> zero_position = {1, 1};
 
 void GCodeFile::generalCommand(int number, const std::string &suffix) {
-    std::stringstream commandNumber;
-    commandNumber << std::setw(2) << std::setfill('0') << number;
-    bodyStream << "G" << commandNumber.str() << " " << suffix + "\n";
+    std::stringstream command_number;
+    command_number << std::setw(2) << std::setfill('0') << number;
+    body_stream << "G" << command_number.str() << " " << suffix + "\n";
 }
 
-void GCodeFile::generalCommand(const std::vector<char> &commands, const std::vector<bool> &isInt,
+void GCodeFile::generalCommand(const std::vector<char> &commands, const std::vector<bool> &is_int,
                                const std::vector<double> &values) {
-    if (commands.size() == values.size() && commands.size() == isInt.size()) {
+    if (commands.size() == values.size() && commands.size() == is_int.size()) {
         for (int i = 0; i < commands.size(); i++) {
-            if (isInt[i]) {
-                bodyStream << commands[i] << int(values[i]) << " ";
+            if (is_int[i]) {
+                body_stream << commands[i] << int(values[i]) << " ";
             } else {
-                bodyStream << commands[i] << std::fixed << values[i] << " ";
+                body_stream << commands[i] << std::fixed << values[i] << " ";
             }
         }
-        bodyStream << "\n";
+        body_stream << "\n";
     } else {
         addComment("\t\tSYNTAX ERROR");
     }
 }
 
-void GCodeFile::generalCommand(const std::vector<char> &commands, const std::vector<bool> &isInt,
+void GCodeFile::generalCommand(const std::vector<char> &commands, const std::vector<bool> &is_int,
                                const std::vector<double> &values, const std::string &comment) {
-    if (commands.size() == values.size() && commands.size() == isInt.size()) {
+    if (commands.size() == values.size() && commands.size() == is_int.size()) {
         for (int i = 0; i < commands.size(); i++) {
-            if (isInt[i]) {
-                bodyStream << commands[i] << int(values[i]) << " ";
+            if (is_int[i]) {
+                body_stream << commands[i] << int(values[i]) << " ";
             } else {
-                bodyStream << commands[i] << std::fixed << values[i] << " ";
+                body_stream << commands[i] << std::fixed << values[i] << " ";
             }
         }
-        bodyStream << "\t;" << comment << "\n";
+        body_stream << "\t;" << comment << "\n";
     }
 }
 
@@ -93,8 +93,8 @@ void GCodeFile::setTemperatureHotend(int temperature) {
 }
 
 void GCodeFile::setTemperatureHotendGradual(int temperature) {
-    for (int currentTemperature = 20; currentTemperature < temperature; currentTemperature++) {
-        setTemperatureHotend(currentTemperature);
+    for (int current_temperature = 20; current_temperature < temperature; current_temperature++) {
+        setTemperatureHotend(current_temperature);
     }
 }
 
@@ -113,44 +113,45 @@ void GCodeFile::turnMotorsOff() {
 void GCodeFile::movePlanar(const std::valarray<double> &xy) {
     generalCommand({'G', 'X', 'Y', 'F'},
                    {true, false, false, true},
-                   {0, xy[0], xy[1], (double) moveSpeed});
-    std::valarray<double> newPositions = {xy[0], xy[1], positions[2]};
-    printTime += norm(newPositions - positions) / moveSpeed;
-    positions = newPositions;
+                   {0, xy[0], xy[1], (double) move_speed});
+    std::valarray<double> new_positions = {xy[0], xy[1], positions[2]};
+    print_time += norm(new_positions - positions) / move_speed;
+    positions = new_positions;
 }
 
 void GCodeFile::moveVertical(double z) {
     generalCommand({'G', 'Z', 'F'},
                    {true, false, true},
-                   {0, z, (double) moveSpeed / VERTICAL_MOVE_SLOWDOWN});
-    std::valarray<double> newPositions = {positions[0], positions[1], z};
-    printTime += norm(newPositions - positions) / (moveSpeed / VERTICAL_MOVE_SLOWDOWN);
-    positions = newPositions;
+                   {0, z, (double) move_speed / vertical_move_slowdown});
+    std::valarray<double> new_positions = {positions[0], positions[1], z};
+    print_time += norm(new_positions - positions) / (move_speed / vertical_move_slowdown);
+    positions = new_positions;
 }
 
-void GCodeFile::moveVerticalRelative(double deltaZ) {
-    positions[2] += deltaZ;
-    printTime += deltaZ / (moveSpeed / VERTICAL_MOVE_SLOWDOWN);
-    bodyStream << "G0 Z" << positions[2] << " F" << moveSpeed / VERTICAL_MOVE_SLOWDOWN << "\n";
+void GCodeFile::moveVerticalRelative(double delta_z) {
+    positions[2] += delta_z;
+    print_time += delta_z / (move_speed / vertical_move_slowdown);
+    body_stream << "G0 Z" << positions[2] << " F" << move_speed / vertical_move_slowdown << "\n";
 }
 
 void GCodeFile::move(double x, double y, double z) {
     generalCommand({'G', 'X', 'Y', 'Z', 'F'},
                    {true, false, false, false, true},
-                   {0, x, y, z, (double) moveSpeed});
+                   {0, x, y, z, (double) move_speed});
 
-    std::valarray<double> newPositions = {x, y, z};
-    printTime += norm(newPositions - positions) / moveSpeed;
-    positions = newPositions;
+    std::valarray<double> new_positions = {x, y, z};
+    print_time += norm(new_positions - positions) / move_speed;
+    positions = new_positions;
 }
 
 void GCodeFile::extrude(const std::valarray<double> &xy) {
-    std::valarray<double> newPositions = {xy[0], xy[1], positions[2]};
-    double extrusion = extrusionCoefficient * norm(newPositions - positions);
-    extrusionValue += extrusion;
-    printTime += norm(newPositions - positions) / printSpeed;
-    positions = newPositions;
-    bodyStream << "G1 X" << xy[0] << " Y" << xy[1] << " F" << printSpeed << " E" << extrusionValue << "\n";
+    std::valarray<double> new_positions = {xy[0], xy[1], positions[2]};
+//    double extrusion = extrusion_coefficient * norm(new_positions - positions);
+    double extrusion = norm(new_positions - positions);
+    extrusion_value += extrusion;
+    print_time += norm(new_positions - positions) / print_speed;
+    positions = new_positions;
+    body_stream << "G1 X" << xy[0] << " Y" << xy[1] << " F" << print_speed << " E" << extrusion_value << "\n";
 }
 
 
@@ -162,19 +163,19 @@ void GCodeFile::setCurrentCoordinatesToZero() {
 }
 
 void GCodeFile::resetPositionOfFilament() {
-    bodyStream << "G92 E0" << "\n";
+    body_stream << "G92 E0" << "\n";
 }
 
 void GCodeFile::addComment(const std::string &comment) {
-    bodyStream << "; " << comment << "\n";
+    body_stream << "; " << comment << "\n";
 }
 
 
-GCodeFile::GCodeFile(int moveSpeed, int printSpeed, double extrusionCoefficient) :
-        moveSpeed(moveSpeed),
-        printSpeed(printSpeed),
-        extrusionCoefficient(extrusionCoefficient) {
-    bodyStream.precision(3);
+GCodeFile::GCodeFile(int move_speed, int print_speed, double extrusion_coefficient) :
+        move_speed(move_speed),
+        print_speed(print_speed),
+        extrusion_coefficient(extrusion_coefficient) {
+    body_stream.precision(3);
 }
 
 GCodeFile::GCodeFile() :
@@ -182,21 +183,21 @@ GCodeFile::GCodeFile() :
 }
 
 
-void GCodeFile::init(int hotendTemperature, int bedTemperature, double cleanLength) {
+void GCodeFile::init(int hotend_temperature, int bed_temperature, double clean_length) {
     autoHome();
     levelBed();
 
     setAbsolutePositioning();
     resetPositionOfFilament();
-    setTemperatureBed(bedTemperature);
-    setTemperatureHotendGradual(hotendTemperature);
+    setTemperatureBed(bed_temperature);
+    setTemperatureHotendGradual(hotend_temperature);
 
     move(1, 1, 0);
-    extrude(ZERO_POSITION + std::valarray<double>({cleanLength, 0}));
+    extrude(zero_position + std::valarray<double>({clean_length, 0}));
 }
 
-void GCodeFile::init(int hotendTemperature) {
-    init(hotendTemperature, 0, 20);
+void GCodeFile::init(int hotend_temperature) {
+    init(hotend_temperature, 0, 20);
 }
 
 void GCodeFile::shutDown() {
@@ -204,36 +205,36 @@ void GCodeFile::shutDown() {
     setTemperatureHotend(0);
 
     moveVertical(10);
-    movePlanar(ZERO_POSITION);
+    movePlanar(zero_position);
     turnMotorsOff();
 }
 
 std::string GCodeFile::getText() {
-    return bodyStream.str();
+    return body_stream.str();
 }
 
-void GCodeFile::printPath(const std::vector<std::valarray<int>> &path, const std::valarray<double> &positionOffset,
-                          double gridDistance) {
+void GCodeFile::printPath(const std::vector<std::valarray<int>> &path, const std::valarray<double> &position_offset,
+                          double grid_distance) {
 
     addComment("Moving up.");
     moveVerticalRelative(1);
     addComment("Moving to new starting point.");
 
-    movePlanar(itodArray(path[0]) * gridDistance + positionOffset);
+    movePlanar(itodArray(path[0]) * grid_distance + position_offset);
     addComment("Moving down.");
     moveVerticalRelative(-1);
     addComment("Starting new path.");
     for (auto &position: path) {
-        extrude(itodArray(position) * gridDistance + positionOffset);
+        extrude(itodArray(position) * grid_distance + position_offset);
     }
 }
 
 void
-GCodeFile::printPattern(const std::vector<std::vector<std::valarray<int>>> &sortedSequenceOfPaths,
-                        const std::valarray<double> &positionOffset,
-                        double gridDistance) {
-    for (auto &path: sortedSequenceOfPaths) {
-        printPath(path, positionOffset, gridDistance);
+GCodeFile::printPattern(const std::vector<std::vector<std::valarray<int>>> &sorted_sequence_of_paths,
+                        const std::valarray<double> &position_offset,
+                        double grid_distance) {
+    for (auto &path: sorted_sequence_of_paths) {
+        printPath(path, position_offset, grid_distance);
     }
 }
 
@@ -241,29 +242,33 @@ void GCodeFile::exportToFile(const std::string &path) {
     std::string filename = path + R"(\results\pattern.gcode)";
     std::ofstream file(filename);
 
-    file << "; Estimated print time: " << printTime << " min" << std::endl;
+    file << "; Estimated print time: " << print_time << " min" << std::endl;
     file << getText();
     file.close();
 }
 
 void GCodeFile::addBreak() {
-    bodyStream << "\n";
+    body_stream << "\n";
 }
 
-void GCodeFile::setPrintSpeed(int printSpeed) {
-    GCodeFile::printSpeed = printSpeed;
+void GCodeFile::setPrintSpeed(int print_speed) {
+    GCodeFile::print_speed = print_speed;
+}
+
+double GCodeFile::getExtrusionValue() const {
+    return extrusion_value;
 }
 
 
-void generateGCode(const std::string &baseDirectory, int temperature, double cleaningDistance,
-                   const std::valarray<double> &positionOffset, double gridDistance) {
+void generateGCode(const std::string &base_directory, int temperature, double cleaning_distance,
+                   const std::valarray<double> &position_offset, double grid_distance) {
     std::cout << std::endl;
-    std::string directoryPath = baseDirectory + R"(\results)";
-    std::vector<std::vector<std::valarray<int>>> sortedPaths = read3DVectorFromFile(directoryPath, "best_paths");
-    GCodeFile gCodeFile;
-    gCodeFile.init(temperature, 0, cleaningDistance);
-    gCodeFile.printPattern(sortedPaths, positionOffset, gridDistance);
-    gCodeFile.shutDown();
+    std::string directory_path = base_directory + R"(\results)";
+    std::vector<std::vector<std::valarray<int>>> sorted_paths = read3DVectorFromFile(directory_path, "best_paths");
+    GCodeFile g_code_file;
+    g_code_file.init(temperature, 0, cleaning_distance);
+    g_code_file.printPattern(sorted_paths, position_offset, grid_distance);
+    g_code_file.shutDown();
 
-    gCodeFile.exportToFile(baseDirectory);
+    g_code_file.exportToFile(base_directory);
 }

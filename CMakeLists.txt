@@ -20,5 +20,5 @@ add_executable(GCodeGenerator
 
 target_link_libraries(GCodeGenerator
         ${Boost_SYSTEM_LIBRARY}
-        ${Boost_FILESYSTEM_LIBRARY}   -ldl
+        ${Boost_FILESYSTEM_LIBRARY} -ldl
         )
