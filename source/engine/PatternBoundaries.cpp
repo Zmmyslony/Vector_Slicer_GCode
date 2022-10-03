@@ -5,67 +5,68 @@
 #include <iostream>
 #include "PatternBoundaries.h"
 
-PatternBoundaries::PatternBoundaries(const std::vector<std::vector<std::valarray<int>>> &sequenceOfPaths) {
-    for (auto &path: sequenceOfPaths) {
+PatternBoundaries::PatternBoundaries(const std::vector<std::vector<std::valarray<int>>> &sequence_of_paths) {
+    for (auto &path: sequence_of_paths) {
         for (auto &point: path) {
-            if (xMax < point[0]) { xMax = point[0]; }
-            if (xMin > point[0]) { xMin = point[0]; }
-            if (yMax < point[1]) { yMax = point[1]; }
-            if (yMin > point[1]) { yMin = point[1]; }
+            if (x_max < point[0]) { x_max = point[0]; }
+            if (x_min > point[0]) { x_min = point[0]; }
+            if (y_max < point[1]) { y_max = point[1]; }
+            if (y_min > point[1]) { y_min = point[1]; }
         }
     }
-    xMax -= xMin;
-    xMin -= xMin;
-    yMax -= yMin;
-    yMin -= yMin;
+    x_max -= x_min;
+    x_min -= x_min;
+    y_max -= y_min;
+    y_min -= y_min;
 }
 
 double PatternBoundaries::getXMin() const {
-    return xMin;
+    return x_min;
 }
 
 double PatternBoundaries::getYMin() const {
-    return yMin;
+    return y_min;
 }
 
 double PatternBoundaries::getXMax() const {
-    return xMax;
+    return x_max;
 }
 
 double PatternBoundaries::getYMax() const {
-    return yMax;
+    return y_max;
 }
 
 void PatternBoundaries::scale(double multiplier) {
-    xMax *= multiplier;
-    xMin *= multiplier;
-    yMax *= multiplier;
-    yMin *= multiplier;
+    x_max *= multiplier;
+    x_min *= multiplier;
+    y_max *= multiplier;
+    y_min *= multiplier;
 }
 
 void PatternBoundaries::move(const std::valarray<double> &offset) {
-    xMin += offset[0];
-    xMax += offset[0];
-    yMin += offset[1];
-    yMax += offset[1];
+    x_min += offset[0];
+    x_max += offset[0];
+    y_min += offset[1];
+    y_max += offset[1];
 }
 
 std::valarray<double> PatternBoundaries::getBottomLeftCorner() {
-    return std::valarray<double>({xMin, yMin});
+    return std::valarray<double>({x_min, y_min});
 }
 
 std::valarray<double> PatternBoundaries::getBottomRightCorner() {
-    return std::valarray<double>({xMax, yMin});
+    return std::valarray<double>({x_max, y_min});
 }
 
 std::valarray<double> PatternBoundaries::getTopLeftCorner() {
-    return std::valarray<double>({xMin, yMax});
+    return std::valarray<double>({x_min, y_max});
 }
 
 std::valarray<double> PatternBoundaries::getTopRightCorner() {
-    return std::valarray<double>({xMax, yMax});
+    return std::valarray<double>({x_max, y_max});
 }
 
 void PatternBoundaries::print() const {
-    std::cout << "xMin = " << xMin << ", xMax = " << xMax << ", yMin = " << yMin << ", yMax = " << yMax << std::endl;
+    std::cout << "x_min = " << x_min << ", x_max = " << x_max << ", y_min = " << y_min << ", y_max = " << y_max
+              << std::endl;
 }

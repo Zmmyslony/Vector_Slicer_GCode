@@ -10,10 +10,10 @@
 #include <valarray>
 
 class PatternBoundaries {
-    double xMin = INT_MAX;
-    double yMin = INT_MAX;
-    double xMax = INT_MIN;
-    double yMax = INT_MIN;
+    double x_min = INT_MAX;
+    double y_min = INT_MAX;
+    double x_max = INT_MIN;
+    double y_max = INT_MIN;
 
 public:
     double getXMin() const;
@@ -24,7 +24,7 @@ public:
 
     double getYMax() const;
 
-    PatternBoundaries(const std::vector<std::vector<std::valarray<int>>> &sequenceOfPaths);
+    explicit PatternBoundaries(const std::vector<std::vector<std::valarray<int>>> &sequence_of_paths);
 
     void scale(double multiplier);
 
