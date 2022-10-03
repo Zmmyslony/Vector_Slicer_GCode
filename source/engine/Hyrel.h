@@ -48,8 +48,8 @@ public:
 
     void
     init(int hotend_temperature, int bed_temperature, double clean_length, double nozzle_width,
-         double first_layer_height,
-         double layer_height, int tool_number, std::vector<double> &tool_offset);
+         double first_layer_height, double layer_height, int tool_number, std::vector<double> &tool_offset,
+         int cleaning_lines);
 
     void shutDown();
 
@@ -69,6 +69,8 @@ public:
     void configureUvPen(int print_head_tool_number, int pen_tool_number, int duty_cycle);
 
     void addLocalOffset(std::vector<double> offset);
+
+    void configureUvarray(int print_head_tool_number, int duty_cycle);
 };
 
 void testHeaderAndFooter();

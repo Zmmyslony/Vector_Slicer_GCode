@@ -24,7 +24,7 @@ public:
 
     double getYMax() const;
 
-    PatternBoundaries(const std::vector<std::vector<std::valarray<int>>> &sequence_of_paths);
+    explicit PatternBoundaries(const std::vector<std::vector<std::valarray<int>>> &sequence_of_paths);
 
     void scale(double multiplier);
 

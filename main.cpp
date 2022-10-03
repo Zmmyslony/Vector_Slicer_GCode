@@ -36,7 +36,7 @@ int main() {
     double nozzle_diameter_assumed = 0.3; // Nozzle diameter which was assumed for generation of the director pattern
     double grid_spacing_assumed = 0.02; // Spacing which was used for slicing the pattern, can be scaled for different nozzle diameters
     double grid_spacing = grid_spacing_assumed * nozzle_diameter / nozzle_diameter_assumed;
-    std::vector<double> tool_offset = {15, 15, 0};
+    std::vector<double> tool_offset = {50, 150, 0};
     std::valarray<double> pattern_offset = {0, 3};
 
 
@@ -54,7 +54,7 @@ int main() {
                         tool_offset, uv_pen_tool_number, uv_duty_cycle, 1, first_layer_height);
         hyrelMultiLayer(patterns_directory, pattern, cleaning_distance, tool_number, printing_temperature, move_speed,
                         print_speed, nozzle_diameter, layer_height, extrusion_multiplier, grid_spacing, pattern_offset,
-                        tool_offset, uv_pen_tool_number, uv_duty_cycle, 6, first_layer_height);
+                        tool_offset, uv_pen_tool_number, uv_duty_cycle, 4, first_layer_height);
     }
 
     std::cout << "Generation complete." << std::endl;

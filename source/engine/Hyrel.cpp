@@ -158,10 +158,10 @@ void Hyrel::clean(double clean_length, int number_of_lines, double nozzle_width,
 
 void
 Hyrel::init(int hotend_temperature, int bed_temperature, double clean_length, double nozzle_width,
-            double first_layer_height, double layer_height, int tool_number, std::vector<double> &tool_offset) {
+            double first_layer_height, double layer_height, int tool_number, std::vector<double> &tool_offset,
+            int cleaning_lines) {
     const int height_offset_register = 2;
     const int kra_2_pulses_per_microlitre = 1297;
-    const int cleaning_lines = 12;
 
     addBreak();
     addComment(
@@ -210,6 +210,17 @@ void Hyrel::configureUvPen(int print_head_tool_number, int pen_tool_number, int 
                        {621, (double) mCommandToolNumber(pen_tool_number), (double) duty_cycle});
     }
 }
+
+void Hyrel::configureUvarray(int print_head_tool_number, int duty_cycle) {
+    if (duty_cycle >= 0 && duty_cycle <= 100) {
+        addComment("Linking pen to activate with the printing moves ");
+        generalCommand({'M', 'T', 'S'},
+                       {true, true, true},
+                       {106, (double) mCommandToolNumber(print_head_tool_number),
+                        (double) mCommandToolNumber(duty_cycle)});
+    }
+}
+
 
 void Hyrel::shutDown() {
     setTemperatureBed(0);
@@ -283,7 +294,7 @@ PatternBoundaries Hyrel::printPattern(const std::vector<std::vector<std::valarra
 void testHeaderAndFooter() {
     Hyrel hyrel(600, 100, 1);
     std::vector<double> tool_offset = {50, 30, 30};
-    hyrel.init(20, 0, 30, 0.335, 0, 0.16, 1, tool_offset);
+    hyrel.init(20, 0, 30, 0.335, 0, 0.16, 1, tool_offset, 0);
     hyrel.shutDown();
     std::cout << hyrel.getText();
 }
@@ -294,7 +305,7 @@ void Hyrel::exportToFile(const boost::filesystem::path &results_path, const std:
     boost::filesystem::path filename = results_path / (pattern_name + suffix + ".gcode");
     std::ofstream file(filename.string());
 
-    time_t ttime = time(0);
+    time_t ttime = time(nullptr);
 
     char *time = ctime(&ttime);
     file << std::fixed;
@@ -347,16 +358,19 @@ hyrelMultiLayer(const boost::filesystem::path &directory, const std::string &pat
                 const std::valarray<double> &pattern_offset, std::vector<double> &tool_offset, int uv_pen_tool_number,
                 int curing_duty_cycle, int layers, double first_layer_height) {
     boost::filesystem::path pattern_path = directory / pattern_name;
+    int number_of_cleaning_lines = 12;
     if (boost::filesystem::exists(pattern_path)) {
         std::vector<std::vector<std::valarray<int>>> sorted_paths = read3DVectorFromFile(pattern_path.string(),
                                                                                          "best_paths");
         Hyrel hyrel(move_speed, print_speed, extrusion_multiplier);
         hyrel.init(temperature, 0, cleaning_distance, nozzle_diameter, first_layer_height,
-                   layer_height, tool_number, tool_offset);
-        hyrel.configureUvPen(tool_number, uv_pen_tool_number, curing_duty_cycle);
+                   layer_height, tool_number, tool_offset, number_of_cleaning_lines);
+//        hyrel.configureUvPen(tool_number, uv_pen_tool_number, curing_duty_cycle);
+        hyrel.configureUvarray(tool_number, curing_duty_cycle);
         hyrel.addBreak();
 
-        printMultiLayer(hyrel, pattern_offset, grid_spacing, sorted_paths, layers, layer_height);
+        std::valarray<double> cleaning_offset = {0, number_of_cleaning_lines * nozzle_diameter};
+        printMultiLayer(hyrel, pattern_offset + cleaning_offset, grid_spacing, sorted_paths, layers, layer_height);
         hyrel.shutDown();
 
         std::ostringstream suffix_stream;
