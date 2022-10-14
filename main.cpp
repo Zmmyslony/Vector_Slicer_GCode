@@ -15,7 +15,7 @@ int main() {
                                                      "symmetricPositive, 2x0.6 cm",
                                                      "symmetric gauss curved rectangle", "linear, 1x0.5 cm",
                                                      "azimuthal, r = 1 cm"};
-//    patterns_to_generate = {"radial, r = 1 cm"};
+    patterns_to_generate = {"azimuthal, r = 1 cm"};
 //    patterns_to_generate = {"linear, 2x1 cm"};
     std::cout << "\nGenerating GCode for the files contained in" << std::endl << '\t' << patterns_directory
               << std::endl;
@@ -23,12 +23,12 @@ int main() {
     double cleaning_distance = 20; // Also allows the material to start flowing until we are in the shear thinning regime
     int printing_temperature = 20;
     int move_speed = 1000;
-    int print_speed = 100;
-    int tool_number = 1;
+    int print_speed = 200;
+    int tool_number = 2;
     int uv_pen_tool_number = 1;
-    int uv_duty_cycle = 15;
+    int uv_duty_cycle = 50;
 
-    double nozzle_diameter = 0.260;
+    double nozzle_diameter = 0.200;
     double layer_height = 0.200;
     double first_layer_height = 0.200;
     double extrusion_multiplier = 1.;

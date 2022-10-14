@@ -143,13 +143,16 @@ void Hyrel::clean(double clean_length, int number_of_lines, double nozzle_width,
     addBreak();
     addComment("Starting cleaning");
     if (clean_length > 0) {
-        for (int i = 0; i < number_of_lines; i++) {
+        movePlanar({0, 0});
+        extrude({clean_length, 0});
+
+        for (int i = 1; i < number_of_lines; i++) {
             if (i % 2 == 0) {
-                movePlanar({0, i * nozzle_width});
+                extrude({0, i * nozzle_width});
                 extrude({clean_length, i * nozzle_width});
 
             } else {
-                movePlanar({clean_length, i * nozzle_width});
+                extrude({clean_length, i * nozzle_width});
                 extrude({0, i * nozzle_width});
             }
         }
@@ -213,11 +216,11 @@ void Hyrel::configureUvPen(int print_head_tool_number, int pen_tool_number, int 
 
 void Hyrel::configureUvarray(int print_head_tool_number, int duty_cycle) {
     if (duty_cycle >= 0 && duty_cycle <= 100) {
-        addComment("Linking pen to activate with the printing moves ");
-        generalCommand({'M', 'T', 'S'},
+        addComment("Setting UV array duty cycle ");
+        generalCommand({'M', 'T', 'P'},
                        {true, true, true},
                        {106, (double) mCommandToolNumber(print_head_tool_number),
-                        (double) mCommandToolNumber(duty_cycle)});
+                        (double) duty_cycle});
     }
 }
 
@@ -311,9 +314,9 @@ void Hyrel::exportToFile(const boost::filesystem::path &results_path, const std:
     file << std::fixed;
     file.precision(2);
     file << "; Generated using GCodeGenerator " << version << " on " << time;
-    file << "; Michał Zmyślony, University of Cambridge, mlz22@cam.ac.uk" << std::endl << std::endl;;
+    file << "; Michal Zmyslony, University of Cambridge, mlz22@cam.ac.uk" << std::endl << std::endl;;
     file << "; Estimated print time: " << print_time << " min" << std::endl;
-    file << "; Estimated amount of extruded material: " << extruded_amount << " μl";
+    file << "; Estimated amount of extruded material: " << extruded_amount << " ul";
     file << getText();
     file.close();
 }
@@ -358,7 +361,7 @@ hyrelMultiLayer(const boost::filesystem::path &directory, const std::string &pat
                 const std::valarray<double> &pattern_offset, std::vector<double> &tool_offset, int uv_pen_tool_number,
                 int curing_duty_cycle, int layers, double first_layer_height) {
     boost::filesystem::path pattern_path = directory / pattern_name;
-    int number_of_cleaning_lines = 12;
+    int number_of_cleaning_lines = 20;
     if (boost::filesystem::exists(pattern_path)) {
         std::vector<std::vector<std::valarray<int>>> sorted_paths = read3DVectorFromFile(pattern_path.string(),
                                                                                          "best_paths");
