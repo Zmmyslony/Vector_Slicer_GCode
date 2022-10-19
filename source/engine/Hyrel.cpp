@@ -148,12 +148,12 @@ void Hyrel::clean(double clean_length, int number_of_lines, double nozzle_width,
 
         for (int i = 1; i < number_of_lines; i++) {
             if (i % 2 == 0) {
-                extrude({0, i * nozzle_width});
-                extrude({clean_length, i * nozzle_width});
+                extrude({0, 2 * i * nozzle_width});
+                extrude({clean_length, 2 * i * nozzle_width});
 
             } else {
-                extrude({clean_length, i * nozzle_width});
-                extrude({0, i * nozzle_width});
+                extrude({clean_length, 2 * i * nozzle_width});
+                extrude({0, 2 * i * nozzle_width});
             }
         }
     }
