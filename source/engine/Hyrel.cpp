@@ -10,6 +10,8 @@
 #include "ValarrayOperations.h"
 #include "Exporting.h"
 #include "PatternBoundaries.h"
+#include "extrusion_configuration.h"
+#include "printer_configuration.h"
 
 const std::string version = "0.1a";
 
@@ -333,9 +335,9 @@ hyrelSingleLayer(const boost::filesystem::path &directory, const std::string &pa
                  double layer_height, double extrusion_multiplier, double grid_spacing,
                  const std::valarray<double> &pattern_offset, std::vector<double> &tool_offset, int uv_pen_tool_number,
                  int curing_duty_cycle) {
-    hyrelMultiLayer(directory, pattern_name, cleaning_distance, tool_number, temperature, move_speed, print_speed,
-                    nozzle_diameter, layer_height, extrusion_multiplier, grid_spacing, pattern_offset, tool_offset,
-                    uv_pen_tool_number, curing_duty_cycle, 1, layer_height);
+    hyrelMultiLayer(directory, pattern_name, grid_spacing, pattern_offset, cleaning_distance, tool_offset,
+                    curing_duty_cycle, layer_height,
+                    1, ExtrusionConfiguration(0, 0, 0, 0, 0), PrinterConfiguration(0, 0, 0));
 }
 
 void printMultiLayer(Hyrel &hyrel, const std::valarray<double> &initial_pattern_offset, double grid_spacing,
@@ -355,35 +357,48 @@ double extrudedAmount(double length, double width, double height, double extrusi
 }
 
 void
-hyrelMultiLayer(const boost::filesystem::path &directory, const std::string &pattern_name, double cleaning_distance,
-                int tool_number, int temperature, int move_speed, int print_speed, double nozzle_diameter,
-                double layer_height, double extrusion_multiplier, double grid_spacing,
-                const std::valarray<double> &pattern_offset, std::vector<double> &tool_offset, int uv_pen_tool_number,
-                int curing_duty_cycle, int layers, double first_layer_height) {
+hyrelMultiLayer(const boost::filesystem::path &directory, const std::string &pattern_name, double grid_spacing,
+                const std::valarray<double> &pattern_offset, double cleaning_distance,
+                std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height, int layers,
+                ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration) {
     boost::filesystem::path pattern_path = directory / pattern_name;
     int number_of_cleaning_lines = 20;
     if (boost::filesystem::exists(pattern_path)) {
         std::vector<std::vector<std::valarray<int>>> sorted_paths = read3DVectorFromFile(pattern_path.string(),
                                                                                          "best_paths");
-        Hyrel hyrel(move_speed, print_speed, extrusion_multiplier);
-        hyrel.init(temperature, 0, cleaning_distance, nozzle_diameter, first_layer_height,
-                   layer_height, tool_number, tool_offset, number_of_cleaning_lines);
+        Hyrel hyrel(printer_configuration.getNonPrintingSpeed(), extrusion_configuration.getPrintingSpeed(),
+                    extrusion_configuration.getExtrusionMultiplier());
+        hyrel.init(extrusion_configuration.getNozzleTemperature(), printer_configuration.getBedTemperature(),
+                   cleaning_distance,
+                   extrusion_configuration.getDiameter(), first_layer_height,
+                   extrusion_configuration.getLayerHeight(), printer_configuration.getPrintHeadToolNumber(),
+                   tool_offset, number_of_cleaning_lines);
 //        hyrel.configureUvPen(tool_number, uv_pen_tool_number, curing_duty_cycle);
-        hyrel.configureUvarray(tool_number, curing_duty_cycle);
+        hyrel.configureUvarray(printer_configuration.getPrintHeadToolNumber(), curing_duty_cycle);
         hyrel.addBreak();
 
-        std::valarray<double> cleaning_offset = {0, number_of_cleaning_lines * nozzle_diameter};
-        printMultiLayer(hyrel, pattern_offset + cleaning_offset, grid_spacing, sorted_paths, layers, layer_height);
+        std::valarray<double> cleaning_offset = {0, number_of_cleaning_lines * extrusion_configuration.getDiameter()};
+        printMultiLayer(hyrel, pattern_offset + cleaning_offset, grid_spacing, sorted_paths, layers,
+                        extrusion_configuration.getLayerHeight());
         hyrel.shutDown();
 
         std::ostringstream suffix_stream;
         suffix_stream << std::fixed << std::setprecision(3);
-        suffix_stream << "_" << nozzle_diameter << "_um_" << layers << "_layers";
+        suffix_stream << "_" << extrusion_configuration.getDiameter() << "_um_" << layers << "_layers";
 
-        double extruded_amount = extrudedAmount(hyrel.getExtrusionValue(), nozzle_diameter, layer_height,
-                                                extrusion_multiplier);
+        double extruded_amount = extrudedAmount(hyrel.getExtrusionValue(), extrusion_configuration.getDiameter(),
+                                                extrusion_configuration.getLayerHeight(),
+                                                extrusion_configuration.getExtrusionMultiplier());
         hyrel.exportToFile(directory / "gcode", pattern_name, suffix_stream.str(), extruded_amount);
     } else {
         std::cout << "ERROR: Directory \"" << pattern_path << "\" does not exist." << std::endl;
     }
 }
+
+//void hyrelTuneLayerSeparation(const boost::filesystem::path &directory, const std::string &pattern_name,
+//                              double cleaning_distance,
+//                              int tool_number, int temperature, int move_speed, int print_speed, double nozzle_diameter,
+//                              double layer_height, double extrusion_multiplier, double grid_spacing,
+//                              const std::valarray<double> &pattern_offset, std::vector<double> &tool_offset,
+//                              int uv_pen_tool_number,
+//                              int curing_duty_cycle, int layers, double first_layer_height)

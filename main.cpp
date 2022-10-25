@@ -1,5 +1,7 @@
 #include <iostream>
 #include "source/engine/Hyrel.h"
+#include "source/engine/extrusion_configuration.h"
+#include "source/engine/printer_configuration.h"
 #include <boost/filesystem.hpp>
 #include <boost/dll.hpp>
 
@@ -21,40 +23,27 @@ int main() {
               << std::endl;
     // All units are in mm
     double cleaning_distance = 20; // Also allows the material to start flowing until we are in the shear thinning regime
-    int printing_temperature = 20;
-    int move_speed = 1000;
-    int print_speed = 200;
-    int tool_number = 2;
-    int uv_pen_tool_number = 1;
-    int uv_duty_cycle = 50;
 
-    double nozzle_diameter = 0.200;
-    double layer_height = 0.200;
-    double first_layer_height = 0.200;
-    double extrusion_multiplier = 1.;
+    ExtrusionConfiguration extrusion_configuration(50, 20, 0.2, 0.08, 1);
+    PrinterConfiguration printing_configuration(1000, 0, 2);
+
+    int uv_duty_cycle = 30;
+    double first_layer_height = 0.08;
 
     double nozzle_diameter_assumed = 0.3; // Nozzle diameter which was assumed for generation of the director pattern
     double grid_spacing_assumed = 0.02; // Spacing which was used for slicing the pattern, can be scaled for different nozzle diameters
-    double grid_spacing = grid_spacing_assumed * nozzle_diameter / nozzle_diameter_assumed;
+    double grid_spacing = grid_spacing_assumed * extrusion_configuration.getDiameter() / nozzle_diameter_assumed;
     std::vector<double> tool_offset = {50, 150, 0};
-    std::valarray<double> pattern_offset = {0, 3};
+    std::valarray<double> pattern_offset = {0, 4};
 
 
     for (auto &pattern: patterns_to_generate) {
-//        hyrelSingleLayer(patterns_directory, pattern, cleaning_distance, tool_number, printing_temperature, move_speed,
-//                           print_speed, nozzle_diameter, layer_height, extrusion_multiplier, grid_spacing, pattern_offset,
-//                           tool_offset, uv_pen_tool_number, uv_duty_cycle);
-//        for (int layers = 1; layers <= 4; layers++) {
-//            hyrelMultiLayer(patterns_directory, pattern, cleaning_distance, tool_number, printing_temperature, move_speed,
-//                            print_speed, nozzle_diameter, layer_height, extrusion_multiplier, grid_spacing, pattern_offset,
-//                            tool_offset, uv_pen_tool_number, uv_duty_cycle, layers, first_layer_height);
-//        }
-        hyrelMultiLayer(patterns_directory, pattern, cleaning_distance, tool_number, printing_temperature, move_speed,
-                        print_speed, nozzle_diameter, layer_height, extrusion_multiplier, grid_spacing, pattern_offset,
-                        tool_offset, uv_pen_tool_number, uv_duty_cycle, 1, first_layer_height);
-        hyrelMultiLayer(patterns_directory, pattern, cleaning_distance, tool_number, printing_temperature, move_speed,
-                        print_speed, nozzle_diameter, layer_height, extrusion_multiplier, grid_spacing, pattern_offset,
-                        tool_offset, uv_pen_tool_number, uv_duty_cycle, 4, first_layer_height);
+        hyrelMultiLayer(patterns_directory, pattern, grid_spacing, pattern_offset, cleaning_distance,
+                        tool_offset, uv_duty_cycle, first_layer_height, 1, extrusion_configuration,
+                        printing_configuration);
+        hyrelMultiLayer(patterns_directory, pattern, grid_spacing, pattern_offset, cleaning_distance,
+                        tool_offset, uv_duty_cycle, first_layer_height, 4, extrusion_configuration,
+                        printing_configuration);
     }
 
     std::cout << "Generation complete." << std::endl;

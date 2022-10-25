@@ -7,6 +7,8 @@
 
 #include "GCodeFile.h"
 #include "PatternBoundaries.h"
+#include "extrusion_configuration.h"
+#include "printer_configuration.h"
 #include <boost/filesystem.hpp>
 
 class Hyrel : public GCodeFile {
@@ -83,10 +85,9 @@ hyrelSingleLayer(const boost::filesystem::path &directory, const std::string &pa
                  int curing_duty_cycle);
 
 void
-hyrelMultiLayer(const boost::filesystem::path &directory, const std::string &pattern_name, double cleaning_distance,
-                int tool_number, int temperature, int move_speed, int print_speed, double nozzle_diameter,
-                double layer_height, double extrusion_multiplier, double grid_spacing,
-                const std::valarray<double> &pattern_offset, std::vector<double> &tool_offset, int uv_pen_tool_number,
-                int curing_duty_cycle, int layers, double first_layer_height);
+hyrelMultiLayer(const boost::filesystem::path &directory, const std::string &pattern_name, double grid_spacing,
+                const std::valarray<double> &pattern_offset, double cleaning_distance,
+                std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height, int layers,
+                ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration);
 
 #endif //GCODEGENERATOR_HYREL_H
