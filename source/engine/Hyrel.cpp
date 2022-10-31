@@ -13,7 +13,7 @@
 #include "extrusion_configuration.h"
 #include "printer_configuration.h"
 
-const std::string version = "0.1a";
+const std::string version = "0.2a";
 
 int mCommandToolNumber(int tool_number) {
     return tool_number + 11;
