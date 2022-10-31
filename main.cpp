@@ -12,15 +12,18 @@ int main() {
     fs::path cwd = boost::dll::program_location().parent_path().parent_path();
     fs::path patterns_directory = cwd / "patterns";
 
-    std::vector<std::string> patterns_to_generate = {"radial, r = 1 cm", "radial, r = 0.5 cm", "diagonal, 1x0.5 cm",
-                                                     "diagonal, 2x1 cm", "linear, 2x1 cm",
+    std::vector<std::string> patterns_to_generate = {"radial, r = 1 cm",
+                                                     "radial, r = 0.5 cm",
+                                                     "diagonal, 1x0.5 cm",
+                                                     "diagonal, 2x1 cm",
+                                                     "linear, 2x1 cm",
                                                      "symmetricPositive, 2x0.6 cm",
-                                                     "symmetric gauss curved rectangle", "linear, 1x0.5 cm",
+                                                     "symmetric gauss curved rectangle",
+                                                     "linear, 1x0.5 cm",
                                                      "azimuthal, r = 1 cm"};
     patterns_to_generate = {"azimuthal, r = 1 cm"};
 //    patterns_to_generate = {"linear, 2x1 cm"};
-    std::cout << "\nGenerating GCode for the files contained in" << std::endl << '\t' << patterns_directory
-              << std::endl;
+
     // All units are in mm
     double cleaning_distance = 20; // Also allows the material to start flowing until we are in the shear thinning regime
 
@@ -36,7 +39,8 @@ int main() {
     std::vector<double> tool_offset = {50, 150, 0};
     std::valarray<double> pattern_offset = {0, 2};
 
-
+    std::cout << "\nGenerating GCode for the files contained in" << std::endl << '\t' << patterns_directory
+              << std::endl;
     for (auto &pattern: patterns_to_generate) {
         singleLayer(patterns_directory, pattern, grid_spacing, pattern_offset, cleaning_distance,
                     tool_offset, uv_duty_cycle, first_layer_height, extrusion_configuration,
@@ -46,6 +50,10 @@ int main() {
                    printing_configuration);
         tuneLineSeparation(patterns_directory, 10, tool_offset, uv_duty_cycle, first_layer_height,
                            extrusion_configuration, printing_configuration, 2, 0.75, 0.25);
+        tuneLineSeparationAndHeight(patterns_directory, 10, tool_offset, uv_duty_cycle, first_layer_height,
+                                    extrusion_configuration, printing_configuration,
+                                    2, 0.75, 0.25,
+                                    0.09, 0.06, 0.01);
     }
 
     std::cout << "Generation complete." << std::endl;

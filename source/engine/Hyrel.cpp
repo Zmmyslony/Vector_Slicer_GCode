@@ -456,3 +456,44 @@ tuneLineSeparation(const boost::filesystem::path &directory, double cleaning_dis
     hyrel.exportToFile(directory / "gcode", "line_spacing", suffix_stream.str(), extruded_amount);
 }
 
+void
+tuneLineSeparationAndHeight(const boost::filesystem::path &directory, double cleaning_distance,
+                            std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
+                            ExtrusionConfiguration extrusion_configuration,
+                            PrinterConfiguration printer_configuration, double max_line_separation,
+                            double min_line_separation, double line_separation_step, double max_height,
+                            double min_height, double height_step) {
+    int number_of_cleaning_lines = 5;
+    Hyrel hyrel(extrusion_configuration, printer_configuration);
+    hyrel.init(extrusion_configuration, printer_configuration, first_layer_height, number_of_cleaning_lines,
+               cleaning_distance, tool_offset);
+
+    hyrel.configureUvarray(printer_configuration.getPrintHeadToolNumber(), curing_duty_cycle);
+    hyrel.addBreak();
+
+    std::valarray<double> base_offset = {0, 2 * number_of_cleaning_lines * extrusion_configuration.getDiameter()};
+    std::valarray<double> current_offset;
+
+    for (double height = min_height; height <= max_height; height += height_step) {
+        hyrel.moveVertical(height);
+        current_offset = base_offset;
+        base_offset += {cleaning_distance + 1, 0};
+        for (double relative_line_spacing = max_line_separation;
+             relative_line_spacing >= min_line_separation; relative_line_spacing -= line_separation_step) {
+            current_offset = hyrel.printZigZagPattern(cleaning_distance, 10,
+                                                      relative_line_spacing * extrusion_configuration.getDiameter(),
+                                                      current_offset + std::valarray<double>{0, 1});
+        }
+    }
+
+    hyrel.shutDown();
+
+    std::ostringstream suffix_stream;
+    suffix_stream << std::fixed << std::setprecision(3);
+    suffix_stream << "_" << extrusion_configuration.getDiameter() << "_um";
+
+    double extruded_amount = extrudedAmount(hyrel.getExtrusionValue(), extrusion_configuration.getDiameter(),
+                                            extrusion_configuration.getLayerHeight(),
+                                            extrusion_configuration.getExtrusionMultiplier());
+    hyrel.exportToFile(directory / "gcode", "height_and_line_spacing", suffix_stream.str(), extruded_amount);
+}

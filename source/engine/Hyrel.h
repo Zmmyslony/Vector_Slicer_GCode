@@ -104,4 +104,12 @@ tuneLineSeparation(const boost::filesystem::path &directory, double cleaning_dis
                    PrinterConfiguration printer_configuration, double max_line_separation, double min_line_separation,
                    double line_separation_step);
 
+void
+tuneLineSeparationAndHeight(const boost::filesystem::path &directory, double cleaning_distance,
+                            std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
+                            ExtrusionConfiguration extrusion_configuration,
+                            PrinterConfiguration printer_configuration, double max_line_separation,
+                            double min_line_separation, double line_separation_step, double max_height,
+                            double min_height, double height_step);
+
 #endif //GCODEGENERATOR_HYREL_H
