@@ -1,9 +1,10 @@
 #include <iostream>
+#include <boost/filesystem.hpp>
+#include <boost/dll.hpp>
+
 #include "source/engine/Hyrel.h"
 #include "source/engine/extrusion_configuration.h"
 #include "source/engine/printer_configuration.h"
-#include <boost/filesystem.hpp>
-#include <boost/dll.hpp>
 
 namespace fs = boost::filesystem;
 
@@ -52,7 +53,7 @@ int main() {
                            extrusion_configuration, printing_configuration, 2, 0.75, 0.25);
         tuneLineSeparationAndHeight(patterns_directory, 10, tool_offset, uv_duty_cycle, first_layer_height,
                                     extrusion_configuration, printing_configuration,
-                                    2, 0.75, 0.25,
+                                    1.5, 1, 0.25,
                                     0.09, 0.06, 0.01);
     }
 
