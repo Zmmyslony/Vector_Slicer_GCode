@@ -29,10 +29,6 @@ class Hyrel : public GCodeFile {
     void turnMotorsOff();
 
     void
-    clean(double clean_length, int number_of_lines, double nozzle_width, int height_offset_register,
-          double layer_height);
-
-    void
     configurePrime(int tool_number, double pulse_rate, double number_of_pulses, double dwell_time,
                    bool is_executed_immediately);
 
@@ -73,6 +69,14 @@ public:
     void addLocalOffset(std::vector<double> offset);
 
     void configureUvarray(int print_head_tool_number, int duty_cycle);
+
+    void
+    clean(double clean_length, int number_of_lines, double nozzle_width, int height_offset_register,
+          double layer_height);
+
+    std::valarray<double>
+    printZigZagPattern(double length, int number_of_lines, double line_separation,
+                       const std::valarray<double> &starting_position);
 };
 
 void testHeaderAndFooter();
@@ -89,5 +93,11 @@ hyrelMultiLayer(const boost::filesystem::path &directory, const std::string &pat
                 const std::valarray<double> &pattern_offset, double cleaning_distance,
                 std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height, int layers,
                 ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration);
+
+void
+hyrelTuneLineSeparation(const boost::filesystem::path &directory, double cleaning_distance,
+                        std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
+                        ExtrusionConfiguration extrusion_configuration,
+                        PrinterConfiguration printer_configuration);
 
 #endif //GCODEGENERATOR_HYREL_H

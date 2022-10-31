@@ -34,7 +34,7 @@ int main() {
     double grid_spacing_assumed = 0.02; // Spacing which was used for slicing the pattern, can be scaled for different nozzle diameters
     double grid_spacing = grid_spacing_assumed * extrusion_configuration.getDiameter() / nozzle_diameter_assumed;
     std::vector<double> tool_offset = {50, 150, 0};
-    std::valarray<double> pattern_offset = {0, 4};
+    std::valarray<double> pattern_offset = {0, 2};
 
 
     for (auto &pattern: patterns_to_generate) {
@@ -44,6 +44,8 @@ int main() {
         hyrelMultiLayer(patterns_directory, pattern, grid_spacing, pattern_offset, cleaning_distance,
                         tool_offset, uv_duty_cycle, first_layer_height, 4, extrusion_configuration,
                         printing_configuration);
+        hyrelTuneLineSeparation(patterns_directory, 20, tool_offset, uv_duty_cycle, first_layer_height,
+                                extrusion_configuration, printing_configuration);
     }
 
     std::cout << "Generation complete." << std::endl;

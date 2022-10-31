@@ -129,6 +129,30 @@ void Hyrel::clearOffsets() {
     generalCommand('G', 53);
 }
 
+std::valarray<double> Hyrel::printZigZagPattern(double length, int number_of_lines, double line_separation,
+                                                const std::valarray<double> &starting_position) {
+    movePlanar(starting_position);
+    extrude(starting_position + std::valarray<double>{length, 0});
+    std::valarray<double> last_coordinate;
+
+    for (int i = 1; i < number_of_lines; i++) {
+        if (i % 2 == 0) {
+            extrude(starting_position + std::valarray<double>{0, i * line_separation});
+            extrude(starting_position + std::valarray<double>{length, i * line_separation});
+
+            last_coordinate = starting_position + std::valarray<double>{0, i * line_separation};
+
+        } else {
+            extrude(starting_position + std::valarray<double>{length, i * line_separation});
+            extrude(starting_position + std::valarray<double>{0, i * line_separation});
+
+            last_coordinate = starting_position + std::valarray<double>{0, i * line_separation};
+        }
+    }
+    return last_coordinate;
+}
+
+
 void Hyrel::clean(double clean_length, int number_of_lines, double nozzle_width, int height_offset_register,
                   double layer_height) {
     addComment("Invoking offsets");
@@ -145,19 +169,20 @@ void Hyrel::clean(double clean_length, int number_of_lines, double nozzle_width,
     addBreak();
     addComment("Starting cleaning");
     if (clean_length > 0) {
-        movePlanar({0, 0});
-        extrude({clean_length, 0});
-
-        for (int i = 1; i < number_of_lines; i++) {
-            if (i % 2 == 0) {
-                extrude({0, 2 * i * nozzle_width});
-                extrude({clean_length, 2 * i * nozzle_width});
-
-            } else {
-                extrude({clean_length, 2 * i * nozzle_width});
-                extrude({0, 2 * i * nozzle_width});
-            }
-        }
+        printZigZagPattern(clean_length, number_of_lines, 2 * nozzle_width, {0, 0});
+//        movePlanar({0, 0});
+//        extrude({clean_length, 0});
+//
+//        for (int i = 1; i < number_of_lines; i++) {
+//            if (i % 2 == 0) {
+//                extrude({0, 2 * i * nozzle_width});
+//                extrude({clean_length, 2 * i * nozzle_width});
+//
+//            } else {
+//                extrude({clean_length, 2 * i * nozzle_width});
+//                extrude({0, 2 * i * nozzle_width});
+//            }
+//        }
     }
 }
 
@@ -369,15 +394,13 @@ hyrelMultiLayer(const boost::filesystem::path &directory, const std::string &pat
         Hyrel hyrel(printer_configuration.getNonPrintingSpeed(), extrusion_configuration.getPrintingSpeed(),
                     extrusion_configuration.getExtrusionMultiplier());
         hyrel.init(extrusion_configuration.getNozzleTemperature(), printer_configuration.getBedTemperature(),
-                   cleaning_distance,
-                   extrusion_configuration.getDiameter(), first_layer_height,
+                   cleaning_distance, extrusion_configuration.getDiameter(), first_layer_height,
                    extrusion_configuration.getLayerHeight(), printer_configuration.getPrintHeadToolNumber(),
                    tool_offset, number_of_cleaning_lines);
-//        hyrel.configureUvPen(tool_number, uv_pen_tool_number, curing_duty_cycle);
         hyrel.configureUvarray(printer_configuration.getPrintHeadToolNumber(), curing_duty_cycle);
         hyrel.addBreak();
 
-        std::valarray<double> cleaning_offset = {0, number_of_cleaning_lines * extrusion_configuration.getDiameter()};
+        std::valarray<double> cleaning_offset = {0, 2 * number_of_cleaning_lines * extrusion_configuration.getDiameter()};
         printMultiLayer(hyrel, pattern_offset + cleaning_offset, grid_spacing, sorted_paths, layers,
                         extrusion_configuration.getLayerHeight());
         hyrel.shutDown();
@@ -395,10 +418,39 @@ hyrelMultiLayer(const boost::filesystem::path &directory, const std::string &pat
     }
 }
 
-//void hyrelTuneLayerSeparation(const boost::filesystem::path &directory, const std::string &pattern_name,
-//                              double cleaning_distance,
-//                              int tool_number, int temperature, int move_speed, int print_speed, double nozzle_diameter,
-//                              double layer_height, double extrusion_multiplier, double grid_spacing,
-//                              const std::valarray<double> &pattern_offset, std::vector<double> &tool_offset,
-//                              int uv_pen_tool_number,
-//                              int curing_duty_cycle, int layers, double first_layer_height)
+
+void
+hyrelTuneLineSeparation(const boost::filesystem::path &directory, double cleaning_distance,
+                        std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
+                        ExtrusionConfiguration extrusion_configuration,
+                        PrinterConfiguration printer_configuration) {
+    int number_of_cleaning_lines = 5;
+    Hyrel hyrel(printer_configuration.getNonPrintingSpeed(), extrusion_configuration.getPrintingSpeed(),
+                extrusion_configuration.getExtrusionMultiplier());
+    hyrel.init(extrusion_configuration.getNozzleTemperature(), printer_configuration.getBedTemperature(),
+               cleaning_distance, extrusion_configuration.getDiameter(), first_layer_height,
+               extrusion_configuration.getLayerHeight(), printer_configuration.getPrintHeadToolNumber(), tool_offset,
+               number_of_cleaning_lines);
+
+    hyrel.configureUvarray(printer_configuration.getPrintHeadToolNumber(), curing_duty_cycle);
+    hyrel.addBreak();
+
+    std::valarray<double> current_offset = {0, 2 * number_of_cleaning_lines * extrusion_configuration.getDiameter()};
+
+    for (double relative_line_spacing = 2; relative_line_spacing >= 0.5; relative_line_spacing -= 0.5) {
+        current_offset = hyrel.printZigZagPattern(cleaning_distance, 10,
+                                                  relative_line_spacing * extrusion_configuration.getDiameter(),
+                                                  current_offset + std::valarray<double>{0, 1});
+    }
+    hyrel.shutDown();
+
+    std::ostringstream suffix_stream;
+    suffix_stream << std::fixed << std::setprecision(3);
+    suffix_stream << "_" << extrusion_configuration.getDiameter() << "_um_";
+
+    double extruded_amount = extrudedAmount(hyrel.getExtrusionValue(), extrusion_configuration.getDiameter(),
+                                            extrusion_configuration.getLayerHeight(),
+                                            extrusion_configuration.getExtrusionMultiplier());
+    hyrel.exportToFile(directory / "gcode", "line_spacing", suffix_stream.str(), extruded_amount);
+}
+
