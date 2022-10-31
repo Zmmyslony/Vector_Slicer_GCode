@@ -337,6 +337,18 @@ PatternBoundaries Hyrel::printPattern(const std::vector<std::vector<std::valarra
 
 void Hyrel::exportToFile(const boost::filesystem::path &results_path, const std::string &pattern_name,
                          const std::string &suffix, double extruded_amount) {
+    if (!is_directory(results_path)) {
+        std::cout << "GCode directory \"" << results_path.string() << "\" does not exist. Attempting to create it."
+                  << std::endl;
+        boost::filesystem::create_directory(results_path);
+        if (!is_directory(results_path)) {
+            std::cout << "GCode directory could not be created. Please create it manually." << std::endl;
+            std::cout << "Aborting generation of " << pattern_name << std::endl;
+            return;
+        } else {
+            std::cout << "Creation successful." << std::endl;
+        }
+    }
     boost::filesystem::path filename = results_path / (pattern_name + suffix + ".gcode");
     std::ofstream file(filename.string());
 
