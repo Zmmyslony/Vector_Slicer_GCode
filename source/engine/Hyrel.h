@@ -85,14 +85,11 @@ public:
               double first_layer_height, int cleaning_lines, double clean_length, std::vector<double> &tool_offset);
 };
 
-void testHeaderAndFooter();
-
 void
-hyrelSingleLayer(const boost::filesystem::path &directory, const std::string &pattern_name, double cleaning_distance,
-                 int tool_number, int temperature, int move_speed, int print_speed, double nozzle_diameter,
-                 double layer_height, double extrusion_multiplier, double grid_spacing,
-                 const std::valarray<double> &pattern_offset, std::vector<double> &tool_offset, int uv_pen_tool_number,
-                 int curing_duty_cycle);
+singleLayer(const boost::filesystem::path &directory, const std::string &pattern_name, double grid_spacing,
+            const std::valarray<double> &pattern_offset, double cleaning_distance,
+            std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
+            ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration);
 
 void
 multiLayer(const boost::filesystem::path &directory, const std::string &pattern_name, double grid_spacing,

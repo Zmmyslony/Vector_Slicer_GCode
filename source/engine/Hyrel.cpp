@@ -279,8 +279,8 @@ Hyrel::Hyrel(int move_speed, int print_speed, double extrusion_coefficient) : GC
 }
 
 Hyrel::Hyrel(const ExtrusionConfiguration &extrusion_configuration, const PrinterConfiguration &printer_configuration)
-        : GCodeFile(printer_configuration.getNonPrintingSpeed(), extrusion_configuration.getPrintingSpeed(),
-                    extrusion_configuration.getExtrusionMultiplier()) {
+        : Hyrel(printer_configuration.getNonPrintingSpeed(), extrusion_configuration.getPrintingSpeed(),
+                extrusion_configuration.getExtrusionMultiplier()) {
 
 }
 
@@ -359,16 +359,6 @@ void Hyrel::addLocalOffset(std::vector<double> offset) {
                    {54, offset[0], offset[1], offset[2]});
 }
 
-void
-hyrelSingleLayer(const boost::filesystem::path &directory, const std::string &pattern_name, double cleaning_distance,
-                 int tool_number, int temperature, int move_speed, int print_speed, double nozzle_diameter,
-                 double layer_height, double extrusion_multiplier, double grid_spacing,
-                 const std::valarray<double> &pattern_offset, std::vector<double> &tool_offset, int uv_pen_tool_number,
-                 int curing_duty_cycle) {
-    multiLayer(directory, pattern_name, grid_spacing, pattern_offset, cleaning_distance, tool_offset,
-               curing_duty_cycle, layer_height,
-               1, ExtrusionConfiguration(0, 0, 0, 0, 0), PrinterConfiguration(0, 0, 0));
-}
 
 void printMultiLayer(Hyrel &hyrel, const std::valarray<double> &initial_pattern_offset, double grid_spacing,
                      const std::vector<std::vector<std::valarray<int>>> &sorted_paths, int layers,
@@ -384,6 +374,15 @@ void printMultiLayer(Hyrel &hyrel, const std::valarray<double> &initial_pattern_
 
 double extrudedAmount(double length, double width, double height, double extrusion_multiplier) {
     return length * width * height * extrusion_multiplier;
+}
+
+void
+singleLayer(const boost::filesystem::path &directory, const std::string &pattern_name, double grid_spacing,
+            const std::valarray<double> &pattern_offset, double cleaning_distance,
+            std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
+            ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration) {
+    multiLayer(directory, pattern_name, grid_spacing, pattern_offset, cleaning_distance, tool_offset, curing_duty_cycle,
+               first_layer_height, 1, extrusion_configuration, printer_configuration);
 }
 
 void

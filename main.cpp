@@ -38,9 +38,9 @@ int main() {
 
 
     for (auto &pattern: patterns_to_generate) {
-        multiLayer(patterns_directory, pattern, grid_spacing, pattern_offset, cleaning_distance,
-                   tool_offset, uv_duty_cycle, first_layer_height, 1, extrusion_configuration,
-                   printing_configuration);
+        singleLayer(patterns_directory, pattern, grid_spacing, pattern_offset, cleaning_distance,
+                    tool_offset, uv_duty_cycle, first_layer_height, extrusion_configuration,
+                    printing_configuration);
         multiLayer(patterns_directory, pattern, grid_spacing, pattern_offset, cleaning_distance,
                    tool_offset, uv_duty_cycle, first_layer_height, 4, extrusion_configuration,
                    printing_configuration);
