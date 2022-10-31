@@ -20,7 +20,7 @@ add_executable(GCodeGenerator
         source/engine/PatternBoundaries.h
         source/engine/extrusion_configuration.cpp
         source/engine/extrusion_configuration.h
-        ource/engine/printer_configuration.cpp
+        source/engine/printer_configuration.cpp
         source/engine/printer_configuration.h)
 
 target_link_libraries(GCodeGenerator
