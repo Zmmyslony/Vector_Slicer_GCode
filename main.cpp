@@ -28,7 +28,7 @@ int main() {
     PrinterConfiguration printing_configuration(1000, 0, 2);
 
     int uv_duty_cycle = 30;
-    double first_layer_height = 0.08;
+    double first_layer_height = extrusion_configuration.getLayerHeight();
 
     double nozzle_diameter_assumed = 0.3; // Nozzle diameter which was assumed for generation of the director pattern
     double grid_spacing_assumed = 0.02; // Spacing which was used for slicing the pattern, can be scaled for different nozzle diameters
@@ -38,14 +38,14 @@ int main() {
 
 
     for (auto &pattern: patterns_to_generate) {
-        hyrelMultiLayer(patterns_directory, pattern, grid_spacing, pattern_offset, cleaning_distance,
-                        tool_offset, uv_duty_cycle, first_layer_height, 1, extrusion_configuration,
-                        printing_configuration);
-        hyrelMultiLayer(patterns_directory, pattern, grid_spacing, pattern_offset, cleaning_distance,
-                        tool_offset, uv_duty_cycle, first_layer_height, 4, extrusion_configuration,
-                        printing_configuration);
-        hyrelTuneLineSeparation(patterns_directory, 20, tool_offset, uv_duty_cycle, first_layer_height,
-                                extrusion_configuration, printing_configuration);
+        multiLayer(patterns_directory, pattern, grid_spacing, pattern_offset, cleaning_distance,
+                   tool_offset, uv_duty_cycle, first_layer_height, 1, extrusion_configuration,
+                   printing_configuration);
+        multiLayer(patterns_directory, pattern, grid_spacing, pattern_offset, cleaning_distance,
+                   tool_offset, uv_duty_cycle, first_layer_height, 4, extrusion_configuration,
+                   printing_configuration);
+        tuneLineSeparation(patterns_directory, 10, tool_offset, uv_duty_cycle, first_layer_height,
+                           extrusion_configuration, printing_configuration, 2, 0.75, 0.25);
     }
 
     std::cout << "Generation complete." << std::endl;

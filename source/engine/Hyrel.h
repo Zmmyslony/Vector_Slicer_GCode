@@ -12,6 +12,7 @@
 #include <boost/filesystem.hpp>
 
 class Hyrel : public GCodeFile {
+
     void defineHeightOffset(unsigned int register_number, double height);
 
     void defineToolOffset(int tool_number, const std::vector<double> &xyz, unsigned int height_register_offset);
@@ -53,6 +54,8 @@ public:
 
     Hyrel(int move_speed, int print_speed, double extrusion_coefficient);
 
+    Hyrel(const ExtrusionConfiguration &extrusion_configuration, const PrinterConfiguration &printer_configuration);
+
     void
     printPath(const std::vector<std::valarray<int>> &path, const std::valarray<double> &position_offset,
               double grid_distance);
@@ -77,6 +80,9 @@ public:
     std::valarray<double>
     printZigZagPattern(double length, int number_of_lines, double line_separation,
                        const std::valarray<double> &starting_position);
+
+    void init(const ExtrusionConfiguration &extrusion_configuration, const PrinterConfiguration &printer_configuration,
+              double first_layer_height, int cleaning_lines, double clean_length, std::vector<double> &tool_offset);
 };
 
 void testHeaderAndFooter();
@@ -89,15 +95,16 @@ hyrelSingleLayer(const boost::filesystem::path &directory, const std::string &pa
                  int curing_duty_cycle);
 
 void
-hyrelMultiLayer(const boost::filesystem::path &directory, const std::string &pattern_name, double grid_spacing,
-                const std::valarray<double> &pattern_offset, double cleaning_distance,
-                std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height, int layers,
-                ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration);
+multiLayer(const boost::filesystem::path &directory, const std::string &pattern_name, double grid_spacing,
+           const std::valarray<double> &pattern_offset, double cleaning_distance,
+           std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height, int layers,
+           ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration);
 
 void
-hyrelTuneLineSeparation(const boost::filesystem::path &directory, double cleaning_distance,
-                        std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
-                        ExtrusionConfiguration extrusion_configuration,
-                        PrinterConfiguration printer_configuration);
+tuneLineSeparation(const boost::filesystem::path &directory, double cleaning_distance,
+                   std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
+                   ExtrusionConfiguration extrusion_configuration,
+                   PrinterConfiguration printer_configuration, double max_line_separation, double min_line_separation,
+                   double line_separation_step);
 
 #endif //GCODEGENERATOR_HYREL_H
