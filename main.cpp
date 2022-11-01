@@ -23,11 +23,12 @@ int main() {
                                                      "linear, 1x0.5 cm",
                                                      "azimuthal, r = 1 cm"};
     patterns_to_generate = {"radial, r = 1 cm", "azimuthal, r = 1 cm"};
+    patterns_to_generate = {"linear, 2x1 cm"};
 
     // All units are in mm
     double cleaning_distance = 20; // Also allows the material to start flowing until we are in the shear thinning regime
 
-    ExtrusionConfiguration extrusion_configuration(75, 20, 0.2, 0.08, 1);
+    ExtrusionConfiguration extrusion_configuration(100, 20, 0.2, 0.08, 1);
     PrinterConfiguration printing_configuration(1000, 0, 2);
 
     int uv_duty_cycle = 30;
@@ -54,12 +55,17 @@ int main() {
 
     tuneLineSeparation(patterns_directory, 10, tool_offset, uv_duty_cycle, first_layer_height,
                        extrusion_configuration, printing_configuration,
-                       2, 0.75, 0.25);
+                       1.8, 0.8, 0.2);
 
     tuneLineSeparationAndHeight(patterns_directory, 10, tool_offset, uv_duty_cycle, first_layer_height,
                                 extrusion_configuration, printing_configuration,
                                 1.5, 1, 0.25,
                                 0.09, 0.06, 0.01);
+
+    tuneLineSeparationAndSpeed(patterns_directory, 10, tool_offset, uv_duty_cycle, first_layer_height,
+                               extrusion_configuration, printing_configuration,
+                               1.1, 0.8, 0.1,
+                               120, 80, 10);
 
     std::cout << "Generation complete." << std::endl;
     return 0;
