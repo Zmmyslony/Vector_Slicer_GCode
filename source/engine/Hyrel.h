@@ -98,14 +98,14 @@ multiLayer(const boost::filesystem::path &directory, const std::string &pattern_
            ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration);
 
 void
-tuneLineSeparation(const boost::filesystem::path &directory, double cleaning_distance,
+tuneLineSeparation(const boost::filesystem::path &directory, double printing_distance,
                    std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
                    ExtrusionConfiguration extrusion_configuration,
                    PrinterConfiguration printer_configuration, double max_line_separation, double min_line_separation,
                    double line_separation_step);
 
 void
-tuneLineSeparationAndHeight(const boost::filesystem::path &directory, double cleaning_distance,
+tuneLineSeparationAndHeight(const boost::filesystem::path &directory, double printing_distance,
                             std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
                             ExtrusionConfiguration extrusion_configuration,
                             PrinterConfiguration printer_configuration, double max_line_separation,
@@ -113,7 +113,7 @@ tuneLineSeparationAndHeight(const boost::filesystem::path &directory, double cle
                             double min_height, double height_step);
 
 void
-tuneLineSeparationAndSpeed(const boost::filesystem::path &directory, double cleaning_distance,
+tuneLineSeparationAndSpeed(const boost::filesystem::path &directory, double printing_distance,
                            std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
                            ExtrusionConfiguration extrusion_configuration,
                            PrinterConfiguration printer_configuration, double max_line_separation,
