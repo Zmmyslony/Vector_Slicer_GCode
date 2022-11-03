@@ -415,7 +415,7 @@ tuneLineSeparation(const boost::filesystem::path &directory, double printing_dis
                    ExtrusionConfiguration extrusion_configuration,
                    PrinterConfiguration printer_configuration, double max_line_separation, double min_line_separation,
                    double line_separation_step) {
-    int number_of_cleaning_lines = 5;
+    int number_of_cleaning_lines = 16;
     Hyrel hyrel(extrusion_configuration, printer_configuration);
     hyrel.init(extrusion_configuration, printer_configuration, first_layer_height, number_of_cleaning_lines,
                printing_distance, tool_offset);
@@ -450,7 +450,7 @@ tuneLineSeparationAndHeight(const boost::filesystem::path &directory, double pri
                             PrinterConfiguration printer_configuration, double max_line_separation,
                             double min_line_separation, double line_separation_step, double max_height,
                             double min_height, double height_step) {
-    int number_of_cleaning_lines = 5;
+    int number_of_cleaning_lines = 16;
     Hyrel hyrel(extrusion_configuration, printer_configuration);
     hyrel.init(extrusion_configuration, printer_configuration, first_layer_height, number_of_cleaning_lines,
                printing_distance, tool_offset);
@@ -492,7 +492,7 @@ tuneLineSeparationAndSpeed(const boost::filesystem::path &directory, double prin
                            PrinterConfiguration printer_configuration, double max_line_separation,
                            double min_line_separation, double line_separation_step, int max_speed,
                            int min_speed, int speed_step) {
-    int number_of_cleaning_lines = 5;
+    int number_of_cleaning_lines = 16;
     Hyrel hyrel(extrusion_configuration, printer_configuration);
     hyrel.init(extrusion_configuration, printer_configuration, first_layer_height, number_of_cleaning_lines,
                printing_distance, tool_offset);
