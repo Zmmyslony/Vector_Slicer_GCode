@@ -138,9 +138,7 @@ void GCodeFile::moveVertical(double z) {
 }
 
 void GCodeFile::moveVerticalRelative(double delta_z) {
-    positions[2] += delta_z;
-    print_time += delta_z / (move_speed / vertical_move_slowdown);
-    body_stream << "G0 Z" << positions[2] << " F" << move_speed / vertical_move_slowdown << "\n";
+    moveVertical(positions[2] + delta_z);
 }
 
 void GCodeFile::move(double x, double y, double z) {
