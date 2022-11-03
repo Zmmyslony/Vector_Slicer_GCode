@@ -26,7 +26,7 @@ int main() {
     patterns_to_generate = {"linear, 2x1 cm"};
 
     // All units are in mm
-    double cleaning_distance = 20; // Also allows the material to start flowing until we are in the shear thinning regime
+    double cleaning_distance = 30; // Also allows the material to start flowing until we are in the shear thinning regime
 
     ExtrusionConfiguration extrusion_configuration(100, 20, 0.2, 0.08, 1, 2);
     PrinterConfiguration printing_configuration(1000, 0, 2);
@@ -53,16 +53,23 @@ int main() {
                    printing_configuration);
     }
 
-    tuneLineSeparation(patterns_directory, 10, tool_offset, uv_duty_cycle, first_layer_height,
+
+    double printing_distance = 15;
+    int number_of_lines = 12;
+
+    tuneLineSeparation(patterns_directory, printing_distance, number_of_lines, tool_offset, uv_duty_cycle,
+                       first_layer_height,
                        extrusion_configuration, printing_configuration,
                        1.8, 0.8, 0.2);
 
-    tuneLineSeparationAndHeight(patterns_directory, 10, tool_offset, uv_duty_cycle, first_layer_height,
+    tuneLineSeparationAndHeight(patterns_directory, printing_distance, number_of_lines, tool_offset, uv_duty_cycle,
+                                first_layer_height,
                                 extrusion_configuration, printing_configuration,
                                 1.5, 1, 0.25,
                                 0.09, 0.06, 0.01);
 
-    tuneLineSeparationAndSpeed(patterns_directory, 10, tool_offset, uv_duty_cycle, first_layer_height,
+    tuneLineSeparationAndSpeed(patterns_directory, printing_distance, number_of_lines, tool_offset, uv_duty_cycle,
+                               first_layer_height,
                                extrusion_configuration, printing_configuration,
                                1.1, 0.8, 0.1,
                                120, 80, 10);

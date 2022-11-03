@@ -98,26 +98,24 @@ multiLayer(const boost::filesystem::path &directory, const std::string &pattern_
            ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration);
 
 void
-tuneLineSeparation(const boost::filesystem::path &directory, double printing_distance,
+tuneLineSeparation(const boost::filesystem::path &directory, double printing_distance, int number_of_lines,
                    std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
-                   ExtrusionConfiguration extrusion_configuration,
-                   PrinterConfiguration printer_configuration, double max_line_separation, double min_line_separation,
-                   double line_separation_step);
+                   ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration,
+                   double max_line_separation, double min_line_separation, double line_separation_step);
 
 void
-tuneLineSeparationAndHeight(const boost::filesystem::path &directory, double printing_distance,
+tuneLineSeparationAndHeight(const boost::filesystem::path &directory, double printing_distance, int number_of_lines,
                             std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
-                            ExtrusionConfiguration extrusion_configuration,
-                            PrinterConfiguration printer_configuration, double max_line_separation,
-                            double min_line_separation, double line_separation_step, double max_height,
-                            double min_height, double height_step);
+                            ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration,
+                            double max_line_separation, double min_line_separation, double line_separation_step,
+                            double max_height, double min_height, double height_step);
 
 void
-tuneLineSeparationAndSpeed(const boost::filesystem::path &directory, double printing_distance,
+tuneLineSeparationAndSpeed(const boost::filesystem::path &directory, double printing_distance, int number_of_lines,
                            std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
                            ExtrusionConfiguration extrusion_configuration,
                            PrinterConfiguration printer_configuration, double max_line_separation,
-                           double min_line_separation, double line_separation_step, int max_speed,
-                           int min_speed, int speed_step);
+                           double min_line_separation, double line_separation_step, int max_speed, int min_speed,
+                           int speed_step);
 
 #endif //GCODEGENERATOR_HYREL_H

@@ -410,11 +410,10 @@ multiLayer(const boost::filesystem::path &directory, const std::string &pattern_
 
 
 void
-tuneLineSeparation(const boost::filesystem::path &directory, double printing_distance,
+tuneLineSeparation(const boost::filesystem::path &directory, double printing_distance, int number_of_lines,
                    std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
-                   ExtrusionConfiguration extrusion_configuration,
-                   PrinterConfiguration printer_configuration, double max_line_separation, double min_line_separation,
-                   double line_separation_step) {
+                   ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration,
+                   double max_line_separation, double min_line_separation, double line_separation_step) {
     int number_of_cleaning_lines = 16;
     Hyrel hyrel(extrusion_configuration, printer_configuration);
     hyrel.init(extrusion_configuration, printer_configuration, first_layer_height, number_of_cleaning_lines,
@@ -427,7 +426,7 @@ tuneLineSeparation(const boost::filesystem::path &directory, double printing_dis
 
     for (double relative_line_spacing = max_line_separation;
          relative_line_spacing >= min_line_separation; relative_line_spacing -= line_separation_step) {
-        current_offset = hyrel.printZigZagPattern(printing_distance, 10,
+        current_offset = hyrel.printZigZagPattern(printing_distance, number_of_lines,
                                                   relative_line_spacing * extrusion_configuration.getDiameter(),
                                                   current_offset + std::valarray<double>{0, 1});
     }
@@ -444,12 +443,11 @@ tuneLineSeparation(const boost::filesystem::path &directory, double printing_dis
 }
 
 void
-tuneLineSeparationAndHeight(const boost::filesystem::path &directory, double printing_distance,
+tuneLineSeparationAndHeight(const boost::filesystem::path &directory, double printing_distance, int number_of_lines,
                             std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
-                            ExtrusionConfiguration extrusion_configuration,
-                            PrinterConfiguration printer_configuration, double max_line_separation,
-                            double min_line_separation, double line_separation_step, double max_height,
-                            double min_height, double height_step) {
+                            ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration,
+                            double max_line_separation, double min_line_separation, double line_separation_step,
+                            double max_height, double min_height, double height_step) {
     int number_of_cleaning_lines = 16;
     Hyrel hyrel(extrusion_configuration, printer_configuration);
     hyrel.init(extrusion_configuration, printer_configuration, first_layer_height, number_of_cleaning_lines,
@@ -467,7 +465,7 @@ tuneLineSeparationAndHeight(const boost::filesystem::path &directory, double pri
         base_offset += {printing_distance + 1, 0};
         for (double relative_line_spacing = max_line_separation;
              relative_line_spacing >= min_line_separation; relative_line_spacing -= line_separation_step) {
-            current_offset = hyrel.printZigZagPattern(printing_distance, 10,
+            current_offset = hyrel.printZigZagPattern(printing_distance, number_of_lines,
                                                       relative_line_spacing * extrusion_configuration.getDiameter(),
                                                       current_offset + std::valarray<double>{0, 1});
         }
@@ -486,12 +484,12 @@ tuneLineSeparationAndHeight(const boost::filesystem::path &directory, double pri
 }
 
 void
-tuneLineSeparationAndSpeed(const boost::filesystem::path &directory, double printing_distance,
+tuneLineSeparationAndSpeed(const boost::filesystem::path &directory, double printing_distance, int number_of_lines,
                            std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
                            ExtrusionConfiguration extrusion_configuration,
                            PrinterConfiguration printer_configuration, double max_line_separation,
-                           double min_line_separation, double line_separation_step, int max_speed,
-                           int min_speed, int speed_step) {
+                           double min_line_separation, double line_separation_step, int max_speed, int min_speed,
+                           int speed_step) {
     int number_of_cleaning_lines = 16;
     Hyrel hyrel(extrusion_configuration, printer_configuration);
     hyrel.init(extrusion_configuration, printer_configuration, first_layer_height, number_of_cleaning_lines,
@@ -509,7 +507,7 @@ tuneLineSeparationAndSpeed(const boost::filesystem::path &directory, double prin
         base_offset += {printing_distance + 1, 0};
         for (double relative_line_spacing = max_line_separation;
              relative_line_spacing >= min_line_separation; relative_line_spacing -= line_separation_step) {
-            current_offset = hyrel.printZigZagPattern(printing_distance, 10,
+            current_offset = hyrel.printZigZagPattern(printing_distance, number_of_lines,
                                                       relative_line_spacing * extrusion_configuration.getDiameter(),
                                                       current_offset + std::valarray<double>{0, 1});
         }
