@@ -52,7 +52,7 @@ public:
 
     void shutDown();
 
-    Hyrel(int move_speed, int print_speed, double extrusion_coefficient);
+    Hyrel(int move_speed, int print_speed, double extrusion_coefficient, double lift_off_distance);
 
     Hyrel(const ExtrusionConfiguration &extrusion_configuration, const PrinterConfiguration &printer_configuration);
 

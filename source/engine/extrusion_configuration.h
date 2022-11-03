@@ -12,8 +12,11 @@ class ExtrusionConfiguration {
     double extrusion_multiplier = 1;
     int printing_speed = 100;
     int nozzle_temperature = 20;
+    double lift_off_distance = 0;
 
 public:
+    double getLiftOffDistance() const;
+
     double getDiameter() const;
 
     double getLayerHeight() const;
@@ -25,7 +28,7 @@ public:
     int getNozzleTemperature() const;
 
     ExtrusionConfiguration(int printing_speed, int nozzle_temperature, double diameter, double layer_height,
-                           double extrusion_multiplier);
+                           double extrusion_multiplier, double lift_off_distance);
 
 };
 

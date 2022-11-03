@@ -17,6 +17,7 @@ class GCodeFile {
     int print_speed;
     const double extrusion_coefficient;
     double print_time = 0;
+    double lift_off_distance = 0;
 
     std::valarray<double> positions = {0, 0, 0};
     double extrusion_value = 0;
@@ -70,7 +71,7 @@ public:
 
     void moveVertical(double z);
 
-    GCodeFile(int move_speed, int print_speed, double extrusion_coefficient);
+    GCodeFile(int move_speed, int print_speed, double extrusion_coefficient, double lift_off_distance);
 
     explicit GCodeFile();
 

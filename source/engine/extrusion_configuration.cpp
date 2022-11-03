@@ -6,14 +6,18 @@
 
 ExtrusionConfiguration::ExtrusionConfiguration(int printing_speed, int nozzle_temperature, double diameter,
                                                double layer_height,
-                                               double extrusion_multiplier) : diameter(diameter),
-                                                                                             layer_height(layer_height),
-                                                                                             extrusion_multiplier(
-                                                                                                     extrusion_multiplier),
-                                                                                             printing_speed(
-                                                                                                     printing_speed),
-                                                                                             nozzle_temperature(
-                                                                                                     nozzle_temperature) {}
+                                               double extrusion_multiplier, double lift_off_distance) : diameter(
+        diameter),
+                                                                                                        layer_height(
+                                                                                                                layer_height),
+                                                                                                        extrusion_multiplier(
+                                                                                                                extrusion_multiplier),
+                                                                                                        printing_speed(
+                                                                                                                printing_speed),
+                                                                                                        nozzle_temperature(
+                                                                                                                nozzle_temperature),
+                                                                                                        lift_off_distance(
+                                                                                                                lift_off_distance) {}
 
 double ExtrusionConfiguration::getDiameter() const {
     return diameter;
@@ -33,4 +37,8 @@ int ExtrusionConfiguration::getPrintingSpeed() const {
 
 int ExtrusionConfiguration::getNozzleTemperature() const {
     return nozzle_temperature;
+}
+
+double ExtrusionConfiguration::getLiftOffDistance() const {
+    return lift_off_distance;
 }

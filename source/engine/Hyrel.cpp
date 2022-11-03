@@ -170,19 +170,6 @@ void Hyrel::clean(double clean_length, int number_of_lines, double nozzle_width,
     addComment("Starting cleaning");
     if (clean_length > 0) {
         printZigZagPattern(clean_length, number_of_lines, 2 * nozzle_width, {0, 0});
-//        movePlanar({0, 0});
-//        extrude({clean_length, 0});
-//
-//        for (int i = 1; i < number_of_lines; i++) {
-//            if (i % 2 == 0) {
-//                extrude({0, 2 * i * nozzle_width});
-//                extrude({clean_length, 2 * i * nozzle_width});
-//
-//            } else {
-//                extrude({clean_length, 2 * i * nozzle_width});
-//                extrude({0, 2 * i * nozzle_width});
-//            }
-//        }
     }
 }
 
@@ -273,14 +260,15 @@ void Hyrel::shutDown() {
     signalFinishedPrint();
 }
 
-Hyrel::Hyrel(int move_speed, int print_speed, double extrusion_coefficient) : GCodeFile(move_speed, print_speed,
-                                                                                        extrusion_coefficient) {
+Hyrel::Hyrel(int move_speed, int print_speed, double extrusion_coefficient, double lift_off_distance)
+        : GCodeFile(move_speed, print_speed,
+                    extrusion_coefficient, lift_off_distance) {
 
 }
 
 Hyrel::Hyrel(const ExtrusionConfiguration &extrusion_configuration, const PrinterConfiguration &printer_configuration)
         : Hyrel(printer_configuration.getNonPrintingSpeed(), extrusion_configuration.getPrintingSpeed(),
-                extrusion_configuration.getExtrusionMultiplier()) {
+                extrusion_configuration.getExtrusionMultiplier(), extrusion_configuration.getLiftOffDistance()) {
 
 }
 
@@ -305,26 +293,13 @@ void Hyrel::printPath(const std::vector<std::valarray<int>> &path, const std::va
 PatternBoundaries Hyrel::printPattern(const std::vector<std::vector<std::valarray<int>>> &sorted_sequence_of_paths,
                                       const std::valarray<double> &position_offset, double grid_spacing,
                                       double lift_off_distance) {
-    std::valarray<int> current_coordinates;
-    std::valarray<int> previous_coordinates = {(int) (positions[0] / grid_spacing),
-                                               (int) (positions[1] / grid_spacing)};
 
     for (auto &path: sorted_sequence_of_paths) {
-        current_coordinates = path.front();
-        double current_distance = norm(previous_coordinates - current_coordinates) * grid_spacing;
-        if (current_distance > lift_off_distance) {
-            addComment("Moving up.");
-            moveVerticalRelative(1);
-            addComment("Moving to new starting point.");
-            movePlanar(itodArray(path[0]) * grid_spacing + position_offset);
-            addComment("Moving down.");
-            moveVerticalRelative(-1);
-        } else {
-            addComment("Moving to new starting point.");
-            movePlanar(itodArray(path[0]) * grid_spacing + position_offset);
-        }
+        addComment("Moving to new starting point.");
+        movePlanar(itodArray(path[0]) * grid_spacing + position_offset);
+
         printPath(path, position_offset, grid_spacing);
-        previous_coordinates = path.back();
+
     }
     addComment("Pattern completed.");
     PatternBoundaries pattern_boundaries(sorted_sequence_of_paths);

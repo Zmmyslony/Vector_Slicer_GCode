@@ -111,11 +111,20 @@ void GCodeFile::turnMotorsOff() {
 }
 
 void GCodeFile::movePlanar(const std::valarray<double> &xy) {
-    generalCommand({'G', 'X', 'Y', 'F'},
-                   {true, false, false, true},
-                   {0, xy[0], xy[1], (double) move_speed});
     std::valarray<double> new_positions = {xy[0], xy[1], positions[2]};
-    print_time += norm(new_positions - positions) / move_speed;
+    double moved_distance = norm(new_positions - positions);
+    if (moved_distance > lift_off_distance) {
+        moveVerticalRelative(1);
+        generalCommand({'G', 'X', 'Y', 'F'},
+                       {true, false, false, true},
+                       {0, xy[0], xy[1], (double) move_speed});
+        moveVerticalRelative(-1);
+    } else {
+        generalCommand({'G', 'X', 'Y', 'F'},
+                       {true, false, false, true},
+                       {0, xy[0], xy[1], (double) move_speed});
+    }
+    print_time += moved_distance / move_speed;
     positions = new_positions;
 }
 
@@ -171,15 +180,16 @@ void GCodeFile::addComment(const std::string &comment) {
 }
 
 
-GCodeFile::GCodeFile(int move_speed, int print_speed, double extrusion_coefficient) :
+GCodeFile::GCodeFile(int move_speed, int print_speed, double extrusion_coefficient, double lift_off_distance) :
         move_speed(move_speed),
         print_speed(print_speed),
-        extrusion_coefficient(extrusion_coefficient) {
+        extrusion_coefficient(extrusion_coefficient),
+        lift_off_distance(lift_off_distance) {
     body_stream.precision(3);
 }
 
 GCodeFile::GCodeFile() :
-        GCodeFile(600, 100, 1) {
+        GCodeFile(600, 100, 1, 2) {
 }
 
 
