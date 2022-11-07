@@ -75,7 +75,10 @@ public:
                                    const std::valarray<double> &position_offset, double grid_spacing);
 
     void exportToFile(const boost::filesystem::path &results_path, const std::string &pattern_name,
-                      const std::string &suffix, double extruded_amount);
+                      const std::string &suffix, double extruded_amount, const std::string &comment);
+
+    void exportToFile(const boost::filesystem::path &results_path, const std::string &pattern_name,
+                             const std::string &suffix, double extruded_amount);
 
     void configureUvPen(int print_head_tool_number, int pen_tool_number, int duty_cycle);
 
