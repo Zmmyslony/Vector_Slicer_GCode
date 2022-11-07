@@ -27,19 +27,27 @@ void Hyrel::selectTool(unsigned int tool_number) {
     }
 }
 
-void Hyrel::defineHeightOffset(unsigned int register_number, double height) {
+void Hyrel::defineHeightOffset(double height, unsigned int register_number) {
 // TODO Obtain max tool numbers from a new class of Printer -> Hyrel and automate retrieving maximal values
     const double max_height = 120;
     if (0 > height || height > max_height) {
         std::cout << "Gcode writing -> defineHeightOffset -> tool height: max value "
                   << max_height << ", used value " << height << "\n";
     } else {
-        body_stream << "M660 H" << register_number << " Z" << height << "\n";
+        generalCommand({'M', 'H', 'Z'},
+                       {true, true, false},
+                       {660, (double) register_number, height});
     }
 }
 
+void Hyrel::invokeHeightOffset(double height, unsigned int register_number) {
+    generalCommand({'G', 'Z', 'H'},
+                   {true, false, true},
+                   {0, height, (double) register_number});
+}
+
 void
-Hyrel::defineToolOffset(int tool_number, const std::vector<double> &xyz, unsigned int height_register_offset) {
+Hyrel::defineToolOffset(int tool_number, const std::vector<double> &xyz) {
     const double x_max = 200;
     const double y_max = 200;
     const double z_max = 120;
@@ -98,7 +106,8 @@ void Hyrel::extrude(const std::valarray<double> &xy) {
 
 void Hyrel::configureFlow(double nozzle_width, double layer_height, double flow_multiplier, int pulses, int tool) {
     addComment("Configuring flow");
-    generalCommand({'M', 'T', 'W', 'Z', 'S', 'P'}, {true, true, false, false, false, true},
+    generalCommand({'M', 'T', 'W', 'Z', 'S', 'P'},
+                   {true, true, false, false, false, true},
                    {221, (double) mCommandToolNumber(tool), nozzle_width, layer_height, flow_multiplier,
                     (double) pulses});
 }
@@ -152,20 +161,12 @@ std::valarray<double> Hyrel::printZigZagPattern(double length, int number_of_lin
     return last_coordinate;
 }
 
-
 void Hyrel::clean(double clean_length, int number_of_lines, double nozzle_width, int height_offset_register,
                   double layer_height) {
     addComment("Invoking offsets");
-    generalCommand({'M', 'H', 'Z'},
-                   {true, true, false},
-                   {660, (double) height_offset_register, layer_height});
-    generalCommand({'G', 'X', 'Y'},
-                   {true, false, false},
-                   {0, 0, 0});
-    generalCommand({'G', 'Z', 'H'},
-                   {true, false, true},
-                   {0, 0, (double) height_offset_register});
-
+    movePlanar({0, 0});
+    defineHeightOffset(layer_height, height_offset_register);
+    invokeHeightOffset(0, height_offset_register);
     addBreak();
     addComment("Starting cleaning");
     if (clean_length > 0) {
@@ -195,7 +196,7 @@ Hyrel::init(int hotend_temperature, int bed_temperature, double clean_length, do
 
     autoHome();
     addBreak();
-    defineToolOffset(tool_number, tool_offset, height_offset_register);
+    defineToolOffset(tool_number, tool_offset);
     addBreak();
 
     setTemperatureHotend(hotend_temperature, tool_number);

@@ -13,9 +13,11 @@
 
 class Hyrel : public GCodeFile {
 
-    void defineHeightOffset(unsigned int register_number, double height);
+    void defineHeightOffset(double height, unsigned int register_number);
 
-    void defineToolOffset(int tool_number, const std::vector<double> &xyz, unsigned int height_register_offset);
+    void invokeHeightOffset(double height, unsigned int register_number);
+
+    void defineToolOffset(int tool_number, const std::vector<double> &xyz);
 
     void extrude(const std::valarray<double> &xy);
 
