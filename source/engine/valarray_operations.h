@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2022, Michał Zmyślony, mlz22@cam.ac.uk. All rights reserved.
+ *
+ * Please cite Michał Zmyślony and Dr John Biggins if you use any part of this code in work you publish or distribute.
+ *
+ * This file is a part of gCode Generator.
+ */
+
 //
 // Created by Michał Zmyślony on 15/10/2021.
 //
