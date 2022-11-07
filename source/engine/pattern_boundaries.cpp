@@ -11,6 +11,7 @@
 //
 
 #include <iostream>
+
 #include "pattern_boundaries.h"
 
 PatternBoundaries::PatternBoundaries(const std::vector<std::vector<std::valarray<int>>> &sequence_of_paths) {

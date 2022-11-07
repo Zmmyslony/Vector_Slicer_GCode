@@ -10,9 +10,10 @@
 // Created by Michał Zmyślony on 15/10/2021.
 //
 
-#include "valarray_operations.h"
 #include <stdexcept>
 #include <iostream>
+
+#include "valarray_operations.h"
 
 std::valarray<double> itodArray(const std::valarray<int> &int_array) {
     std::valarray<double> double_array(int_array.size());

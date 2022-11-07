@@ -10,10 +10,11 @@
 // Created by Michał Zmyślony on 13/10/2021.
 //
 
-#include "exporting.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
+
+#include "exporting.h"
 
 std::string readRowToString(const std::vector<int> &row) {
     std::string row_string;
