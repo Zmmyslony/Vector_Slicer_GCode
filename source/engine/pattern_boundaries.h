@@ -24,13 +24,13 @@ class PatternBoundaries {
     double y_max = INT_MIN;
 
 public:
-    double getXMin() const;
+    [[nodiscard]] double getXMin() const;
 
-    double getYMin() const;
+    [[nodiscard]] double getYMin() const;
 
-    double getXMax() const;
+    [[nodiscard]] double getXMax() const;
 
-    double getYMax() const;
+    [[nodiscard]] double getYMax() const;
 
     explicit PatternBoundaries(const std::vector<std::vector<std::valarray<int>>> &sequence_of_paths);
 

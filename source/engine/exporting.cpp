@@ -26,7 +26,6 @@ std::string readRowToString(const std::vector<int> &row) {
     return row_string;
 }
 
-
 std::string readRowToString(const std::vector<double> &row) {
     std::string row_string;
     for (auto &element: row) {
@@ -38,7 +37,6 @@ std::string readRowToString(const std::vector<double> &row) {
     return row_string;
 }
 
-
 void exportVectorTableToFile(const std::vector<std::vector<int>> &table, std::string &filename) {
     std::ofstream file(filename);
     if (file.is_open()) {
@@ -49,7 +47,6 @@ void exportVectorTableToFile(const std::vector<std::vector<int>> &table, std::st
     }
 }
 
-
 void exportVectorTableToFile(const std::vector<std::vector<double>> &table, std::string &filename) {
     std::ofstream file(filename);
     if (file.is_open()) {
@@ -59,7 +56,6 @@ void exportVectorTableToFile(const std::vector<std::vector<double>> &table, std:
     }
     file.close();
 }
-
 
 std::vector<std::vector<int>> indexTable(const std::vector<std::vector<std::valarray<int>>> &grid_of_coordinates,
                                          int index) {
@@ -76,7 +72,6 @@ std::vector<std::vector<int>> indexTable(const std::vector<std::vector<std::vala
     return table;
 }
 
-
 void
 export3DVectorToFile(const std::vector<std::vector<std::valarray<int>>> &grid_of_coordinates, const std::string &path,
                      const std::string &suffix) {
@@ -89,7 +84,6 @@ export3DVectorToFile(const std::vector<std::vector<std::valarray<int>>> &grid_of
     exportVectorTableToFile(x_table, x_filename);
     exportVectorTableToFile(y_table, y_filename);
 }
-
 
 std::vector<std::vector<int>> importTableInt(const std::string &filename) {
     std::vector<std::vector<int>> table;
@@ -126,7 +120,6 @@ std::vector<std::vector<std::valarray<int>>> mergeTwoTables(const std::vector<st
     }
     return merged_table;
 }
-
 
 std::vector<std::vector<std::valarray<int>>> read3DVectorFromFile(const std::string &path, const std::string &suffix) {
     std::string x_filename = path + "\\x_" + suffix + ".csv";

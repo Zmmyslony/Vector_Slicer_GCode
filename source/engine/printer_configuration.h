@@ -22,11 +22,11 @@ class PrinterConfiguration {
 public:
     PrinterConfiguration(int non_printing_speed, int bed_temperature, int print_head_tool_number);
 
-    int getNonPrintingSpeed() const;
+    [[nodiscard]] int getNonPrintingSpeed() const;
 
-    int getBedTemperature() const;
+    [[nodiscard]] int getBedTemperature() const;
 
-    int getPrintHeadToolNumber() const;
+    [[nodiscard]] int getPrintHeadToolNumber() const;
 };
 
 

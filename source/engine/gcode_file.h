@@ -29,8 +29,6 @@ class GCodeFile {
 
     std::valarray<double> positions = {0, 0, 0};
     double extrusion_value = 0;
-public:
-    double getExtrusionValue() const;
 
 private:
 
@@ -75,6 +73,8 @@ private:
                    const std::string &comment);
 
 public:
+    [[nodiscard]] double getExtrusionValue() const;
+
     void setPrintSpeed(int print_speed);
 
     void moveVertical(double z);
@@ -111,6 +111,5 @@ public:
 
 void generateGCode(const std::string &base_directory, int temperature, double cleaning_distance,
                    const std::valarray<double> &position_offset, double grid_distance);
-
 
 #endif //GCODEGENERATOR_GCODE_FILE_H

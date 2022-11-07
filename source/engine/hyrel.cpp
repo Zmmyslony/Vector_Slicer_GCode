@@ -22,7 +22,6 @@
 #include "printer_configuration.h"
 #include "auxiliary.h"
 
-
 const std::string version = "0.2a";
 
 int mCommandToolNumber(int tool_number) {
@@ -87,7 +86,6 @@ void Hyrel::configurePrime(int tool_number, double pulse_rate, double number_of_
                     (double) is_executed_immediately});
 }
 
-
 void Hyrel::configureUnprime(int tool_number, double pulse_rate, double number_of_pulses, double dwell_time,
                              bool is_executed_immediately) {
     addComment("Configure priming");
@@ -101,7 +99,6 @@ void Hyrel::disablePriming(int tool_number) {
     configureUnprime(tool_number, 0, 0, 0, false);
     configurePrime(tool_number, 0, 0, 0, false);
 }
-
 
 void Hyrel::extrude(const std::valarray<double> &xy) {
     std::valarray<double> new_positions = {xy[0], xy[1], positions[2]};
@@ -258,7 +255,6 @@ void Hyrel::configureUvArray(int print_head_tool_number, int duty_cycle) {
     addBreak();
 }
 
-
 void Hyrel::shutDown() {
     setTemperatureBed(0);
     GCodeFile::setTemperatureHotend(0);
@@ -329,7 +325,6 @@ PatternBoundaries Hyrel::printPattern(const std::vector<std::vector<std::valarra
     return pattern_boundaries;
 }
 
-
 void Hyrel::exportToFile(const boost::filesystem::path &results_path, const std::string &pattern_name,
                          const std::string &suffix, double extruded_amount) {
     if (!is_directory(results_path)) {
@@ -367,7 +362,6 @@ void Hyrel::addLocalOffset(std::vector<double> offset) {
                    {54, offset[0], offset[1], offset[2]});
 }
 
-
 void printMultiLayer(Hyrel &hyrel, const std::valarray<double> &initial_pattern_offset, double grid_spacing,
                      const std::vector<std::vector<std::valarray<int>>> &sorted_paths, int layers,
                      double layer_height) {
@@ -378,7 +372,6 @@ void printMultiLayer(Hyrel &hyrel, const std::valarray<double> &initial_pattern_
         hyrel.printPattern(sorted_paths, initial_pattern_offset, grid_spacing);
     }
 }
-
 
 void
 singleLayer(const boost::filesystem::path &directory, const std::string &pattern_name, double grid_spacing,
@@ -442,7 +435,6 @@ void tuneLineSeparationBody(Hyrel &hyrel, std::valarray<double> &current_offset,
                                                   diameter, current_offset + pattern_spacing);
     }
 }
-
 
 void
 tuneLineSeparation(const boost::filesystem::path &directory, double printing_distance, int number_of_lines,

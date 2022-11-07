@@ -16,7 +16,6 @@
 
 namespace fs = boost::filesystem;
 
-
 int main() {
     fs::path cwd = boost::dll::program_location().parent_path().parent_path();
     fs::path patterns_directory = cwd / "patterns";
@@ -62,7 +61,6 @@ int main() {
                    tool_offset, uv_duty_cycle, first_layer_height, 4, extrusion_configuration,
                    printing_configuration);
     }
-
 
     double printing_distance = 15;
     int number_of_lines = 12;

@@ -169,7 +169,6 @@ void GCodeFile::extrude(const std::valarray<double> &xy) {
     body_stream << "G1 X" << xy[0] << " Y" << xy[1] << " F" << print_speed << " E" << extrusion_value << "\n";
 }
 
-
 void GCodeFile::setCurrentCoordinatesToZero() {
     addComment("Setting current coordinates as new zero");
     generalCommand({'G', 'X', 'Y', 'Z'},
@@ -185,7 +184,6 @@ void GCodeFile::addComment(const std::string &comment) {
     body_stream << "; " << comment << "\n";
 }
 
-
 GCodeFile::GCodeFile(int move_speed, int print_speed, double extrusion_coefficient, double lift_off_distance) :
         move_speed(move_speed),
         print_speed(print_speed),
@@ -197,7 +195,6 @@ GCodeFile::GCodeFile(int move_speed, int print_speed, double extrusion_coefficie
 GCodeFile::GCodeFile() :
         GCodeFile(600, 100, 1, 2) {
 }
-
 
 void GCodeFile::init(int hotend_temperature, int bed_temperature, double clean_length) {
     autoHome();
@@ -274,7 +271,6 @@ void GCodeFile::setPrintSpeed(int print_speed) {
 double GCodeFile::getExtrusionValue() const {
     return extrusion_value;
 }
-
 
 void generateGCode(const std::string &base_directory, int temperature, double cleaning_distance,
                    const std::valarray<double> &position_offset, double grid_distance) {
