@@ -421,7 +421,7 @@ multiLayer(const boost::filesystem::path &directory, const std::string &pattern_
         double extruded_amount = extrudedAmount(hyrel.getExtrusionValue(), extrusion_configuration.getDiameter(),
                                                 extrusion_configuration.getLayerHeight(),
                                                 extrusion_configuration.getExtrusionMultiplier());
-        hyrel.exportToFile(directory / "gcode", pattern_name, suffix_stream.str(), extruded_amount);
+        hyrel.exportToFile(directory.parent_path() / "gcode", pattern_name, suffix_stream.str(), extruded_amount);
     } else {
         std::cout << "ERROR: Directory \"" << pattern_path << "\" does not exist." << std::endl;
     }
@@ -458,7 +458,7 @@ tuneLineSeparation(const boost::filesystem::path &directory, double printing_dis
     double extruded_amount = extrudedAmount(hyrel.getExtrusionValue(), extrusion_configuration.getDiameter(),
                                             extrusion_configuration.getLayerHeight(),
                                             extrusion_configuration.getExtrusionMultiplier());
-    hyrel.exportToFile(directory / "gcode", "line_spacing", suffix_stream.str(), extruded_amount);
+    hyrel.exportToFile(directory.parent_path() / "gcode", "line_spacing", suffix_stream.str(), extruded_amount);
 }
 
 void
@@ -499,7 +499,7 @@ tuneLineSeparationAndHeight(const boost::filesystem::path &directory, double pri
     double extruded_amount = extrudedAmount(hyrel.getExtrusionValue(), extrusion_configuration.getDiameter(),
                                             extrusion_configuration.getLayerHeight(),
                                             extrusion_configuration.getExtrusionMultiplier());
-    hyrel.exportToFile(directory / "gcode", "height_and_line_spacing", suffix_stream.str(), extruded_amount);
+    hyrel.exportToFile(directory.parent_path() / "gcode", "height_and_line_spacing", suffix_stream.str(), extruded_amount);
 }
 
 void
@@ -541,5 +541,5 @@ tuneLineSeparationAndSpeed(const boost::filesystem::path &directory, double prin
     double extruded_amount = extrudedAmount(hyrel.getExtrusionValue(), extrusion_configuration.getDiameter(),
                                             extrusion_configuration.getLayerHeight(),
                                             extrusion_configuration.getExtrusionMultiplier());
-    hyrel.exportToFile(directory / "gcode", "speed_and_line_spacing", suffix_stream.str(), extruded_amount);
+    hyrel.exportToFile(directory.parent_path() / "gcode", "speed_and_line_spacing", suffix_stream.str(), extruded_amount);
 }
