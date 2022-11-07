@@ -5,8 +5,8 @@
 #ifndef GCODEGENERATOR_HYREL_H
 #define GCODEGENERATOR_HYREL_H
 
-#include "GCodeFile.h"
-#include "PatternBoundaries.h"
+#include "gcode_file.h"
+#include "pattern_boundaries.h"
 #include "extrusion_configuration.h"
 #include "printer_configuration.h"
 #include <boost/filesystem.hpp>

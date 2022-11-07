@@ -6,10 +6,10 @@
 #include <fstream>
 #include <ctime>
 
-#include "Hyrel.h"
-#include "ValarrayOperations.h"
-#include "Exporting.h"
-#include "PatternBoundaries.h"
+#include "hyrel.h"
+#include "valarray_operations.h"
+#include "exporting.h"
+#include "pattern_boundaries.h"
 #include "extrusion_configuration.h"
 #include "printer_configuration.h"
 

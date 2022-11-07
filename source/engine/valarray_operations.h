@@ -2,8 +2,8 @@
 // Created by Michał Zmyślony on 15/10/2021.
 //
 
-#ifndef GCODEGENERATOR_VALARRAYOPERATIONS_H
-#define GCODEGENERATOR_VALARRAYOPERATIONS_H
+#ifndef GCODEGENERATOR_VALARRAY_OPERATIONS_H
+#define GCODEGENERATOR_VALARRAY_OPERATIONS_H
 
 #include <valarray>
 #include <vector>
@@ -38,4 +38,4 @@ void printArray(const std::vector<std::valarray<double>> &array);
 
 std::valarray<int> uinttointArray(const std::valarray<unsigned int> &uint_array);
 
-#endif //GCODEGENERATOR_VALARRAYOPERATIONS_H
+#endif //GCODEGENERATOR_VALARRAY_OPERATIONS_H

@@ -2,8 +2,8 @@
 // Created by Michał Zmyślony on 04/01/2022.
 //
 
-#ifndef GCODEGENERATOR_GCODEFILE_H
-#define GCODEGENERATOR_GCODEFILE_H
+#ifndef GCODEGENERATOR_GCODE_FILE_H
+#define GCODEGENERATOR_GCODE_FILE_H
 
 #include <sstream>
 #include <iomanip>
@@ -105,4 +105,4 @@ void generateGCode(const std::string &base_directory, int temperature, double cl
                    const std::valarray<double> &position_offset, double grid_distance);
 
 
-#endif //GCODEGENERATOR_GCODEFILE_H
+#endif //GCODEGENERATOR_GCODE_FILE_H

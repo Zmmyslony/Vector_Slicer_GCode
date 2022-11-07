@@ -3,9 +3,9 @@
 //
 
 #include <fstream>
-#include "GCodeFile.h"
-#include "ValarrayOperations.h"
-#include "Exporting.h"
+#include "gcode_file.h"
+#include "valarray_operations.h"
+#include "exporting.h"
 #include <iostream>
 
 const double vertical_move_slowdown = 1;
