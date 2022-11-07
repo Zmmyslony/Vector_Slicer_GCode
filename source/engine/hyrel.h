@@ -13,11 +13,12 @@
 #ifndef GCODEGENERATOR_HYREL_H
 #define GCODEGENERATOR_HYREL_H
 
+#include <boost/filesystem.hpp>
+
 #include "gcode_file.h"
 #include "pattern_boundaries.h"
 #include "extrusion_configuration.h"
 #include "printer_configuration.h"
-#include <boost/filesystem.hpp>
 
 class Hyrel : public GCodeFile {
 
@@ -110,21 +111,26 @@ void
 tuneLineSeparation(const boost::filesystem::path &directory, double printing_distance, int number_of_lines,
                    std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
                    ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration,
-                   double max_line_separation, double min_line_separation, double line_separation_step);
+                   double starting_line_separation, double finishing_line_separation, int line_separation_steps);
 
 void
 tuneLineSeparationAndHeight(const boost::filesystem::path &directory, double printing_distance, int number_of_lines,
                             std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
                             ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration,
-                            double max_line_separation, double min_line_separation, double line_separation_step,
-                            double max_height, double min_height, double height_step);
+                            double starting_line_separation, double finishing_line_separation, int line_separation_steps,
+                            double starting_height, double finishing_height, int height_steps);
 
 void
 tuneLineSeparationAndSpeed(const boost::filesystem::path &directory, double printing_distance, int number_of_lines,
                            std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
                            ExtrusionConfiguration extrusion_configuration,
-                           PrinterConfiguration printer_configuration, double max_line_separation,
-                           double min_line_separation, double line_separation_step, int max_speed, int min_speed,
-                           int speed_step);
+                           PrinterConfiguration printer_configuration, double starting_line_separation,
+                           double finishing_line_separation, int line_separation_steps, int starting_speed, int finishing_speed,
+                           int speed_steps);
+
+Hyrel standardHyrelInitialisation(const ExtrusionConfiguration &extrusion_configuration,
+                                  const PrinterConfiguration &printer_configuration, double printing_distance,
+                                  std::vector<double> &tool_offset, int curing_duty_cycle,
+                                  double first_layer_height, int number_of_cleaning_lines);
 
 #endif //GCODEGENERATOR_HYREL_H

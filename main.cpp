@@ -70,19 +70,19 @@ int main() {
     tuneLineSeparation(patterns_directory, printing_distance, number_of_lines, tool_offset, uv_duty_cycle,
                        first_layer_height,
                        extrusion_configuration, printing_configuration,
-                       1.8, 0.8, 0.2);
+                       1.8, 0.8, 6);
 
     tuneLineSeparationAndHeight(patterns_directory, printing_distance, number_of_lines, tool_offset, uv_duty_cycle,
                                 first_layer_height,
                                 extrusion_configuration, printing_configuration,
-                                1.5, 1, 0.25,
-                                0.09, 0.06, 0.01);
+                                1.5, 1, 3,
+                                0.09, 0.06, 4);
 
     tuneLineSeparationAndSpeed(patterns_directory, printing_distance, number_of_lines, tool_offset, uv_duty_cycle,
                                first_layer_height,
                                extrusion_configuration, printing_configuration,
-                               1.1, 0.8, 0.1,
-                               120, 80, 10);
+                               1.1, 0.8, 4,
+                               120, 80, 5);
 
     std::cout << "Generation complete." << std::endl;
     return 0;
