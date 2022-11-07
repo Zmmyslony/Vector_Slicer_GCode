@@ -71,8 +71,7 @@ public:
               double grid_distance);
 
     PatternBoundaries printPattern(const std::vector<std::vector<std::valarray<int>>> &sorted_sequence_of_paths,
-                                   const std::valarray<double> &position_offset, double grid_spacing,
-                                   double lift_off_distance);
+                                   const std::valarray<double> &position_offset, double grid_spacing);
 
     void exportToFile(const boost::filesystem::path &results_path, const std::string &pattern_name,
                       const std::string &suffix, double extruded_amount);

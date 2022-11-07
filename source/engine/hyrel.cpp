@@ -310,8 +310,7 @@ void Hyrel::printPath(const std::vector<std::valarray<int>> &path, const std::va
 }
 
 PatternBoundaries Hyrel::printPattern(const std::vector<std::vector<std::valarray<int>>> &sorted_sequence_of_paths,
-                                      const std::valarray<double> &position_offset, double grid_spacing,
-                                      double lift_off_distance) {
+                                      const std::valarray<double> &position_offset, double grid_spacing) {
 
     for (auto &path: sorted_sequence_of_paths) {
         addComment("Moving to new starting point.");
@@ -353,7 +352,7 @@ void Hyrel::exportToFile(const boost::filesystem::path &results_path, const std:
     file << std::fixed;
     file.precision(2);
     file << "; Generated using GCodeGenerator " << version << " on " << time;
-    file << "; Michal Zmyslony, University of Cambridge, mlz22@cam.ac.uk" << std::endl << std::endl;;
+    file << "; Michal Zmyslony, University of Cambridge, mlz22@cam.ac.uk" << std::endl << std::endl;
     file << "; Estimated print time: " << print_time << " min" << std::endl;
     file << "; Estimated amount of extruded material: " << extruded_amount << " ul";
     file << getText();
@@ -374,7 +373,7 @@ void printMultiLayer(Hyrel &hyrel, const std::valarray<double> &initial_pattern_
     for (int i = 0; i < layers; i++) {
         double current_layer_height = i * layer_height;
         hyrel.moveVertical(current_layer_height);
-        hyrel.printPattern(sorted_paths, initial_pattern_offset, grid_spacing, 2);
+        hyrel.printPattern(sorted_paths, initial_pattern_offset, grid_spacing);
     }
 }
 
