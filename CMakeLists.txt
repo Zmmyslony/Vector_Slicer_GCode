@@ -16,12 +16,12 @@ add_executable(GCodeGenerator
         source/engine/hyrel.cpp
         source/engine/valarray_operations.h
         source/engine/valarray_operations.cpp
-        source/engine/pattern_boundaries.cpp
         source/engine/pattern_boundaries.h
-        source/engine/extrusion_configuration.cpp
+        source/engine/pattern_boundaries.cpp
         source/engine/extrusion_configuration.h
-        source/engine/printer_configuration.cpp
-        source/engine/printer_configuration.h)
+        source/engine/extrusion_configuration.cpp
+        source/engine/printer_configuration.h
+        source/engine/printer_configuration.cpp)
 
 target_link_libraries(GCodeGenerator
         ${Boost_SYSTEM_LIBRARY}
