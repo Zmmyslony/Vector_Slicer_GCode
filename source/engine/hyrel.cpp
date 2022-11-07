@@ -348,7 +348,8 @@ void Hyrel::exportToFile(const boost::filesystem::path &results_path, const std:
 
     time_t ttime = time(nullptr);
 
-    char *time = ctime(&ttime);
+    char time[26];
+    ctime_s(time, sizeof time, &ttime);
     file << std::fixed;
     file.precision(2);
     file << "; Generated using GCodeGenerator " << version << " on " << time;
