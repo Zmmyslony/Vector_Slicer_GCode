@@ -73,7 +73,7 @@ public:
 
     void addLocalOffset(std::vector<double> offset);
 
-    void configureUvarray(int print_head_tool_number, int duty_cycle);
+    void configureUvArray(int print_head_tool_number, int duty_cycle);
 
     void
     clean(double clean_length, int number_of_lines, double nozzle_width, int height_offset_register,

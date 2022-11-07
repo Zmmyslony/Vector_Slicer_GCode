@@ -100,7 +100,8 @@ void Hyrel::extrude(const std::valarray<double> &xy) {
     extrusion_value += extrusion_length;
     print_time += extrusion_length / print_speed;
     positions = new_positions;
-    generalCommand({'G', 'X', 'Y', 'F', 'E'}, {true, false, false, true, true},
+    generalCommand({'G', 'X', 'Y', 'F', 'E'},
+                   {true, false, false, true, true},
                    {1, xy[0], xy[1], (double) print_speed, 1});
 }
 
@@ -237,7 +238,7 @@ void Hyrel::configureUvPen(int print_head_tool_number, int pen_tool_number, int 
     }
 }
 
-void Hyrel::configureUvarray(int print_head_tool_number, int duty_cycle) {
+void Hyrel::configureUvArray(int print_head_tool_number, int duty_cycle) {
     if (duty_cycle >= 0 && duty_cycle <= 100) {
         addComment("Setting UV array duty cycle ");
         generalCommand({'M', 'T', 'P'},
@@ -273,6 +274,16 @@ Hyrel::Hyrel(const ExtrusionConfiguration &extrusion_configuration, const Printe
 
 }
 
+bool isInDifferentDirection(const std::valarray<int> &last_position,
+                            const std::valarray<int> &position,
+                            const std::valarray<int> &previous_position,
+                            const std::valarray<int> &previous_connecting_vector) {
+    std::valarray<int> connecting_vector = position - previous_position;
+    double dot_length = dot(previous_connecting_vector, connecting_vector) /
+                        (norm(previous_connecting_vector) * norm(connecting_vector));
+    return dot_length < 1 || isEqual(position == last_position);
+}
+
 void Hyrel::printPath(const std::vector<std::valarray<int>> &path, const std::valarray<double> &position_offset,
                       double grid_distance) {
     addComment("Starting new path.");
@@ -280,14 +291,13 @@ void Hyrel::printPath(const std::vector<std::valarray<int>> &path, const std::va
     std::valarray<int> previous_position = {0, 0};
 
     for (auto &position: path) {
-        std::valarray<int> connecting_vector = position - previous_position;
-        previous_position = position;
-        double dot_length = dot(previous_connecting_vector, connecting_vector) /
-                            (norm(previous_connecting_vector) * norm(connecting_vector));
-        if (dot_length < 1 || position[0] == path.back()[0] && position[1] == path.back()[1]) {
-            previous_connecting_vector = connecting_vector;
+        // Check if the printing direction differs, and if it doesn't merge the points into a single line to make gcode
+        // clearer. Additionally, if it is a last point print it even if it is in the same direction.
+        if (isInDifferentDirection(path.back(), position, previous_position, previous_connecting_vector)) {
+            previous_connecting_vector = position - previous_position;
             extrude(itodArray(position) * grid_distance + position_offset);
         }
+        previous_position = position;
     }
 }
 
@@ -387,7 +397,7 @@ multiLayer(const boost::filesystem::path &directory, const std::string &pattern_
         hyrel.init(extrusion_configuration, printer_configuration, first_layer_height, number_of_cleaning_lines,
                    cleaning_distance, tool_offset);
 
-        hyrel.configureUvarray(printer_configuration.getPrintHeadToolNumber(), curing_duty_cycle);
+        hyrel.configureUvArray(printer_configuration.getPrintHeadToolNumber(), curing_duty_cycle);
         hyrel.addBreak();
 
         std::valarray<double> cleaning_offset = {0,
@@ -420,7 +430,7 @@ tuneLineSeparation(const boost::filesystem::path &directory, double printing_dis
     hyrel.init(extrusion_configuration, printer_configuration, first_layer_height, number_of_cleaning_lines,
                printing_distance, tool_offset);
 
-    hyrel.configureUvarray(printer_configuration.getPrintHeadToolNumber(), curing_duty_cycle);
+    hyrel.configureUvArray(printer_configuration.getPrintHeadToolNumber(), curing_duty_cycle);
     hyrel.addBreak();
 
     std::valarray<double> current_offset = {0, 2 * number_of_cleaning_lines * extrusion_configuration.getDiameter()};
@@ -454,7 +464,7 @@ tuneLineSeparationAndHeight(const boost::filesystem::path &directory, double pri
     hyrel.init(extrusion_configuration, printer_configuration, first_layer_height, number_of_cleaning_lines,
                printing_distance, tool_offset);
 
-    hyrel.configureUvarray(printer_configuration.getPrintHeadToolNumber(), curing_duty_cycle);
+    hyrel.configureUvArray(printer_configuration.getPrintHeadToolNumber(), curing_duty_cycle);
     hyrel.addBreak();
 
     std::valarray<double> base_offset = {0, 2 * number_of_cleaning_lines * extrusion_configuration.getDiameter()};
@@ -496,7 +506,7 @@ tuneLineSeparationAndSpeed(const boost::filesystem::path &directory, double prin
     hyrel.init(extrusion_configuration, printer_configuration, first_layer_height, number_of_cleaning_lines,
                printing_distance, tool_offset);
 
-    hyrel.configureUvarray(printer_configuration.getPrintHeadToolNumber(), curing_duty_cycle);
+    hyrel.configureUvArray(printer_configuration.getPrintHeadToolNumber(), curing_duty_cycle);
     hyrel.addBreak();
 
     std::valarray<double> base_offset = {0, 2 * number_of_cleaning_lines * extrusion_configuration.getDiameter()};

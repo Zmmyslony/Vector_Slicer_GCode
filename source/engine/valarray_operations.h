@@ -38,4 +38,6 @@ void printArray(const std::vector<std::valarray<double>> &array);
 
 std::valarray<int> uinttointArray(const std::valarray<unsigned int> &uint_array);
 
+bool isEqual(const std::valarray<bool> &bool_valarray);
+
 #endif //GCODEGENERATOR_VALARRAY_OPERATIONS_H

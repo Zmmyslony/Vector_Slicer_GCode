@@ -107,3 +107,11 @@ std::valarray<int> uinttointArray(const std::valarray<unsigned int> &uint_array)
     }
     return int_array;
 }
+
+bool isEqual(const std::valarray<bool> &bool_valarray) {
+    bool equals = true;
+    for (auto item: bool_valarray) {
+        equals &= item;
+    }
+    return equals;
+}
