@@ -24,5 +24,11 @@ double extrudedAmount(double length, double width, double height, double extrusi
 
 double extrudedAmount(const Hyrel &hyrel, const ExtrusionConfiguration &extrusion_configuration);
 
+std::string getParameterListString(const std::string &parameter_name, double minimum, double maximum, int steps);
+
+std::string getParameterListStringTwoDimensional(const std::string &parameter_name_first, double minimum_first,
+                                                 double maximum_first, int steps_first,
+                                                 const std::string &parameter_name_second, double minimum_second,
+                                                 double maximum_second, int steps_second);
 
 #endif //GCODEGENERATOR_AUXILIARY_H

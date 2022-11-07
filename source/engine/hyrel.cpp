@@ -326,7 +326,7 @@ PatternBoundaries Hyrel::printPattern(const std::vector<std::vector<std::valarra
 }
 
 void Hyrel::exportToFile(const boost::filesystem::path &results_path, const std::string &pattern_name,
-                         const std::string &suffix, double extruded_amount) {
+                         const std::string &suffix, double extruded_amount, const std::string &comment) {
     if (!is_directory(results_path)) {
         std::cout << "GCode directory \"" << results_path.string() << "\" does not exist. Attempting to create it."
                   << std::endl;
@@ -351,9 +351,15 @@ void Hyrel::exportToFile(const boost::filesystem::path &results_path, const std:
     file << "; Generated using GCodeGenerator " << version << " on " << time;
     file << "; Michal Zmyslony, University of Cambridge, mlz22@cam.ac.uk" << std::endl << std::endl;
     file << "; Estimated print time: " << print_time << " min" << std::endl;
-    file << "; Estimated amount of extruded material: " << extruded_amount << " ul";
+    file << "; Estimated amount of extruded material: " << extruded_amount << " ul" << std::endl;
+    file << comment;
     file << getText();
     file.close();
+}
+
+void Hyrel::exportToFile(const boost::filesystem::path &results_path, const std::string &pattern_name,
+                         const std::string &suffix, double extruded_amount) {
+    exportToFile(results_path, pattern_name, suffix, extruded_amount, "");
 }
 
 void Hyrel::addLocalOffset(std::vector<double> offset) {
@@ -428,7 +434,7 @@ void tuneLineSeparationBody(Hyrel &hyrel, std::valarray<double> &current_offset,
                             const std::valarray<double> &pattern_spacing,
                             double finishing_line_separation, double starting_line_separation,
                             int line_separation_steps, double printing_distance, int number_of_lines, double diameter) {
-    double line_separation_step = (finishing_line_separation - starting_line_separation) / line_separation_steps;
+    double line_separation_step = (finishing_line_separation - starting_line_separation) / (line_separation_steps - 1);
     for (int j = 0; j < line_separation_steps; j++) {
         current_offset = hyrel.printZigZagPattern(printing_distance, number_of_lines,
                                                   (starting_line_separation + j * line_separation_step) *
@@ -456,7 +462,10 @@ tuneLineSeparation(const boost::filesystem::path &directory, double printing_dis
 
     std::string diameter_suffix = getDiameterString(extrusion_configuration);
     double extruded_amount = extrudedAmount(hyrel, extrusion_configuration);
-    hyrel.exportToFile(directory.parent_path() / "gcode", "line_spacing", diameter_suffix, extruded_amount);
+    std::string tuning_description = getParameterListString("relative_line_spacing", starting_line_separation,
+                                                            finishing_line_separation, line_separation_steps);
+    hyrel.exportToFile(directory.parent_path() / "gcode", "line_spacing", diameter_suffix, extruded_amount,
+                       tuning_description);
 }
 
 void
@@ -474,7 +483,7 @@ tuneLineSeparationAndHeight(const boost::filesystem::path &directory, double pri
     std::valarray<double> base_offset = {0, 2 * number_of_cleaning_lines * extrusion_configuration.getDiameter()};
     std::valarray<double> current_offset;
 
-    double height_step = (finishing_height - starting_height) / height_steps;
+    double height_step = (finishing_height - starting_height) / (height_steps - 1);
     for (int i = 0; i < height_steps; i++) {
         hyrel.moveVertical(starting_height + i * height_step - first_layer_height);
         current_offset = base_offset;
@@ -488,8 +497,13 @@ tuneLineSeparationAndHeight(const boost::filesystem::path &directory, double pri
 
     std::string diameter_suffix = getDiameterString(extrusion_configuration);
     double extruded_amount = extrudedAmount(hyrel, extrusion_configuration);
+    std::string tuning_description = getParameterListStringTwoDimensional("height", starting_height, finishing_height,
+                                                                          height_steps, "relative_line_spacing",
+                                                                          starting_line_separation,
+                                                                          finishing_line_separation,
+                                                                          line_separation_steps);
     hyrel.exportToFile(directory.parent_path() / "gcode", "height_and_line_spacing", diameter_suffix,
-                       extruded_amount);
+                       extruded_amount, tuning_description);
 }
 
 void
@@ -508,7 +522,7 @@ tuneLineSeparationAndSpeed(const boost::filesystem::path &directory, double prin
     std::valarray<double> base_offset = {0, 2 * number_of_cleaning_lines * extrusion_configuration.getDiameter()};
     std::valarray<double> current_offset;
 
-    int speed_step = (finishing_speed - starting_speed) / speed_steps;
+    int speed_step = (finishing_speed - starting_speed) / (speed_steps - 1);
     for (int i = 0; i < speed_steps; i++) {
         hyrel.setPrintSpeed(starting_speed + speed_step * i);
         current_offset = base_offset;
@@ -521,6 +535,11 @@ tuneLineSeparationAndSpeed(const boost::filesystem::path &directory, double prin
 
     std::string diameter_suffix = getDiameterString(extrusion_configuration);
     double extruded_amount = extrudedAmount(hyrel, extrusion_configuration);
+    std::string tuning_description = getParameterListStringTwoDimensional("speed", starting_speed, finishing_speed,
+                                                                          speed_steps, "relative_line_spacing",
+                                                                          starting_line_separation,
+                                                                          finishing_line_separation,
+                                                                          line_separation_steps);
     hyrel.exportToFile(directory.parent_path() / "gcode", "speed_and_line_spacing", diameter_suffix,
                        extruded_amount);
 }
