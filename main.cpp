@@ -2,7 +2,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/dll.hpp>
 
-#include "source/engine/Hyrel.h"
+#include "source/engine/hyrel.h"
 #include "source/engine/extrusion_configuration.h"
 #include "source/engine/printer_configuration.h"
 
@@ -23,7 +23,9 @@ int main() {
                                                      "linear, 1x0.5 cm",
                                                      "azimuthal, r = 1 cm"};
     patterns_to_generate = {"radial, r = 1 cm", "azimuthal, r = 1 cm"};
-    patterns_to_generate = {"linear, 2x1 cm"};
+    patterns_to_generate = {"linear, 2x1 cm",
+                            "symmetricPositive, 2x0.6 cm",
+                            "symmetric gauss curved rectangle",};
 
     // All units are in mm
     double cleaning_distance = 30; // Also allows the material to start flowing until we are in the shear thinning regime
