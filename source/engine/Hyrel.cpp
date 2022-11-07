@@ -461,7 +461,7 @@ tuneLineSeparationAndHeight(const boost::filesystem::path &directory, double pri
     std::valarray<double> current_offset;
 
     for (double height = min_height; height <= max_height; height += height_step) {
-        hyrel.moveVertical(height);
+        hyrel.moveVertical(height - first_layer_height);
         current_offset = base_offset;
         base_offset += {printing_distance + 1, 0};
         for (double relative_line_spacing = max_line_separation;
