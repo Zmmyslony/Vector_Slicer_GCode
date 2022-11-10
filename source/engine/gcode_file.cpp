@@ -17,7 +17,7 @@
 #include "valarray_operations.h"
 #include "exporting.h"
 
-const double vertical_move_slowdown = 1;
+const double vertical_move_slowdown = 2;
 const std::valarray<double> zero_position = {1, 1};
 
 void GCodeFile::generalCommand(int number, const std::string &suffix) {
@@ -69,12 +69,10 @@ void GCodeFile::generalCommand(const char &command, int value) {
 }
 
 void GCodeFile::setRelativePositioning() {
-//    addComment("Setting relative positioning");
     generalCommand('G', 91);
 }
 
 void GCodeFile::setAbsolutePositioning() {
-//    addComment("Setting absolute positioning");
     generalCommand('G', 90);
 }
 
