@@ -35,11 +35,11 @@ int main() {
                             "symmetric gauss curved rectangle",};
 
     // All units are in mm
-    ExtrusionConfiguration extrusion_configuration(20, 50, 0.2, 0.12, 1, 2);
-    PrinterConfiguration printing_configuration(500, 0, 2, 5, 5);
+    ExtrusionConfiguration extrusion_configuration(500, 65, 0.20, 0.12, 1, 2);
+    PrinterConfiguration printing_configuration(400, 0, 2, 10, 15);
 
-    int uv_duty_cycle = 50;
-    double first_layer_height = extrusion_configuration.getLayerHeight() + 0.1;
+    int uv_duty_cycle = 25;
+    double first_layer_height = extrusion_configuration.getLayerHeight() + 0.00;
 
     double nozzle_diameter_assumed = 0.3; // Nozzle diameter which was assumed for generation of the director pattern
     double grid_spacing_assumed = 0.02; // Spacing which was used for slicing the pattern, can be scaled for different nozzle diameters
@@ -60,8 +60,8 @@ int main() {
                    printing_configuration);
     }
 
-    double printing_distance = 5;
-    int number_of_lines = 4;
+    double printing_distance = 10;
+    int number_of_lines = 9;
 
     tuneLineSeparation(patterns_directory, printing_distance, number_of_lines, tool_offset, uv_duty_cycle,
                        first_layer_height,
@@ -71,14 +71,14 @@ int main() {
     tuneLineSeparationAndHeight(patterns_directory, printing_distance, number_of_lines, tool_offset, uv_duty_cycle,
                                 first_layer_height,
                                 extrusion_configuration, printing_configuration,
-                                1.2, 1, 2,
-                                0.2, 0.35, 6);
+                                1.2, 0.6, 2,
+                                0.09, 0.15, 5);
 
     tuneLineSeparationAndSpeed(patterns_directory, printing_distance, number_of_lines, tool_offset, uv_duty_cycle,
                                first_layer_height,
                                extrusion_configuration, printing_configuration,
-                               1.2, 0.8, 3,
-                               10, 20, 2);
+                               1.4, 0.8, 4,
+                               400, 500, 4);
 
     std::cout << "Generation complete." << std::endl;
     return 0;
