@@ -17,7 +17,7 @@
 #include "valarray_operations.h"
 #include "exporting.h"
 
-const double vertical_move_slowdown = 2;
+const double vertical_move_slowdown = 4;
 const std::valarray<double> zero_position = {1, 1};
 
 void GCodeFile::generalCommand(int number, const std::string &suffix) {
