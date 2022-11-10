@@ -18,15 +18,22 @@ class PrinterConfiguration {
     int non_printing_speed = 1000;
     int bed_temperature = 0;
     int print_head_tool_number = 1;
+    int cleaning_lines = 10;
+    int clean_distance = 10;
 
 public:
-    PrinterConfiguration(int non_printing_speed, int bed_temperature, int print_head_tool_number);
+    PrinterConfiguration(int non_printing_speed, int bed_temperature, int print_head_tool_number, int cleaning_lines,
+                         int clean_distance);
 
     [[nodiscard]] int getNonPrintingSpeed() const;
 
     [[nodiscard]] int getBedTemperature() const;
 
     [[nodiscard]] int getPrintHeadToolNumber() const;
+
+    [[nodiscard]] int getCleaningLines() const;
+
+    [[nodiscard]] int getCleanDistance() const;
 };
 
 

@@ -12,9 +12,11 @@
 
 #include "printer_configuration.h"
 
-PrinterConfiguration::PrinterConfiguration(int non_printing_speed, int bed_temperature, int print_head_tool_number)
+PrinterConfiguration::PrinterConfiguration(int non_printing_speed, int bed_temperature, int print_head_tool_number,
+                                           int cleaning_lines,
+                                           int clean_distance)
         : non_printing_speed(non_printing_speed), bed_temperature(bed_temperature),
-          print_head_tool_number(print_head_tool_number) {}
+          print_head_tool_number(print_head_tool_number), cleaning_lines(cleaning_lines) {}
 
 int PrinterConfiguration::getNonPrintingSpeed() const {
     return non_printing_speed;
@@ -26,4 +28,12 @@ int PrinterConfiguration::getBedTemperature() const {
 
 int PrinterConfiguration::getPrintHeadToolNumber() const {
     return print_head_tool_number;
+}
+
+int PrinterConfiguration::getCleaningLines() const {
+    return cleaning_lines;
+}
+
+int PrinterConfiguration::getCleanDistance() const {
+    return clean_distance;
 }

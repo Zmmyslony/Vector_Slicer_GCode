@@ -95,20 +95,20 @@ public:
                        const std::valarray<double> &starting_position);
 
     void init(const ExtrusionConfiguration &extrusion_configuration, const PrinterConfiguration &printer_configuration,
-              double first_layer_height, int cleaning_lines, double clean_length, std::vector<double> &tool_offset);
+              double first_layer_height, std::vector<double> &tool_offset);
 };
 
 void
 singleLayer(const boost::filesystem::path &directory, const std::string &pattern_name, double grid_spacing,
-            const std::valarray<double> &pattern_offset, double cleaning_distance,
-            std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
-            ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration);
+            const std::valarray<double> &pattern_offset, std::vector<double> &tool_offset, int curing_duty_cycle,
+            double first_layer_height, ExtrusionConfiguration extrusion_configuration,
+            PrinterConfiguration printer_configuration);
 
 void
 multiLayer(const boost::filesystem::path &directory, const std::string &pattern_name, double grid_spacing,
-           const std::valarray<double> &pattern_offset, double cleaning_distance,
-           std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height, int layers,
-           ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration);
+           const std::valarray<double> &pattern_offset, std::vector<double> &tool_offset, int curing_duty_cycle,
+           double first_layer_height, int layers, ExtrusionConfiguration extrusion_configuration,
+           PrinterConfiguration printer_configuration);
 
 void
 tuneLineSeparation(const boost::filesystem::path &directory, double printing_distance, int number_of_lines,
@@ -132,8 +132,7 @@ tuneLineSeparationAndSpeed(const boost::filesystem::path &directory, double prin
                            int speed_steps);
 
 Hyrel standardHyrelInitialisation(const ExtrusionConfiguration &extrusion_configuration,
-                                  const PrinterConfiguration &printer_configuration, double printing_distance,
-                                  std::vector<double> &tool_offset, int curing_duty_cycle,
-                                  double first_layer_height, int number_of_cleaning_lines);
+                                  const PrinterConfiguration &printer_configuration, std::vector<double> &tool_offset,
+                                  int curing_duty_cycle, double first_layer_height);
 
 #endif //GCODEGENERATOR_HYREL_H
