@@ -444,11 +444,9 @@ tuneLineSeparation(const boost::filesystem::path &directory, double printing_dis
                    ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration,
                    double starting_line_separation, double finishing_line_separation,
                    int line_separation_steps) {
-    int number_of_cleaning_lines = 16;
     Hyrel hyrel = standardHyrelInitialisation(extrusion_configuration, printer_configuration,
                                               tool_offset, curing_duty_cycle, first_layer_height);
-
-    std::valarray<double> current_offset = {0, 2 * number_of_cleaning_lines * extrusion_configuration.getDiameter()};
+    std::valarray<double> current_offset = {0, 2 * printer_configuration.getCleaningLines() * extrusion_configuration.getDiameter()};
 
     tuneLineSeparationBody(hyrel, current_offset, std::valarray<double>{0, 1}, finishing_line_separation,
                            starting_line_separation, line_separation_steps, printing_distance, number_of_lines,
@@ -470,11 +468,10 @@ tuneLineSeparationAndHeight(const boost::filesystem::path &directory, double pri
                             double starting_line_separation, double finishing_line_separation,
                             int line_separation_steps,
                             double starting_height, double finishing_height, int height_steps) {
-    int number_of_cleaning_lines = 16;
     Hyrel hyrel = standardHyrelInitialisation(extrusion_configuration, printer_configuration,
                                               tool_offset, curing_duty_cycle, first_layer_height);
 
-    std::valarray<double> base_offset = {0, 2 * number_of_cleaning_lines * extrusion_configuration.getDiameter()};
+    std::valarray<double> base_offset = {0, 2 * printer_configuration.getCleaningLines() * extrusion_configuration.getDiameter()};
     std::valarray<double> current_offset;
 
     double height_step = (finishing_height - starting_height) / (height_steps - 1);
@@ -508,11 +505,10 @@ tuneLineSeparationAndSpeed(const boost::filesystem::path &directory, double prin
                            double finishing_line_separation, int line_separation_steps, int starting_speed,
                            int finishing_speed,
                            int speed_steps) {
-    int number_of_cleaning_lines = 16;
     Hyrel hyrel = standardHyrelInitialisation(extrusion_configuration, printer_configuration,
                                               tool_offset, curing_duty_cycle, first_layer_height);
 
-    std::valarray<double> base_offset = {0, 2 * number_of_cleaning_lines * extrusion_configuration.getDiameter()};
+    std::valarray<double> base_offset = {0, 2 * printer_configuration.getCleaningLines() * extrusion_configuration.getDiameter()};
     std::valarray<double> current_offset;
 
     int speed_step = (finishing_speed - starting_speed) / (speed_steps - 1);
