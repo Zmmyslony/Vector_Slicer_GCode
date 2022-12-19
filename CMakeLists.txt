@@ -5,7 +5,9 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(Boost COMPONENTS system filesystem REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
-configure_file(source/engine/config.h.in 'config.h.in')
+configure_file(source/engine/config.h.in
+        config.h @ONLY)
+include_directories(${PROJECT_BINARY_DIR})
 
 add_executable(GCodeGenerator
         main.cpp
@@ -22,7 +24,10 @@ add_executable(GCodeGenerator
         source/engine/extrusion_configuration.h
         source/engine/extrusion_configuration.cpp
         source/engine/printer_configuration.h
-        source/engine/printer_configuration.cpp source/engine/auxiliary.h source/engine/auxiliary.cpp)
+        source/engine/printer_configuration.cpp
+        source/engine/auxiliary.h
+        source/engine/auxiliary.cpp
+        source/engine/config.h.in)
 
 target_link_libraries(GCodeGenerator
         ${Boost_SYSTEM_LIBRARY}

@@ -27,7 +27,7 @@
 #include "extrusion_configuration.h"
 #include "printer_configuration.h"
 #include "auxiliary.h"
-#include "config.h.in"
+#include "config.h"
 
 const std::string version = "0.2a";
 
