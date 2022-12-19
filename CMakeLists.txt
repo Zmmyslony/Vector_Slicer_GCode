@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.21)
-project(GCodeGenerator)
+project(GCodeGenerator VERSION 0.2.0)
 
 set(CMAKE_CXX_STANDARD 17)
 find_package(Boost COMPONENTS system filesystem REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
+configure_file(source/engine/config.h.in 'config.h.in')
 
 add_executable(GCodeGenerator
         main.cpp

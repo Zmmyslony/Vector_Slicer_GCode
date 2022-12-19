@@ -27,6 +27,7 @@
 #include "extrusion_configuration.h"
 #include "printer_configuration.h"
 #include "auxiliary.h"
+#include "config.h.in"
 
 const std::string version = "0.2a";
 
@@ -354,7 +355,7 @@ void Hyrel::exportToFile(const boost::filesystem::path &results_path, const std:
     ctime_s(time, sizeof time, &ttime);
     file << std::fixed;
     file.precision(2);
-    file << "; Generated using GCodeGenerator " << version << " on " << time;
+    file << "; Generated using GCodeGenerator " << PROJECT_VER << " on " << time;
     file << "; Michal Zmyslony, University of Cambridge, mlz22@cam.ac.uk" << std::endl << std::endl;
     file << "; Estimated print time: " << print_time << " min" << std::endl;
     file << "; Estimated amount of extruded material: " << extruded_amount << " ul" << std::endl;
