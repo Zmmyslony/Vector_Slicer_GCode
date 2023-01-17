@@ -23,76 +23,6 @@
 
 #include "exporting.h"
 
-std::string readRowToString(const std::vector<int> &row) {
-    std::string row_string;
-    for (auto &element: row) {
-        row_string += std::to_string(element);
-        row_string += ",";
-    }
-    row_string.pop_back();
-    row_string += "\n";
-    return row_string;
-}
-
-std::string readRowToString(const std::vector<double> &row) {
-    std::string row_string;
-    for (auto &element: row) {
-        row_string += std::to_string(element);
-        row_string += ",";
-    }
-    row_string.pop_back();
-    row_string += "\n";
-    return row_string;
-}
-
-void exportVectorTableToFile(const std::vector<std::vector<int>> &table, fs::path &filename) {
-    std::ofstream file(filename.string());
-    if (file.is_open()) {
-        for (auto &row: table) {
-            file << readRowToString(row);
-        }
-        file.close();
-    }
-}
-
-void exportVectorTableToFile(const std::vector<std::vector<double>> &table, fs::path &filename) {
-    std::ofstream file(filename.string());
-    if (file.is_open()) {
-        for (auto &row: table) {
-            file << readRowToString(row);
-        }
-    }
-    file.close();
-}
-
-std::vector<std::vector<int>> indexTable(const std::vector<std::vector<std::valarray<int>>> &grid_of_coordinates,
-                                         int index) {
-    std::vector<std::vector<int>> table;
-    table.reserve(grid_of_coordinates.size());
-    for (auto &row: grid_of_coordinates) {
-        std::vector<int> new_row;
-        new_row.reserve(row.size());
-        for (auto &element: row) {
-            new_row.push_back(element[index]);
-        }
-        table.push_back(new_row);
-    }
-    return table;
-}
-
-void
-export3DVectorToFile(const std::vector<std::vector<std::valarray<int>>> &grid_of_coordinates, const fs::path &path,
-                     const std::string &suffix) {
-    std::vector<std::vector<int>> x_table = indexTable(grid_of_coordinates, 0);
-    std::vector<std::vector<int>> y_table = indexTable(grid_of_coordinates, 1);
-
-    fs::path x_filename = path / ("x_" + suffix + ".csv");
-    fs::path y_filename = path / ("y_" + suffix + ".csv");
-
-    exportVectorTableToFile(x_table, x_filename);
-    exportVectorTableToFile(y_table, y_filename);
-}
-
 std::vector<std::vector<int>> importTableInt(const fs::path &filename) {
     std::vector<std::vector<int>> table;
     std::string line;
@@ -148,14 +78,13 @@ std::vector<std::vector<std::valarray<int>>> mergeTwoTables(const std::vector<st
     return merged_table;
 }
 
-std::vector<std::vector<std::valarray<int>>> read3DVectorFromFile(const fs::path &path, const std::string &suffix) {
+std::vector<std::vector<std::valarray<int>>> read3DVectorFromFile(const fs::path &path) {
     try {
-        fs::path paths_filename = path / "paths.csv";
-        return importTableValarrayInt(paths_filename);
+        return importTableValarrayInt(path);
     }
     catch (const std::runtime_error &error) {
-        fs::path x_filename = path / ("x_" + suffix + ".csv");
-        fs::path y_filename = path / ("y_" + suffix + ".csv");
+        fs::path x_filename = path / ("x_best_paths.csv");
+        fs::path y_filename = path / ("y_best_paths.csv");
 
         std::vector<std::vector<int>> x_table = importTableInt(x_filename);
         std::vector<std::vector<int>> y_table = importTableInt(y_filename);

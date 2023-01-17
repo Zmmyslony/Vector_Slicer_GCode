@@ -281,7 +281,7 @@ void generateGCode(const std::string &base_directory, int temperature, double cl
                    const std::valarray<double> &position_offset, double grid_distance) {
     std::cout << std::endl;
     std::string directory_path = base_directory + R"(\results)";
-    std::vector<std::vector<std::valarray<int>>> sorted_paths = read3DVectorFromFile(directory_path, "best_paths");
+    std::vector<std::vector<std::valarray<int>>> sorted_paths = read3DVectorFromFile(directory_path);
     GCodeFile g_code_file;
     g_code_file.init(temperature, 0, cleaning_distance);
     g_code_file.printPattern(sorted_paths, position_offset, grid_distance);

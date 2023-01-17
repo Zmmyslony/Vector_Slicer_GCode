@@ -387,11 +387,11 @@ void printMultiLayer(Hyrel &hyrel, const std::valarray<double> &initial_pattern_
 }
 
 void
-singleLayer(const boost::filesystem::path &directory, const std::string &pattern_name, double grid_spacing,
+singleLayer(const boost::filesystem::path &export_directory, const fs::path &pattern_path, double grid_spacing,
             const std::valarray<double> &pattern_offset, std::vector<double> &tool_offset, int curing_duty_cycle,
             double first_layer_height, ExtrusionConfiguration extrusion_configuration,
             PrinterConfiguration printer_configuration) {
-    multiLayer(directory, pattern_name, grid_spacing, pattern_offset, tool_offset, curing_duty_cycle,
+    multiLayer(export_directory, pattern_path, grid_spacing, pattern_offset, tool_offset, curing_duty_cycle,
                first_layer_height, 1, extrusion_configuration, printer_configuration);
 }
 
@@ -406,14 +406,12 @@ Hyrel standardHyrelInitialisation(const ExtrusionConfiguration &extrusion_config
 }
 
 void
-multiLayer(const boost::filesystem::path &directory, const std::string &pattern_name, double grid_spacing,
+multiLayer(const boost::filesystem::path &export_directory, const fs::path &pattern_path, double grid_spacing,
            const std::valarray<double> &pattern_offset, std::vector<double> &tool_offset, int curing_duty_cycle,
            double first_layer_height, int layers, ExtrusionConfiguration extrusion_configuration,
            PrinterConfiguration printer_configuration) {
-    boost::filesystem::path pattern_path = directory / pattern_name;
     if (boost::filesystem::exists(pattern_path)) {
-        std::vector<std::vector<std::valarray<int>>> sorted_paths = read3DVectorFromFile(pattern_path.string(),
-                                                                                         "best_paths");
+        std::vector<std::vector<std::valarray<int>>> sorted_paths = read3DVectorFromFile(pattern_path);
         Hyrel hyrel = standardHyrelInitialisation(extrusion_configuration, printer_configuration,
                                                   tool_offset, curing_duty_cycle, first_layer_height);
 
@@ -427,7 +425,7 @@ multiLayer(const boost::filesystem::path &directory, const std::string &pattern_
         std::string diameter_suffix = getDiameterString(extrusion_configuration);
         std::string suffix = diameter_suffix + "_" + std::to_string(layers) + "_layers";
         double extruded_amount = extrudedAmount(hyrel, extrusion_configuration);
-        hyrel.exportToFile(directory.parent_path() / "gcode", pattern_name, suffix, extruded_amount);
+        hyrel.exportToFile(export_directory, pattern_path.stem().string(), suffix, extruded_amount);
     } else {
         std::cout << "ERROR: Directory \"" << pattern_path << "\" does not exist." << std::endl;
     }
@@ -446,7 +444,7 @@ void tuneLineSeparationBody(Hyrel &hyrel, std::valarray<double> &current_offset,
 }
 
 void
-tuneLineSeparation(const boost::filesystem::path &directory, double printing_distance, int number_of_lines,
+tuneLineSeparation(const boost::filesystem::path &export_directory, double printing_distance, int number_of_lines,
                    std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
                    ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration,
                    double starting_line_separation, double finishing_line_separation,
@@ -464,12 +462,12 @@ tuneLineSeparation(const boost::filesystem::path &directory, double printing_dis
     double extruded_amount = extrudedAmount(hyrel, extrusion_configuration);
     std::string tuning_description = getParameterListString("relative_line_spacing", starting_line_separation,
                                                             finishing_line_separation, line_separation_steps);
-    hyrel.exportToFile(directory.parent_path() / "gcode", "line_spacing", diameter_suffix, extruded_amount,
+    hyrel.exportToFile(export_directory, "line_spacing", diameter_suffix, extruded_amount,
                        tuning_description);
 }
 
 void
-tuneLineSeparationAndHeight(const boost::filesystem::path &directory, double printing_distance, int number_of_lines,
+tuneLineSeparationAndHeight(const boost::filesystem::path &export_directory, double printing_distance, int number_of_lines,
                             std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
                             ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration,
                             double starting_line_separation, double finishing_line_separation,
@@ -500,12 +498,12 @@ tuneLineSeparationAndHeight(const boost::filesystem::path &directory, double pri
                                                                           starting_line_separation,
                                                                           finishing_line_separation,
                                                                           line_separation_steps);
-    hyrel.exportToFile(directory.parent_path() / "gcode", "height_and_line_spacing", diameter_suffix,
+    hyrel.exportToFile(export_directory, "height_and_line_spacing", diameter_suffix,
                        extruded_amount, tuning_description);
 }
 
 void
-tuneLineSeparationAndSpeed(const boost::filesystem::path &directory, double printing_distance, int number_of_lines,
+tuneLineSeparationAndSpeed(const boost::filesystem::path &export_directory, double printing_distance, int number_of_lines,
                            std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
                            ExtrusionConfiguration extrusion_configuration,
                            PrinterConfiguration printer_configuration, double starting_line_separation,
@@ -536,6 +534,6 @@ tuneLineSeparationAndSpeed(const boost::filesystem::path &directory, double prin
                                                                           starting_line_separation,
                                                                           finishing_line_separation,
                                                                           line_separation_steps);
-    hyrel.exportToFile(directory.parent_path() / "gcode", "speed_and_line_spacing", diameter_suffix,
+    hyrel.exportToFile(export_directory, "speed_and_line_spacing", diameter_suffix,
                        extruded_amount, tuning_description);
 }
