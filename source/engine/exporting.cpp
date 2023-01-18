@@ -54,7 +54,7 @@ std::vector<std::vector<int>> importTableInt(const fs::path &filename) {
 std::vector<std::vector<std::valarray<int>>> importTableValarrayInt(const fs::path &filename) {
     std::vector<std::vector<int>> table = importTableInt(filename);
     std::vector<std::vector<std::valarray<int>>> table_valarray;
-    for (auto &row : table) {
+    for (auto &row: table) {
         std::vector<std::valarray<int>> row_valarray;
         for (int i = 0; i < row.size(); i += 2) {
             row_valarray.push_back({row[i], row[i + 1]});
@@ -79,18 +79,6 @@ std::vector<std::vector<std::valarray<int>>> mergeTwoTables(const std::vector<st
 }
 
 std::vector<std::vector<std::valarray<int>>> read3DVectorFromFile(const fs::path &path) {
-    try {
-        return importTableValarrayInt(path);
-    }
-    catch (const std::runtime_error &error) {
-        fs::path x_filename = path / ("x_best_paths.csv");
-        fs::path y_filename = path / ("y_best_paths.csv");
-
-        std::vector<std::vector<int>> x_table = importTableInt(x_filename);
-        std::vector<std::vector<int>> y_table = importTableInt(y_filename);
-
-        std::vector<std::vector<std::valarray<int>>> merged_tables = mergeTwoTables(x_table, y_table);
-        return merged_tables;
-    }
+    return importTableValarrayInt(path);
 }
 
