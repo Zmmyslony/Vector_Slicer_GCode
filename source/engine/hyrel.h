@@ -66,9 +66,11 @@ public:
     void
     init(int hotend_temperature, int bed_temperature, double clean_length, double nozzle_width,
          double first_layer_height, double layer_height, int tool_number, std::vector<double> &tool_offset,
-         int cleaning_lines);
+         int cleaning_lines, double prime_pulses, double prime_rate);
 
-    void shutDown();
+    void shutDown(int tool_number, int prime_pulses, int prime_rate);
+
+    void shutDown(const PrinterConfiguration &printer_configuration);
 
     Hyrel(int move_speed, int print_speed, double extrusion_coefficient, double lift_off_distance);
 

@@ -19,17 +19,18 @@
 #ifndef GCODEGENERATOR_PRINTER_CONFIGURATION_H
 #define GCODEGENERATOR_PRINTER_CONFIGURATION_H
 
-
 class PrinterConfiguration {
     int non_printing_speed = 1000;
     int bed_temperature = 0;
     int print_head_tool_number = 1;
     int cleaning_lines = 10;
     int clean_distance = 10;
+    int prime_pulses = 0;
+    int prime_rate = 0;
 
 public:
     PrinterConfiguration(int non_printing_speed, int bed_temperature, int print_head_tool_number, int cleaning_lines,
-                         int clean_distance);
+                         int cleaning_distance, int priming_pulses, int priming_rate);
 
     [[nodiscard]] int getNonPrintingSpeed() const;
 
@@ -40,7 +41,10 @@ public:
     [[nodiscard]] int getCleaningLines() const;
 
     [[nodiscard]] int getCleanDistance() const;
-};
 
+    [[nodiscard]] int getPrimePulses() const;
+
+    [[nodiscard]] int getPrimeRate() const;
+};
 
 #endif //GCODEGENERATOR_PRINTER_CONFIGURATION_H

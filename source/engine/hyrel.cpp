@@ -191,7 +191,7 @@ void Hyrel::clean(double clean_length, int number_of_lines, double nozzle_width,
 void
 Hyrel::init(int hotend_temperature, int bed_temperature, double clean_length, double nozzle_width,
             double first_layer_height, double layer_height, int tool_number, std::vector<double> &tool_offset,
-            int cleaning_lines) {
+            int cleaning_lines, double prime_pulses, double prime_rate) {
     const int height_offset_register = 2;
     const int kra_2_pulses_per_microlitre = 1297;
 
@@ -217,6 +217,7 @@ Hyrel::init(int hotend_temperature, int bed_temperature, double clean_length, do
     setTemperatureBed(bed_temperature);
     addBreak();
 
+    configurePrime(tool_number, prime_rate, prime_pulses, 0, true);
     configureFlow(nozzle_width, layer_height, extrusion_coefficient, kra_2_pulses_per_microlitre, tool_number);
     disablePriming(tool_number);
 
@@ -230,9 +231,11 @@ Hyrel::init(int hotend_temperature, int bed_temperature, double clean_length, do
 void
 Hyrel::init(const ExtrusionConfiguration &extrusion_configuration, const PrinterConfiguration &printer_configuration,
             double first_layer_height, std::vector<double> &tool_offset) {
-    init(extrusion_configuration.getNozzleTemperature(), printer_configuration.getBedTemperature(), printer_configuration.getCleanDistance(),
+    init(extrusion_configuration.getNozzleTemperature(), printer_configuration.getBedTemperature(),
+         printer_configuration.getCleanDistance(),
          extrusion_configuration.getDiameter(), first_layer_height, extrusion_configuration.getLayerHeight(),
-         printer_configuration.getPrintHeadToolNumber(), tool_offset, printer_configuration.getCleaningLines());
+         printer_configuration.getPrintHeadToolNumber(), tool_offset, printer_configuration.getCleaningLines(),
+         printer_configuration.getPrimePulses(), printer_configuration.getPrimeRate());
 }
 
 void Hyrel::configureUvPen(int print_head_tool_number, int pen_tool_number, int duty_cycle) {
@@ -262,7 +265,9 @@ void Hyrel::configureUvArray(int print_head_tool_number, int duty_cycle) {
     addBreak();
 }
 
-void Hyrel::shutDown() {
+void Hyrel::shutDown(int tool_number, int prime_pulses, int prime_rate) {
+    configureUnprime(tool_number, prime_rate, prime_pulses, 0, true);
+
     setTemperatureBed(0);
     GCodeFile::setTemperatureHotend(0);
     addBreak();
@@ -273,6 +278,11 @@ void Hyrel::shutDown() {
 
     turnMotorsOff();
     signalFinishedPrint();
+}
+
+void Hyrel::shutDown(const PrinterConfiguration &printer_configuration) {
+    shutDown(printer_configuration.getPrintHeadToolNumber(), printer_configuration.getPrimePulses(),
+             printer_configuration.getPrimeRate());
 }
 
 Hyrel::Hyrel(int move_speed, int print_speed, double extrusion_coefficient, double lift_off_distance)
@@ -416,10 +426,11 @@ multiLayer(const boost::filesystem::path &export_directory, const fs::path &patt
                                                   tool_offset, curing_duty_cycle, first_layer_height);
 
         std::valarray<double> cleaning_offset = {0,
-                                                 2 * printer_configuration.getCleaningLines() * extrusion_configuration.getDiameter()};
+                                                 2 * printer_configuration.getCleaningLines() *
+                                                 extrusion_configuration.getDiameter()};
         printMultiLayer(hyrel, pattern_offset + cleaning_offset, grid_spacing, sorted_paths, layers,
                         extrusion_configuration.getLayerHeight());
-        hyrel.shutDown();
+        hyrel.shutDown(printer_configuration);
 
         std::ostringstream suffix_stream;
         std::string diameter_suffix = getDiameterString(extrusion_configuration);
@@ -451,12 +462,13 @@ tuneLineSeparation(const boost::filesystem::path &export_directory, double print
                    int line_separation_steps) {
     Hyrel hyrel = standardHyrelInitialisation(extrusion_configuration, printer_configuration,
                                               tool_offset, curing_duty_cycle, first_layer_height);
-    std::valarray<double> current_offset = {0, 2 * printer_configuration.getCleaningLines() * extrusion_configuration.getDiameter()};
+    std::valarray<double> current_offset = {0, 2 * printer_configuration.getCleaningLines() *
+                                               extrusion_configuration.getDiameter()};
 
     tuneLineSeparationBody(hyrel, current_offset, std::valarray<double>{0, 1}, finishing_line_separation,
                            starting_line_separation, line_separation_steps, printing_distance, number_of_lines,
                            extrusion_configuration.getDiameter());
-    hyrel.shutDown();
+    hyrel.shutDown(printer_configuration);
 
     std::string diameter_suffix = getDiameterString(extrusion_configuration);
     double extruded_amount = extrudedAmount(hyrel, extrusion_configuration);
@@ -467,7 +479,8 @@ tuneLineSeparation(const boost::filesystem::path &export_directory, double print
 }
 
 void
-tuneLineSeparationAndHeight(const boost::filesystem::path &export_directory, double printing_distance, int number_of_lines,
+tuneLineSeparationAndHeight(const boost::filesystem::path &export_directory, double printing_distance,
+                            int number_of_lines,
                             std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
                             ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration,
                             double starting_line_separation, double finishing_line_separation,
@@ -476,7 +489,8 @@ tuneLineSeparationAndHeight(const boost::filesystem::path &export_directory, dou
     Hyrel hyrel = standardHyrelInitialisation(extrusion_configuration, printer_configuration,
                                               tool_offset, curing_duty_cycle, first_layer_height);
 
-    std::valarray<double> base_offset = {0, 2 * printer_configuration.getCleaningLines() * extrusion_configuration.getDiameter()};
+    std::valarray<double> base_offset = {0, 2 * printer_configuration.getCleaningLines() *
+                                            extrusion_configuration.getDiameter()};
     std::valarray<double> current_offset;
 
     double height_step = (finishing_height - starting_height) / (height_steps - 1);
@@ -489,7 +503,7 @@ tuneLineSeparationAndHeight(const boost::filesystem::path &export_directory, dou
                                extrusion_configuration.getDiameter());
     }
 
-    hyrel.shutDown();
+    hyrel.shutDown(printer_configuration);
 
     std::string diameter_suffix = getDiameterString(extrusion_configuration);
     double extruded_amount = extrudedAmount(hyrel, extrusion_configuration);
@@ -503,7 +517,8 @@ tuneLineSeparationAndHeight(const boost::filesystem::path &export_directory, dou
 }
 
 void
-tuneLineSeparationAndSpeed(const boost::filesystem::path &export_directory, double printing_distance, int number_of_lines,
+tuneLineSeparationAndSpeed(const boost::filesystem::path &export_directory, double printing_distance,
+                           int number_of_lines,
                            std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
                            ExtrusionConfiguration extrusion_configuration,
                            PrinterConfiguration printer_configuration, double starting_line_separation,
@@ -513,7 +528,8 @@ tuneLineSeparationAndSpeed(const boost::filesystem::path &export_directory, doub
     Hyrel hyrel = standardHyrelInitialisation(extrusion_configuration, printer_configuration,
                                               tool_offset, curing_duty_cycle, first_layer_height);
 
-    std::valarray<double> base_offset = {0, 2 * printer_configuration.getCleaningLines() * extrusion_configuration.getDiameter()};
+    std::valarray<double> base_offset = {0, 2 * printer_configuration.getCleaningLines() *
+                                            extrusion_configuration.getDiameter()};
     std::valarray<double> current_offset;
 
     int speed_step = (finishing_speed - starting_speed) / (speed_steps - 1);
@@ -525,7 +541,7 @@ tuneLineSeparationAndSpeed(const boost::filesystem::path &export_directory, doub
                                starting_line_separation, line_separation_steps, printing_distance, number_of_lines,
                                extrusion_configuration.getDiameter());
     }
-    hyrel.shutDown();
+    hyrel.shutDown(printer_configuration);
 
     std::string diameter_suffix = getDiameterString(extrusion_configuration);
     double extruded_amount = extrudedAmount(hyrel, extrusion_configuration);

@@ -40,11 +40,12 @@ int main() {
     patterns_to_generate = {"linear, 2x1 cm",
                             "symmetricPositive, 2x0.6 cm",
                             "symmetric gauss curved rectangle",};
-    patterns_to_generate = {"symmetric_gauss_curved_4x3_cm"};
+    patterns_to_generate = {"linear_2x1_cm"};
 
     // All units are in mm
-    ExtrusionConfiguration extrusion_configuration(200, 80, 0.20, 0.10, 1, 2);
-    PrinterConfiguration printing_configuration(500, 0, 2, 10, 15);
+    ExtrusionConfiguration extrusion_configuration(200, 80, 0.20 * 0.8, 0.10, 1.2 / 0.8, 2);
+    PrinterConfiguration printing_configuration(500, 0, 2, 10, 15, 1297, 10000);
+    // For priming 1297 pulses is a single microlitre, tune this value in order to obtain desirable flow.
 
     int uv_duty_cycle = 25;
     double first_layer_height = extrusion_configuration.getLayerHeight() + 0.00;
@@ -52,7 +53,7 @@ int main() {
     double nozzle_diameter_assumed = 0.3; // Nozzle diameter which was assumed for generation of the director pattern
     double grid_spacing_assumed = 0.02; // Spacing which was used for slicing the pattern, can be scaled for different nozzle diameters
     double grid_spacing = grid_spacing_assumed * extrusion_configuration.getDiameter() / nozzle_diameter_assumed;
-    std::vector<double> tool_offset = {145, 88, 0};
+    std::vector<double> tool_offset = {150, 86, 0};
     std::valarray<double> pattern_offset = {0, 2};
 
     std::cout << "\nGenerating GCode for the files contained in" << std::endl << '\t' << paths_directory
@@ -74,7 +75,7 @@ int main() {
     tuneLineSeparation(export_directory, printing_distance, number_of_lines, tool_offset, uv_duty_cycle,
                        first_layer_height,
                        extrusion_configuration, printing_configuration,
-                       1.8, 0.8, 6);
+                       1, 0.8, 5);
 
     tuneLineSeparationAndHeight(export_directory, printing_distance, number_of_lines, tool_offset, uv_duty_cycle,
                                 first_layer_height,
