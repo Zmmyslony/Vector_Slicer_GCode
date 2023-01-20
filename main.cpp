@@ -44,8 +44,11 @@ int main() {
 
     // All units are in mm
     ExtrusionConfiguration extrusion_configuration(200, 80, 0.20 * 0.8, 0.10, 1.2 / 0.8, 2);
-    PrinterConfiguration printing_configuration(500, 0, 2, 10, 15, 1297, 10000);
+    PrinterConfiguration printing_configuration(500, 0, 2, 10, 15, 5000, 10000);
     // For priming 1297 pulses is a single microlitre, tune this value in order to obtain desirable flow.
+    // Single microlitre is 14 mm of "filament" for a nozzle diameter of 300 um.
+    // 100 pulses = 1 mm of filament
+    // 320k pulses is a single lead screw revolution
 
     int uv_duty_cycle = 25;
     double first_layer_height = extrusion_configuration.getLayerHeight() + 0.00;
