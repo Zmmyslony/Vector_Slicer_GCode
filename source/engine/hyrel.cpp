@@ -227,11 +227,13 @@ Hyrel::init(int hotend_temperature, int bed_temperature, double clean_length, do
 
     configurePrime(tool_number, prime_rate, prime_pulses, 0, true);
     configureFlow(nozzle_width, layer_height, extrusion_coefficient, kra_2_pulses_per_microlitre, tool_number);
-    disablePriming(tool_number);
 
     selectTool(tool_number);
     addBreak();
     clean(clean_length, cleaning_lines, nozzle_width, height_offset_register, first_layer_height);
+    addBreak();
+
+    disablePriming(tool_number);
     addBreak();
     addComment("Starting printing");
 }

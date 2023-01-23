@@ -44,7 +44,7 @@ int main() {
 
     // All units are in mm
     ExtrusionConfiguration extrusion_configuration(200, 80, 0.20, 0.14, 1.2, 2);
-    PrinterConfiguration printing_configuration(500, 0, 0, 10, 15, 10000, 10000);
+    PrinterConfiguration printing_configuration(500, 0, 0, 10, 15, 10000, 2000);
     // For priming 1297 pulses is a single microlitre, tune this value in order to obtain desirable flow.
     // Single microlitre is 14 mm of "filament" for a nozzle diameter of 300 um.
     // 100 pulses = 1 mm of filament
