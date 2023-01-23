@@ -363,7 +363,7 @@ void Hyrel::exportToFile(const boost::filesystem::path &results_path, const std:
 
     char time[26];
     ctime_s(time, sizeof time, &ttime);
-    file << std::fixed;
+    file << std::setprecision(2);
     file.precision(2);
     file << "; Generated using GCodeGenerator " << PROJECT_VER << " on " << time;
     file << "; Michal Zmyslony, University of Cambridge, mlz22@cam.ac.uk" << std::endl << std::endl;

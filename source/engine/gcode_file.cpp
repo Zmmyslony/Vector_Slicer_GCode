@@ -36,10 +36,10 @@ void GCodeFile::generalCommand(const std::vector<char> &commands, const std::vec
                                const std::vector<double> &values) {
     if (commands.size() == values.size() && commands.size() == is_int.size()) {
         for (int i = 0; i < commands.size(); i++) {
-            if (is_int[i]) {
-                body_stream << commands[i] << int(values[i]) << " ";
+            if (values[i] >= 1000) {
+                body_stream << commands[i] << std::fixed << int(values[i]) << std::defaultfloat << " ";
             } else {
-                body_stream << commands[i] << std::fixed << values[i] << " ";
+                body_stream << commands[i] << values[i] << " ";
             }
         }
         body_stream << "\n";
@@ -55,7 +55,7 @@ void GCodeFile::generalCommand(const std::vector<char> &commands, const std::vec
             if (is_int[i]) {
                 body_stream << commands[i] << int(values[i]) << " ";
             } else {
-                body_stream << commands[i] << std::fixed << values[i] << " ";
+                body_stream << commands[i] << values[i] << " ";
             }
         }
         body_stream << "\t;" << comment << "\n";

@@ -23,7 +23,7 @@
 
 std::string getDiameterString(const ExtrusionConfiguration &extrusion_configuration) {
     std::ostringstream suffix_stream;
-    suffix_stream << std::fixed << std::setprecision(3);
+    suffix_stream << std::setprecision(3);
     suffix_stream << "_" << extrusion_configuration.getDiameter() << "_um";
     return suffix_stream.str();
 }
@@ -40,7 +40,7 @@ double extrudedAmount(const Hyrel &hyrel, const ExtrusionConfiguration &extrusio
 
 std::string getParameterListString(const std::string &parameter_name, double minimum, double maximum, int steps) {
     std::ostringstream parameter_list_string;
-    parameter_list_string << std::fixed << std::setprecision(3);
+    parameter_list_string << std::setprecision(3);
     parameter_list_string << "; Varied parameter: " << parameter_name << "; values: ";
     double value_step = (maximum - minimum) / (steps - 1);
     for (int i = 0; i < steps; i++) {
