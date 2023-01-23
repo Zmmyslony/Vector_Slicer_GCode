@@ -36,10 +36,10 @@ void GCodeFile::generalCommand(const std::vector<char> &commands, const std::vec
                                const std::vector<double> &values) {
     if (commands.size() == values.size() && commands.size() == is_int.size()) {
         for (int i = 0; i < commands.size(); i++) {
-            if (values[i] >= 1000) {
-                body_stream << commands[i] << std::fixed << int(values[i]) << std::defaultfloat << " ";
+            if (is_int[i]) {
+                body_stream << commands[i] << std::defaultfloat << int(values[i]) << " ";
             } else {
-                body_stream << commands[i] << values[i] << " ";
+                body_stream << commands[i] << std::fixed << values[i] << " ";
             }
         }
         body_stream << "\n";
@@ -195,6 +195,7 @@ GCodeFile::GCodeFile(int move_speed, int print_speed, double extrusion_coefficie
         extrusion_coefficient(extrusion_coefficient),
         lift_off_distance(lift_off_distance) {
     body_stream.precision(3);
+    body_stream << std::fixed;
 }
 
 GCodeFile::GCodeFile() :

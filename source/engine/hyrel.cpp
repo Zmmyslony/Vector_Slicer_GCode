@@ -104,9 +104,10 @@ void Hyrel::configureUnprime(int tool_number, double pulse_rate, double number_o
                    {true, true, false, false, false},
                    {721, (double) mCommandToolNumber(tool_number), pulse_rate, number_of_pulses, dwell_time});
     if (is_executed_immediately) {
-        generalCommand({'M', 'T', 'I'},
-                       {true, true, true},
-                       {721, (double) mCommandToolNumber(tool_number), (double) is_executed_immediately});
+//        generalCommand({'M', 'T', 'I'},
+//                       {true, true, true},
+//                       {721, (double) mCommandToolNumber(tool_number), (double) is_executed_immediately});
+        extrude(positions + std::valarray<double>{0, 0.001, 0});
     }
 }
 
@@ -276,7 +277,9 @@ void Hyrel::configureUvArray(int print_head_tool_number, int duty_cycle) {
 }
 
 void Hyrel::shutDown(int tool_number, int prime_pulses, int prime_rate) {
+    addBreak();
     configureUnprime(tool_number, prime_rate, prime_pulses, 0, true);
+    addBreak();
 
     setTemperatureBed(0);
     GCodeFile::setTemperatureHotend(0);
@@ -373,8 +376,8 @@ void Hyrel::exportToFile(const boost::filesystem::path &results_path, const std:
 
     char time[26];
     ctime_s(time, sizeof time, &ttime);
-    file << std::setprecision(2);
-    file.precision(2);
+    file << std::fixed << std::setprecision(3);
+//    file.precision(2);
     file << "; Generated using GCodeGenerator " << PROJECT_VER << " on " << time;
     file << "; Michal Zmyslony, University of Cambridge, mlz22@cam.ac.uk" << std::endl << std::endl;
     file << "; Estimated print time: " << print_time << " min" << std::endl;
