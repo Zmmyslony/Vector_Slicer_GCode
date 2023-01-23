@@ -107,7 +107,10 @@ void Hyrel::configureUnprime(int tool_number, double pulse_rate, double number_o
 //        generalCommand({'M', 'T', 'I'},
 //                       {true, true, true},
 //                       {721, (double) mCommandToolNumber(tool_number), (double) is_executed_immediately});
-        extrude(positions + std::valarray<double>{0, 0.001, 0});
+        moveVerticalRelative(10);
+        setPrintSpeed(10);
+        movePlanar(std::valarray<double>{positions[0], positions[1] + 2});
+        extrude(positions + std::valarray<double>{number_of_pulses / pulse_rate * print_speed, 0, 0});
     }
 }
 
