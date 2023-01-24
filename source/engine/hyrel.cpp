@@ -100,9 +100,15 @@ void Hyrel::configurePrime(int tool_number, double pulse_rate, double number_of_
 void Hyrel::configureUnprime(int tool_number, double pulse_rate, double number_of_pulses, double dwell_time,
                              bool is_executed_immediately) {
     addComment("Configure unpriming");
+    if (number_of_pulses > 0) {
+        dwell_time = -number_of_pulses / pulse_rate * 1000;
+    }
+    else {
+        dwell_time = 0;
+    }
     generalCommand({'M', 'T', 'S', 'E', 'P'},
                    {true, true, false, false, false},
-                   {721, (double) mCommandToolNumber(tool_number), pulse_rate, number_of_pulses, -number_of_pulses / pulse_rate * 1000});
+                   {721, (double) mCommandToolNumber(tool_number), pulse_rate, number_of_pulses, dwell_time});
     if (is_executed_immediately) {
 //        generalCommand({'M', 'T', 'I'},
 //                       {true, true, true},
