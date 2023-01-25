@@ -40,24 +40,26 @@ int main() {
     patterns_to_generate = {"linear, 2x1 cm",
                             "symmetricPositive, 2x0.6 cm",
                             "symmetric gauss curved rectangle",};
-    patterns_to_generate = {"linear_2x1_cm"};
+    patterns_to_generate = {"linear_2x1_cm", "azimuthal_1_cm", "linear_1x05_cm", "symmetric_gauss_curved_4x3_cm"};
 
     // All units are in mm
-    ExtrusionConfiguration extrusion_configuration(200, 80, 0.20, 0.14, 1.2, 2);
-    PrinterConfiguration printing_configuration(500, 0, 0, 10, 15, 10000, 2000);
+    ExtrusionConfiguration extrusion_configuration(150, 80, 0.20, 0.1, 1.0, 2);
+    PrinterConfiguration printing_configuration(500, 0, 2,
+                                                10, 15,
+                                                15000, 2000);
     // For priming 1297 pulses is a single microlitre, tune this value in order to obtain desirable flow.
     // Single microlitre is 14 mm of "filament" for a nozzle diameter of 300 um.
     // 100 pulses = 1 mm of filament
     // 320k pulses is a single lead screw revolution
     // 10k priming rate corresponds to around 6000 printing speed
 
-    int uv_duty_cycle = 25;
-    double first_layer_height = extrusion_configuration.getLayerHeight() + 0.00;
+    int uv_duty_cycle = 100;
+    double first_layer_height = extrusion_configuration.getLayerHeight() + 0.025;
 
     double nozzle_diameter_assumed = 0.3; // Nozzle diameter which was assumed for generation of the director pattern
     double grid_spacing_assumed = 0.02; // Spacing which was used for slicing the pattern, can be scaled for different nozzle diameters
     double grid_spacing = grid_spacing_assumed * extrusion_configuration.getDiameter() / nozzle_diameter_assumed;
-    std::vector<double> tool_offset = {150, 86, 0};
+    std::vector<double> tool_offset = {150, 90, 0};
     std::valarray<double> pattern_offset = {0, 2};
 
     std::cout << "\nGenerating GCode for the files contained in" << std::endl << '\t' << paths_directory
