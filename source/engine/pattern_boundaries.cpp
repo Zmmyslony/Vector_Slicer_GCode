@@ -85,3 +85,13 @@ void PatternBoundaries::print() const {
     std::cout << "x_min = " << x_min << ", x_max = " << x_max << ", y_min = " << y_min << ", y_max = " << y_max
               << std::endl;
 }
+
+PatternBoundaries::PatternBoundaries(const PatternBoundaries &one, const PatternBoundaries &two) :
+        x_min(fmin(one.x_min, two.x_min)),
+        y_min(fmin(one.y_min, two.y_min)),
+        x_max(fmax(one.x_max, two.x_max)),
+        y_max(fmax(one.y_max, two.y_max)) {}
+
+void PatternBoundaries::joinBoundaries(const PatternBoundaries &other) {
+    *this = PatternBoundaries(*this, other);
+}

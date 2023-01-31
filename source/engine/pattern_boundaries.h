@@ -40,6 +40,10 @@ public:
 
     explicit PatternBoundaries(const std::vector<std::vector<std::valarray<int>>> &sequence_of_paths);
 
+    PatternBoundaries(const PatternBoundaries &one, const PatternBoundaries &two);
+
+    void joinBoundaries(const PatternBoundaries &other);
+
     void scale(double multiplier);
 
     void move(const std::valarray<double> &offset);

@@ -352,18 +352,16 @@ void Hyrel::printPath(const std::vector<std::valarray<int>> &path, const std::va
 
 PatternBoundaries Hyrel::printPattern(const std::vector<std::vector<std::valarray<int>>> &sorted_sequence_of_paths,
                                       const std::valarray<double> &position_offset, double grid_spacing) {
-
-    for (auto &path: sorted_sequence_of_paths) {
-        addComment("Moving to new starting point.");
-        movePlanar(itodArray(path[0]) * grid_spacing + position_offset);
-
-        printPath(path, position_offset, grid_spacing);
-
-    }
-    addComment("Pattern completed.");
     PatternBoundaries pattern_boundaries(sorted_sequence_of_paths);
     pattern_boundaries.scale(grid_spacing);
     pattern_boundaries.move(position_offset);
+    for (auto &path: sorted_sequence_of_paths) {
+        addComment("Moving to new path.");
+        movePlanar(itodArray(path[0]) * grid_spacing + position_offset);
+
+        printPath(path, position_offset, grid_spacing);
+    }
+    addComment("Pattern completed.");
 //    pattern_boundaries.print();
     return pattern_boundaries;
 }
