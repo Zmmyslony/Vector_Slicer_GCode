@@ -114,16 +114,19 @@ void Hyrel::configureUnprime(int tool_number, double pulse_rate, double number_o
 //                       {true, true, true},
 //                       {721, (double) mCommandToolNumber(tool_number), (double) is_executed_immediately});
         moveVerticalRelative(10);
-        setPrintSpeed(10);
         movePlanar(std::valarray<double>{positions[0], positions[1] + 2});
-        extrude(positions + std::valarray<double>{number_of_pulses / pulse_rate * print_speed, 0, 0});
+        extrude(positions + std::valarray<double>{1, 0, 0});
     }
 }
 
 void Hyrel::disablePriming(int tool_number) {
-    configureUnprime(tool_number, 0, 0, 0, false);
     configurePrime(tool_number, 0, 0, 0, false);
 }
+
+void Hyrel::disableUnpriming(int tool_number) {
+    configureUnprime(tool_number, 0, 0, 0, false);
+}
+
 
 void Hyrel::extrude(const std::valarray<double> &xy) {
     std::valarray<double> new_positions = {xy[0], xy[1], positions[2]};
@@ -236,6 +239,7 @@ Hyrel::init(int hotend_temperature, int bed_temperature, double clean_length, do
     addBreak();
 
     configurePrime(tool_number, prime_rate, prime_pulses, 0, true);
+    disableUnpriming(tool_number);
     configureFlow(nozzle_width, layer_height, extrusion_coefficient, kra_2_pulses_per_microlitre, tool_number);
 
     selectTool(tool_number);

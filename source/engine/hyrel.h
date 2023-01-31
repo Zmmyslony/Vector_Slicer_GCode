@@ -105,6 +105,8 @@ public:
 
     void init(const ExtrusionConfiguration &extrusion_configuration, const PrinterConfiguration &printer_configuration,
               double first_layer_height, std::vector<double> &tool_offset);
+
+    void disableUnpriming(int tool_number);
 };
 
 void
