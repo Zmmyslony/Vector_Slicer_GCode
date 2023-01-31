@@ -22,36 +22,41 @@
 #include <valarray>
 #include <vector>
 
-std::valarray<double> itodArray(const std::valarray<int> &int_array);
+using vali = std::valarray<int>;
+using vald = std::valarray<double>;
 
-std::valarray<int> dtoiArray(const std::valarray<double> &double_array);
+vald itodArray(const vali &int_array);
 
-double generalNorm(const std::valarray<double> &array, const double &exponent);
+vali dtoiArray(const vald &double_array);
 
-double norm(const std::valarray<double> &array);
+double generalNorm(const vald &array, const double &exponent);
 
-double norm(const std::valarray<int> &array);
+double norm(const vald &array);
 
-std::valarray<double> generalNormalize(const std::valarray<double> &array, const double &exponent);
+double norm(const vali &array);
 
-std::valarray<double> normalize(const std::valarray<double> &array);
+vald generalNormalize(const vald &array, const double &exponent);
 
-std::valarray<double> normalize(const std::valarray<int> &array);
+vald normalize(const vald &array);
 
-double dot(const std::valarray<double> &array_1, const std::valarray<double> &array_2);
+vald normalize(const vali &array);
 
-double dot(const std::valarray<int> &array_1, const std::valarray<int> &array_2);
+double dot(const vald &array_1, const vald &array_2);
 
-std::valarray<double> perpendicular(std::valarray<double> vector);
+double dot(const vali &array_1, const vali &array_2);
 
-std::valarray<int> perpendicular(const std::valarray<int> &vector);
+vald perpendicular(vald vector);
 
-void printArray(const std::vector<std::valarray<int>> &array);
+vali perpendicular(const vali &vector);
 
-void printArray(const std::vector<std::valarray<double>> &array);
+void printArray(const std::vector<vali> &array);
 
-std::valarray<int> uinttointArray(const std::valarray<unsigned int> &uint_array);
+void printArray(const std::vector<vald> &array);
+
+vali uinttointArray(const std::valarray<unsigned int> &uint_array);
 
 bool isEqual(const std::valarray<bool> &bool_valarray);
+
+std::vector<std::vector<vald>> rotatePattern(std::vector<std::vector<vald>> pattern, double angle, const vald &centre_of_rotation);
 
 #endif //GCODEGENERATOR_VALARRAY_OPERATIONS_H
