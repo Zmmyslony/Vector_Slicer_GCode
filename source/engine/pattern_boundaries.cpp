@@ -20,7 +20,7 @@
 
 #include "pattern_boundaries.h"
 
-PatternBoundaries::PatternBoundaries(const std::vector<std::vector<std::valarray<int>>> &sequence_of_paths) {
+PatternBoundaries::PatternBoundaries(const std::vector<std::vector<std::valarray<double>>> &sequence_of_paths) {
     for (auto &path: sequence_of_paths) {
         for (auto &point: path) {
             if (x_max < point[0]) { x_max = point[0]; }
@@ -79,6 +79,10 @@ std::valarray<double> PatternBoundaries::getTopLeftCorner() {
 
 std::valarray<double> PatternBoundaries::getTopRightCorner() {
     return std::valarray<double>({x_max, y_max});
+}
+
+std::valarray<double> PatternBoundaries::getCentre() const {
+    return {(x_max + x_min) / 2, (y_max + y_min) / 2};
 }
 
 void PatternBoundaries::print() const {

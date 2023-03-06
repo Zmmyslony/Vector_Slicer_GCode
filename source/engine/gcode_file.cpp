@@ -232,24 +232,24 @@ std::string GCodeFile::getText() {
     return body_stream.str();
 }
 
-void GCodeFile::printPath(const std::vector<std::valarray<int>> &path, const std::valarray<double> &position_offset,
+void GCodeFile::printPath(const std::vector<std::valarray<double>> &path, const std::valarray<double> &position_offset,
                           double grid_distance) {
 
     addComment("Moving up.");
     moveVerticalRelative(1);
     addComment("Moving to new starting point.");
 
-    movePlanar(itodArray(path[0]) * grid_distance + position_offset);
+    movePlanar(path[0] * grid_distance + position_offset);
     addComment("Moving down.");
     moveVerticalRelative(-1);
     addComment("Starting new path.");
     for (auto &position: path) {
-        extrude(itodArray(position) * grid_distance + position_offset);
+        extrude(position * grid_distance + position_offset);
     }
 }
 
 void
-GCodeFile::printPattern(const std::vector<std::vector<std::valarray<int>>> &sorted_sequence_of_paths,
+GCodeFile::printPattern(const std::vector<std::vector<std::valarray<double>>> &sorted_sequence_of_paths,
                         const std::valarray<double> &position_offset,
                         double grid_distance) {
     for (auto &path: sorted_sequence_of_paths) {
@@ -282,7 +282,7 @@ void generateGCode(const std::string &base_directory, int temperature, double cl
                    const std::valarray<double> &position_offset, double grid_distance) {
     std::cout << std::endl;
     std::string directory_path = base_directory + R"(\results)";
-    std::vector<std::vector<std::valarray<int>>> sorted_paths = read3DVectorFromFile(directory_path);
+    std::vector<std::vector<std::valarray<double>>> sorted_paths = read3DVectorFromFileDouble(directory_path);
     GCodeFile g_code_file;
     g_code_file.init(temperature, 0, cleaning_distance);
     g_code_file.printPattern(sorted_paths, position_offset, grid_distance);

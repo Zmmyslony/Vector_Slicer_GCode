@@ -57,6 +57,11 @@ vali uinttointArray(const std::valarray<unsigned int> &uint_array);
 
 bool isEqual(const std::valarray<bool> &bool_valarray);
 
-std::vector<std::vector<vald>> rotatePattern(std::vector<std::vector<vald>> pattern, double angle, const vald &centre_of_rotation);
+std::vector<std::vector<vald>>
+rotatePattern(std::vector<std::vector<vald>> pattern, double angle, const vald &centre_of_rotation);
+
+std::vector<std::vector<vald>> rotatePattern(const std::vector<std::vector<vald>> &pattern, double angle);
+
+std::vector<std::vector<vald>> flipPattern(const std::vector<std::vector<vald>> &pattern);
 
 #endif //GCODEGENERATOR_VALARRAY_OPERATIONS_H

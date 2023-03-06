@@ -27,8 +27,6 @@
 
 namespace fs = boost::filesystem;
 
-void exportVectorTableToFile(const std::vector<std::vector<int>> &table, fs::path &filename);
-
-std::vector<std::vector<std::valarray<int>>> read3DVectorFromFile(const fs::path &path);
+std::vector<std::vector<std::valarray<double>>> read3DVectorFromFileDouble(const fs::path &path);
 
 #endif //GCODEGENERATOR_EXPORTING_H

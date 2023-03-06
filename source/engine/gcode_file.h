@@ -95,12 +95,12 @@ public:
 
     void shutDown();
 
-    void printPath(const std::vector<std::valarray<int>> &path, const std::valarray<double> &position_offset,
+    void printPath(const std::vector<std::valarray<double>> &path, const std::valarray<double> &position_offset,
                    double grid_distance);
 
     std::string getText();
 
-    void printPattern(const std::vector<std::vector<std::valarray<int>>> &sorted_sequence_of_paths,
+    void printPattern(const std::vector<std::vector<std::valarray<double>>> &sorted_sequence_of_paths,
                       const std::valarray<double> &position_offset,
                       double grid_distance);
 

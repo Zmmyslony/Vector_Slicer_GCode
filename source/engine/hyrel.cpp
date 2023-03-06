@@ -29,6 +29,8 @@
 #include "auxiliary.h"
 #include "config.h"
 
+
+
 const std::string version = "0.2a";
 
 int mCommandToolNumber(int tool_number) {
@@ -114,8 +116,7 @@ void Hyrel::configureUnprime(int tool_number, double pulse_rate, double number_o
 //                       {true, true, true},
 //                       {721, (double) mCommandToolNumber(tool_number), (double) is_executed_immediately});
         moveVerticalRelative(10);
-        movePlanar(std::valarray<double>{positions[0], positions[1] + 2});
-        extrude(positions + std::valarray<double>{1, 0, 0});
+        extrude(positions + std::valarray<double>{0, 50, 0});
     }
 }
 
@@ -291,7 +292,7 @@ void Hyrel::configureUvArray(int print_head_tool_number, int duty_cycle) {
 
 void Hyrel::shutDown(int tool_number, int prime_pulses, int prime_rate) {
     addBreak();
-    configureUnprime(tool_number, prime_rate, prime_pulses, 0, true);
+    configureUnprime(tool_number, prime_rate * 2, prime_pulses, 0, true);
     addBreak();
 
     setTemperatureBed(0);
@@ -323,41 +324,42 @@ Hyrel::Hyrel(const ExtrusionConfiguration &extrusion_configuration, const Printe
 
 }
 
-bool isInDifferentDirection(const std::valarray<int> &last_position,
-                            const std::valarray<int> &position,
-                            const std::valarray<int> &previous_position,
-                            const std::valarray<int> &previous_connecting_vector) {
-    std::valarray<int> connecting_vector = position - previous_position;
+bool isInDifferentDirection(const std::valarray<double> &last_position,
+                            const std::valarray<double> &position,
+                            const std::valarray<double> &previous_position,
+                            const std::valarray<double> &previous_connecting_vector) {
+    std::valarray<double> connecting_vector = position - previous_position;
     double dot_length = dot(previous_connecting_vector, connecting_vector) /
                         (norm(previous_connecting_vector) * norm(connecting_vector));
     return dot_length < 1 || isEqual(position == last_position);
 }
 
-void Hyrel::printPath(const std::vector<std::valarray<int>> &path, const std::valarray<double> &position_offset,
+void Hyrel::printPath(const std::vector<std::valarray<double>> &path, const std::valarray<double> &position_offset,
                       double grid_distance) {
     addComment("Starting new path.");
-    std::valarray<int> previous_connecting_vector = {1, 0};
-    std::valarray<int> previous_position = {0, 0};
+    std::valarray<double> previous_connecting_vector = {1, 0};
+    std::valarray<double> previous_position = {0, 0};
 
     for (auto &position: path) {
         // Check if the printing direction differs, and if it doesn't merge the points into a single line to make gcode
         // clearer. Additionally, if it is a last point print it even if it is in the same direction.
         if (isInDifferentDirection(path.back(), position, previous_position, previous_connecting_vector)) {
             previous_connecting_vector = position - previous_position;
-            extrude(itodArray(position) * grid_distance + position_offset);
+            extrude(position * grid_distance + position_offset);
         }
         previous_position = position;
     }
 }
 
-PatternBoundaries Hyrel::printPattern(const std::vector<std::vector<std::valarray<int>>> &sorted_sequence_of_paths,
-                                      const std::valarray<double> &position_offset, double grid_spacing) {
+PatternBoundaries Hyrel::printPattern(const std::vector<std::vector<std::valarray<double>>> &sorted_sequence_of_paths,
+                                      const std::valarray<double> &position_offset, double grid_spacing,
+                                      bool is_flipped) {
     PatternBoundaries pattern_boundaries(sorted_sequence_of_paths);
     pattern_boundaries.scale(grid_spacing);
     pattern_boundaries.move(position_offset);
     for (auto &path: sorted_sequence_of_paths) {
         addComment("Moving to new path.");
-        movePlanar(itodArray(path[0]) * grid_spacing + position_offset);
+        movePlanar(path[0] * grid_spacing + position_offset);
 
         printPath(path, position_offset, grid_spacing);
     }
@@ -410,13 +412,19 @@ void Hyrel::addLocalOffset(std::vector<double> offset) {
 }
 
 void printMultiLayer(Hyrel &hyrel, const std::valarray<double> &initial_pattern_offset, double grid_spacing,
-                     const std::vector<std::vector<std::valarray<int>>> &sorted_paths, int layers,
-                     double layer_height) {
+                     const std::vector<std::vector<std::valarray<double>>> &sorted_paths, int layers, double layer_height,
+                     bool is_flipping_enabled) {
 
     for (int i = 0; i < layers; i++) {
         double current_layer_height = i * layer_height;
         hyrel.moveVertical(current_layer_height);
-        hyrel.printPattern(sorted_paths, initial_pattern_offset, grid_spacing);
+        if (is_flipping_enabled && i % 2 == 1) {
+            auto flipped_pattern = flipPattern(sorted_paths);
+            hyrel.printPattern(flipped_pattern, initial_pattern_offset, grid_spacing, true);
+        }
+        else {
+            hyrel.printPattern(sorted_paths, initial_pattern_offset, grid_spacing, false);
+        }
     }
 }
 
@@ -426,7 +434,7 @@ singleLayer(const boost::filesystem::path &export_directory, const fs::path &pat
             double first_layer_height, ExtrusionConfiguration extrusion_configuration,
             PrinterConfiguration printer_configuration) {
     multiLayer(export_directory, pattern_path, grid_spacing, pattern_offset, tool_offset, curing_duty_cycle,
-               first_layer_height, 1, extrusion_configuration, printer_configuration);
+               first_layer_height, 1, extrusion_configuration, printer_configuration, false, 0);
 }
 
 Hyrel standardHyrelInitialisation(const ExtrusionConfiguration &extrusion_configuration,
@@ -443,9 +451,10 @@ void
 multiLayer(const boost::filesystem::path &export_directory, const fs::path &pattern_path, double grid_spacing,
            const std::valarray<double> &pattern_offset, std::vector<double> &tool_offset, int curing_duty_cycle,
            double first_layer_height, int layers, ExtrusionConfiguration extrusion_configuration,
-           PrinterConfiguration printer_configuration) {
-    if (boost::filesystem::exists(pattern_path)) {
-        std::vector<std::vector<std::valarray<int>>> sorted_paths = read3DVectorFromFile(pattern_path);
+           PrinterConfiguration printer_configuration, bool is_flipping_enabled, double pattern_rotation) {
+    if (fs::exists(pattern_path)) {
+        std::vector<std::vector<vald>> sorted_paths = read3DVectorFromFileDouble(pattern_path);
+        sorted_paths = rotatePattern(sorted_paths, pattern_rotation);
         Hyrel hyrel = standardHyrelInitialisation(extrusion_configuration, printer_configuration,
                                                   tool_offset, curing_duty_cycle, first_layer_height);
 
@@ -453,7 +462,7 @@ multiLayer(const boost::filesystem::path &export_directory, const fs::path &patt
                                                  2 * printer_configuration.getCleaningLines() *
                                                  extrusion_configuration.getDiameter()};
         printMultiLayer(hyrel, pattern_offset + cleaning_offset, grid_spacing, sorted_paths, layers,
-                        extrusion_configuration.getLayerHeight());
+                        extrusion_configuration.getLayerHeight(), is_flipping_enabled);
         hyrel.shutDown(printer_configuration);
 
         std::ostringstream suffix_stream;

@@ -23,8 +23,9 @@
 
 #include "exporting.h"
 
-std::vector<std::vector<int>> importTableInt(const fs::path &filename) {
-    std::vector<std::vector<int>> table;
+
+std::vector<std::vector<double>> importTableDouble(const fs::path &filename) {
+    std::vector<std::vector<double>> table;
     std::string line;
     std::fstream file(filename.string());
 
@@ -39,7 +40,7 @@ std::vector<std::vector<int>> importTableInt(const fs::path &filename) {
         }
         std::string element;
         std::stringstream line_stream(line);
-        std::vector<int> row;
+        std::vector<double> row;
 
         while (std::getline(line_stream, element, ',')) {
             row.push_back(stoi(element));
@@ -51,11 +52,12 @@ std::vector<std::vector<int>> importTableInt(const fs::path &filename) {
     return table;
 }
 
-std::vector<std::vector<std::valarray<int>>> importTableValarrayInt(const fs::path &filename) {
-    std::vector<std::vector<int>> table = importTableInt(filename);
-    std::vector<std::vector<std::valarray<int>>> table_valarray;
+
+std::vector<std::vector<std::valarray<double>>> importTableValarrayDouble(const fs::path &filename) {
+    std::vector<std::vector<double>> table = importTableDouble(filename);
+    std::vector<std::vector<std::valarray<double>>> table_valarray;
     for (auto &row: table) {
-        std::vector<std::valarray<int>> row_valarray;
+        std::vector<std::valarray<double>> row_valarray;
         for (int i = 0; i < row.size(); i += 2) {
             row_valarray.push_back({row[i], row[i + 1]});
         }
@@ -78,7 +80,7 @@ std::vector<std::vector<std::valarray<int>>> mergeTwoTables(const std::vector<st
     return merged_table;
 }
 
-std::vector<std::vector<std::valarray<int>>> read3DVectorFromFile(const fs::path &path) {
-    return importTableValarrayInt(path);
+std::vector<std::vector<std::valarray<double>>> read3DVectorFromFileDouble(const fs::path &path) {
+    return importTableValarrayDouble(path);
 }
 

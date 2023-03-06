@@ -27,6 +27,8 @@
 #include "extrusion_configuration.h"
 #include "printer_configuration.h"
 
+namespace fs = boost::filesystem;
+
 class Hyrel : public GCodeFile {
 
     void defineHeightOffset(double height, unsigned int register_number);
@@ -77,11 +79,12 @@ public:
     Hyrel(const ExtrusionConfiguration &extrusion_configuration, const PrinterConfiguration &printer_configuration);
 
     void
-    printPath(const std::vector<std::valarray<int>> &path, const std::valarray<double> &position_offset,
+    printPath(const std::vector<std::valarray<double>> &path, const std::valarray<double> &position_offset,
               double grid_distance);
 
-    PatternBoundaries printPattern(const std::vector<std::vector<std::valarray<int>>> &sorted_sequence_of_paths,
-                                   const std::valarray<double> &position_offset, double grid_spacing);
+    PatternBoundaries printPattern(const std::vector<std::vector<std::valarray<double>>> &sorted_sequence_of_paths,
+                                   const std::valarray<double> &position_offset, double grid_spacing,
+                                   bool is_flipped);
 
     void exportToFile(const boost::filesystem::path &results_path, const std::string &pattern_name,
                       const std::string &suffix, double extruded_amount, const std::string &comment);
@@ -116,10 +119,10 @@ singleLayer(const boost::filesystem::path &export_directory, const boost::filesy
             PrinterConfiguration printer_configuration);
 
 void
-multiLayer(const boost::filesystem::path &export_directory, const boost::filesystem::path &pattern_path, double grid_spacing,
+multiLayer(const boost::filesystem::path &export_directory, const fs::path &pattern_path, double grid_spacing,
            const std::valarray<double> &pattern_offset, std::vector<double> &tool_offset, int curing_duty_cycle,
            double first_layer_height, int layers, ExtrusionConfiguration extrusion_configuration,
-           PrinterConfiguration printer_configuration);
+           PrinterConfiguration printer_configuration, bool is_flipping_enabled, double pattern_rotation);
 
 void
 tuneLineSeparation(const boost::filesystem::path &export_directory, double printing_distance, int number_of_lines,

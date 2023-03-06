@@ -24,10 +24,10 @@
 #include <valarray>
 
 class PatternBoundaries {
-    double x_min = INT_MAX;
-    double y_min = INT_MAX;
-    double x_max = INT_MIN;
-    double y_max = INT_MIN;
+    double x_min = DBL_MAX;
+    double y_min = DBL_MAX;
+    double x_max = DBL_MIN;
+    double y_max = DBL_MIN;
 
 public:
     [[nodiscard]] double getXMin() const;
@@ -38,7 +38,7 @@ public:
 
     [[nodiscard]] double getYMax() const;
 
-    explicit PatternBoundaries(const std::vector<std::vector<std::valarray<int>>> &sequence_of_paths);
+    explicit PatternBoundaries(const std::vector<std::vector<std::valarray<double>>> &sequence_of_paths);
 
     PatternBoundaries(const PatternBoundaries &one, const PatternBoundaries &two);
 
@@ -55,6 +55,8 @@ public:
     std::valarray<double> getTopLeftCorner();
 
     std::valarray<double> getTopRightCorner();
+
+    [[nodiscard]] std::valarray<double> getCentre() const;
 
     void print() const;
 };

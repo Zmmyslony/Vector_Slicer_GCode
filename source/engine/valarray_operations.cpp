@@ -18,7 +18,9 @@
 
 #include <stdexcept>
 #include <iostream>
+#include <algorithm>
 
+#include "pattern_boundaries.h"
 #include "valarray_operations.h"
 
 vald itodArray(const vali &int_array) {
@@ -136,13 +138,33 @@ vald rotate(vald array, double angle) {
             array[1] * cos(angle) + array[0] * sin(angle)};
 }
 
+vald rotateWithOffset(const vald &array, double angle, const vald &offset) {
+    auto offset_rotation = rotate(array - offset, angle);
+    return offset_rotation + offset;
+}
+
 std::vector<std::vector<vald>>
 rotatePattern(std::vector<std::vector<vald>> pattern, double angle, const vald &centre_of_rotation) {
     std::vector<std::vector<vald>> rotated_pattern;
     for (auto &path: pattern) {
         for (auto &element: path) {
-            element = rotate(element - centre_of_rotation, angle);
+            element = rotateWithOffset(element, angle, centre_of_rotation);
         }
     }
     return pattern;
+}
+
+std::vector<std::vector<vald>> rotatePattern(const std::vector<std::vector<vald>> &pattern, double angle) {
+    PatternBoundaries boundaries(pattern);
+    vald pattern_centre = boundaries.getCentre();
+    return rotatePattern(pattern, angle, pattern_centre);
+}
+
+std::vector<std::vector<vald>> flipPattern(const std::vector<std::vector<vald>> &pattern) {
+    auto flipped_pattern = pattern;
+    std::reverse_copy(pattern.begin(), pattern.end(), flipped_pattern.begin());
+    for (auto &path: flipped_pattern) {
+        std::reverse(path.begin(), path.end());
+    }
+    return flipped_pattern;
 }

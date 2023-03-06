@@ -15,6 +15,7 @@
 #include <iostream>
 #include <boost/filesystem.hpp>
 #include <boost/dll.hpp>
+#include <filesystem>
 
 #include "source/engine/hyrel.h"
 #include "source/engine/extrusion_configuration.h"
@@ -27,26 +28,16 @@ int main() {
     fs::path paths_directory = cwd / "paths";
     fs::path export_directory = cwd / "gcode";
 
-    std::vector<std::string> patterns_to_generate = {"radial, r = 1 cm",
-                                                     "radial, r = 0.5 cm",
-                                                     "diagonal, 1x0.5 cm",
-                                                     "diagonal, 2x1 cm",
-                                                     "linear, 2x1 cm",
-                                                     "symmetricPositive, 2x0.6 cm",
-                                                     "symmetric gauss curved rectangle",
-                                                     "linear, 1x0.5 cm",
-                                                     "azimuthal, r = 1 cm"};
-    patterns_to_generate = {"radial, r = 1 cm", "azimuthal, r = 1 cm"};
-    patterns_to_generate = {"linear, 2x1 cm",
-                            "symmetricPositive, 2x0.6 cm",
-                            "symmetric gauss curved rectangle",};
-    patterns_to_generate = {"linear_2x1_cm", "azimuthal_1_cm", "linear_1x05_cm", "symmetric_gauss_curved_4x3_cm"};
+    std::vector<std::string> patterns_to_generate;
+    patterns_to_generate = {"azimuthal_2_cm"};
 
     // All units are in mm
-    ExtrusionConfiguration extrusion_configuration(150, 80, 0.20, 0.1, 1.0, 2);
-    PrinterConfiguration printing_configuration(500, 0, 2,
-                                                10, 15,
-                                                15000, 2000);
+    ExtrusionConfiguration extrusion_configuration(300, 80, 0.25,
+                                                   0.135, 1.0, 10);
+
+    PrinterConfiguration printing_configuration(1000, 0, 0,
+                                                20, 20,
+                                                90000, 4500);
     // For priming 1297 pulses is a single microlitre, tune this value in order to obtain desirable flow.
     // Single microlitre is 14 mm of "filament" for a nozzle diameter of 300 um.
     // 100 pulses = 1 mm of filament
@@ -59,7 +50,7 @@ int main() {
     double nozzle_diameter_assumed = 0.3; // Nozzle diameter which was assumed for generation of the director pattern
     double grid_spacing_assumed = 0.02; // Spacing which was used for slicing the pattern, can be scaled for different nozzle diameters
     double grid_spacing = grid_spacing_assumed * extrusion_configuration.getDiameter() / nozzle_diameter_assumed;
-    std::vector<double> tool_offset = {150, 90, 0};
+    std::vector<double> tool_offset = {50, 78, 0};
     std::valarray<double> pattern_offset = {0, 2};
 
     std::cout << "\nGenerating GCode for the files contained in" << std::endl << '\t' << paths_directory
@@ -71,8 +62,8 @@ int main() {
                     printing_configuration);
 
         multiLayer(export_directory, paths_directory / (pattern + ".csv"), grid_spacing, pattern_offset,
-                   tool_offset, uv_duty_cycle, first_layer_height, 4, extrusion_configuration,
-                   printing_configuration);
+                   tool_offset, uv_duty_cycle, first_layer_height, 3, extrusion_configuration,
+                   printing_configuration, true, 3.14);
     }
 
     double printing_distance = 10;
