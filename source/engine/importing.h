@@ -1,5 +1,5 @@
 /*
- * 2022, Michał Zmyślony, mlz22@cam.ac.uk.
+ * 2023, Michał Zmyślony, mlz22@cam.ac.uk.
  *
  * Please cite Michał Zmyślony and Dr John Biggins if you use any part of this code in work you publish or distribute.
  *
@@ -13,20 +13,22 @@
  */
 
 //
-// Created by Michał Zmyślony on 13/10/2021.
+// Created by Michał Zmyślony on 13/03/2023.
 //
 
-#ifndef GCODEGENERATOR_EXPORTING_H
-#define GCODEGENERATOR_EXPORTING_H
+#ifndef GCODEGENERATOR_IMPORTING_H
+#define GCODEGENERATOR_IMPORTING_H
 
+#include <boost/filesystem/path.hpp>
+#include <filesystem>
 #include <string>
 #include <valarray>
 #include <vector>
-#include <boost/filesystem/path.hpp>
-#include <filesystem>
 
 namespace fs = boost::filesystem;
 
+double readResolution(const fs::path &filepath);
+
 std::vector<std::vector<std::valarray<double>>> read3DVectorFromFileDouble(const fs::path &path);
 
-#endif //GCODEGENERATOR_EXPORTING_H
+#endif //GCODEGENERATOR_IMPORTING_H

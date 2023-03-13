@@ -22,14 +22,12 @@
 
 #include "hyrel.h"
 #include "valarray_operations.h"
-#include "exporting.h"
 #include "pattern_boundaries.h"
 #include "extrusion_configuration.h"
 #include "printer_configuration.h"
 #include "auxiliary.h"
 #include "config.h"
-
-
+#include "importing.h"
 
 const std::string version = "0.2a";
 
@@ -453,6 +451,10 @@ multiLayer(const boost::filesystem::path &export_directory, const fs::path &patt
            double first_layer_height, int layers, ExtrusionConfiguration extrusion_configuration,
            PrinterConfiguration printer_configuration, bool is_flipping_enabled, double pattern_rotation) {
     if (fs::exists(pattern_path)) {
+        double print_resolution = readResolution(pattern_path);
+        if (print_resolution != 1) {
+            grid_spacing = extrusion_configuration.getDiameter() / print_resolution;
+        }
         std::vector<std::vector<vald>> sorted_paths = read3DVectorFromFileDouble(pattern_path);
         sorted_paths = rotatePattern(sorted_paths, pattern_rotation);
         Hyrel hyrel = standardHyrelInitialisation(extrusion_configuration, printer_configuration,

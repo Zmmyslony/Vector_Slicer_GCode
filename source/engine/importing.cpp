@@ -1,5 +1,5 @@
 /*
- * 2022, Michał Zmyślony, mlz22@cam.ac.uk.
+ * 2023, Michał Zmyślony, mlz22@cam.ac.uk.
  *
  * Please cite Michał Zmyślony and Dr John Biggins if you use any part of this code in work you publish or distribute.
  *
@@ -13,16 +13,42 @@
  */
 
 //
-// Created by Michał Zmyślony on 13/10/2021.
+// Created by Michał Zmyślony on 13/03/2023.
 //
 
+#include <boost/filesystem/path.hpp>
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <boost/filesystem/path.hpp>
 
-#include "exporting.h"
+#include "importing.h"
 
+
+double readResolution(const fs::path &filepath) {
+    std::vector<std::vector<double>> table;
+    std::string line;
+    std::fstream file(filepath.string());
+
+    if (!file) {
+        std::cout << filepath << " does not exist" << std::endl;
+        throw std::runtime_error("File " + filepath.string() + " does not exists.");
+    }
+
+    while (std::getline(file, line)) {
+        if ((line.find("# Print diameter:") != std::string::npos)) {
+            std::string element;
+            std::stringstream line_stream(line);
+            std::vector<std::string> row;
+
+            while (std::getline(line_stream, element, ' ')) {
+                row.push_back(element);
+            }
+            std::cout << "Imported resolution: " << row.back() << std::endl;
+            return std::stod(row.back());
+        }
+    }
+    return 1;
+}
 
 std::vector<std::vector<double>> importTableDouble(const fs::path &filename) {
     std::vector<std::vector<double>> table;
@@ -66,21 +92,6 @@ std::vector<std::vector<std::valarray<double>>> importTableValarrayDouble(const 
     return table_valarray;
 }
 
-std::vector<std::vector<std::valarray<int>>> mergeTwoTables(const std::vector<std::vector<int>> &x_table,
-                                                            const std::vector<std::vector<int>> &y_table) {
-    std::vector<std::vector<std::valarray<int>>> merged_table;
-    for (int i = 0; i < x_table.size(); i++) {
-        std::vector<std::valarray<int>> merged_row;
-        for (int j = 0; j < x_table[i].size(); j++) {
-            std::valarray<int> merged_element = {x_table[i][j], y_table[i][j]};
-            merged_row.push_back(merged_element);
-        }
-        merged_table.push_back(merged_row);
-    }
-    return merged_table;
-}
-
 std::vector<std::vector<std::valarray<double>>> read3DVectorFromFileDouble(const fs::path &path) {
     return importTableValarrayDouble(path);
 }
-

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(GCodeGenerator VERSION 0.2.0)
+project(GCodeGenerator VERSION 0.2.1)
 
 set(CMAKE_CXX_STANDARD 17)
 find_package(Boost COMPONENTS system filesystem REQUIRED)
@@ -11,8 +11,6 @@ include_directories(${PROJECT_BINARY_DIR})
 
 add_executable(GCodeGenerator
         main.cpp
-        source/engine/exporting.h
-        source/engine/exporting.cpp
         source/engine/gcode_file.h
         source/engine/gcode_file.cpp
         source/engine/hyrel.h
@@ -27,7 +25,7 @@ add_executable(GCodeGenerator
         source/engine/printer_configuration.cpp
         source/engine/auxiliary.h
         source/engine/auxiliary.cpp
-        source/engine/config.h.in)
+        source/engine/config.h.in source/engine/importing.h source/engine/importing.cpp)
 
 target_link_libraries(GCodeGenerator
         ${Boost_SYSTEM_LIBRARY}

@@ -32,12 +32,12 @@ int main() {
     patterns_to_generate = {"azimuthal_2_cm"};
 
     // All units are in mm
-    ExtrusionConfiguration extrusion_configuration(300, 80, 0.25,
-                                                   0.135, 1.0, 10);
+    ExtrusionConfiguration extrusion_configuration(900, 80, 0.175,
+                                                   0.080, 1.0, 10);
 
-    PrinterConfiguration printing_configuration(1000, 0, 0,
+    PrinterConfiguration printing_configuration(1500, 0, 0,
                                                 20, 20,
-                                                90000, 4500);
+                                                120000, 9000);
     // For priming 1297 pulses is a single microlitre, tune this value in order to obtain desirable flow.
     // Single microlitre is 14 mm of "filament" for a nozzle diameter of 300 um.
     // 100 pulses = 1 mm of filament
@@ -45,12 +45,12 @@ int main() {
     // 10k priming rate corresponds to around 6000 printing speed
 
     int uv_duty_cycle = 100;
-    double first_layer_height = extrusion_configuration.getLayerHeight() + 0.025;
+    double first_layer_height = extrusion_configuration.getLayerHeight() + 0.01;
 
     double nozzle_diameter_assumed = 0.3; // Nozzle diameter which was assumed for generation of the director pattern
-    double grid_spacing_assumed = 0.02; // Spacing which was used for slicing the pattern, can be scaled for different nozzle diameters
+    double grid_spacing_assumed = 0.025; // Spacing which was used for slicing the pattern, can be scaled for different nozzle diameters
     double grid_spacing = grid_spacing_assumed * extrusion_configuration.getDiameter() / nozzle_diameter_assumed;
-    std::vector<double> tool_offset = {50, 78, 0};
+    std::vector<double> tool_offset = {45, 85, 0};
     std::valarray<double> pattern_offset = {0, 2};
 
     std::cout << "\nGenerating GCode for the files contained in" << std::endl << '\t' << paths_directory
@@ -62,7 +62,7 @@ int main() {
                     printing_configuration);
 
         multiLayer(export_directory, paths_directory / (pattern + ".csv"), grid_spacing, pattern_offset,
-                   tool_offset, uv_duty_cycle, first_layer_height, 3, extrusion_configuration,
+                   tool_offset, uv_duty_cycle, first_layer_height, 2, extrusion_configuration,
                    printing_configuration, true, 3.14);
     }
 
