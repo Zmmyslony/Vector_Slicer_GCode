@@ -43,7 +43,6 @@ double readResolution(const fs::path &filepath) {
             while (std::getline(line_stream, element, ' ')) {
                 row.push_back(element);
             }
-            std::cout << "Imported resolution: " << row.back() << std::endl;
             return std::stod(row.back());
         }
     }

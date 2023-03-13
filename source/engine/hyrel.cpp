@@ -290,7 +290,7 @@ void Hyrel::configureUvArray(int print_head_tool_number, int duty_cycle) {
 
 void Hyrel::shutDown(int tool_number, int prime_pulses, int prime_rate) {
     addBreak();
-    configureUnprime(tool_number, prime_rate * 2, prime_pulses, 0, true);
+    configureUnprime(tool_number, prime_rate, prime_pulses, 0, true);
     addBreak();
 
     setTemperatureBed(0);
