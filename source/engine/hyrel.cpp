@@ -19,6 +19,8 @@
 #include <iostream>
 #include <fstream>
 #include <ctime>
+#include <algorithm>
+#include <math.h>
 
 #include "hyrel.h"
 #include "valarray_operations.h"
@@ -90,11 +92,11 @@ void Hyrel::configurePrime(int tool_number, double pulse_rate, double number_of_
     generalCommand({'M', 'T', 'S', 'E', 'P'},
                    {true, true, false, false, false},
                    {722, (double) mCommandToolNumber(tool_number), pulse_rate, number_of_pulses, dwell_time});
-    if (is_executed_immediately) {
-        generalCommand({'M', 'T', 'I'},
-                       {true, true, true},
-                       {722, (double) mCommandToolNumber(tool_number), (double) is_executed_immediately});
-    }
+//    if (is_executed_immediately) {
+//        generalCommand({'M', 'T', 'I'},
+//                       {true, true, true},
+//                       {722, (double) mCommandToolNumber(tool_number), (double) is_executed_immediately});
+//    }
 }
 
 void Hyrel::configureUnprime(int tool_number, double pulse_rate, double number_of_pulses, double dwell_time,
@@ -102,19 +104,21 @@ void Hyrel::configureUnprime(int tool_number, double pulse_rate, double number_o
     addComment("Configure unpriming");
     if (number_of_pulses > 0) {
         dwell_time = -number_of_pulses / pulse_rate * 1000;
-    }
-    else {
+        dwell_time = 0;
+    } else {
         dwell_time = 0;
     }
     generalCommand({'M', 'T', 'S', 'E', 'P'},
                    {true, true, false, false, false},
                    {721, (double) mCommandToolNumber(tool_number), pulse_rate, number_of_pulses, dwell_time});
     if (is_executed_immediately) {
-//        generalCommand({'M', 'T', 'I'},
-//                       {true, true, true},
-//                       {721, (double) mCommandToolNumber(tool_number), (double) is_executed_immediately});
-        moveVerticalRelative(10);
-        extrude(positions + std::valarray<double>{0, 50, 0});
+        generalCommand({'M', 'T', 'I'},
+                       {true, true, true},
+                       {721, (double) mCommandToolNumber(tool_number), (double) is_executed_immediately});
+        double z_move = 5;
+        move(positions[0], positions[1], positions[2] + z_move, z_move * pulse_rate * 60 / number_of_pulses);
+//        moveVerticalRelative(10);
+//        movePlanar(positions + std::valarray<double>{0, 50, 0});
     }
 }
 
@@ -127,16 +131,22 @@ void Hyrel::disableUnpriming(int tool_number) {
 }
 
 
-void Hyrel::extrude(const std::valarray<double> &xy) {
+void Hyrel::extrude(const std::valarray<double> &xy, double speed) {
     std::valarray<double> new_positions = {xy[0], xy[1], positions[2]};
     double extrusion_length = norm(new_positions - positions);
     extrusion_value += extrusion_length;
-    print_time += extrusion_length / print_speed;
+    print_time += extrusion_length / speed;
     positions = new_positions;
     generalCommand({'G', 'X', 'Y', 'F', 'E'},
                    {true, false, false, true, true},
-                   {1, xy[0], xy[1], (double) print_speed, 1});
+                   {1, xy[0], xy[1], (double) speed, 1});
 }
+
+
+void Hyrel::extrude(const std::valarray<double> &xy) {
+    extrude(xy, print_speed);
+}
+
 
 void Hyrel::configureFlow(double nozzle_width, double layer_height, double flow_multiplier, int pulses, int tool) {
     addComment("Configuring flow");
@@ -173,38 +183,85 @@ void Hyrel::clearOffsets() {
 }
 
 std::valarray<double> Hyrel::printZigZagPattern(double length, int number_of_lines, double line_separation,
-                                                const std::valarray<double> &starting_position) {
-    movePlanar(starting_position);
-    extrude(starting_position + std::valarray<double>{length, 0});
+                                                const std::valarray<double> &starting_position, double speed) {
+    extrude(starting_position, speed);
+    extrude(starting_position + std::valarray<double>{length, 0}, speed);
     std::valarray<double> last_coordinate;
 
     for (int i = 1; i < number_of_lines; i++) {
         if (i % 2 == 0) {
-            extrude(starting_position + std::valarray<double>{0, i * line_separation});
-            extrude(starting_position + std::valarray<double>{length, i * line_separation});
-
-            last_coordinate = starting_position + std::valarray<double>{0, i * line_separation};
-
+            extrude(starting_position + std::valarray<double>{0, i * line_separation}, speed);
+            extrude(starting_position + std::valarray<double>{length, i * line_separation}, speed);
         } else {
-            extrude(starting_position + std::valarray<double>{length, i * line_separation});
-            extrude(starting_position + std::valarray<double>{0, i * line_separation});
-
-            last_coordinate = starting_position + std::valarray<double>{0, i * line_separation};
+            extrude(starting_position + std::valarray<double>{length, i * line_separation}, speed);
+            extrude(starting_position + std::valarray<double>{0, i * line_separation}, speed);
         }
     }
+    last_coordinate = starting_position + std::valarray<double>{0, (number_of_lines - 1) * line_separation};
     return last_coordinate;
 }
 
-void Hyrel::clean(double clean_length, int number_of_lines, double nozzle_width, int height_offset_register,
-                  double layer_height) {
+std::valarray<double> Hyrel::printZigZagPattern(double length, int number_of_lines, double line_separation,
+                                                const std::valarray<double> &starting_position) {
+    return printZigZagPattern(length, number_of_lines, line_separation, starting_position, print_speed);
+}
+
+vald Hyrel::primeNow(double length, double prime_rate, double line_separation, double prime_pulses, int tool_number) {
+    int priming_lines = ceil(prime_pulses / (USHRT_MAX - 1));
+    double priming_pulses_per_line = prime_pulses / priming_lines;
+    double priming_time = priming_pulses_per_line / prime_rate / 60;
+    double priming_speed = std::min((double) print_speed, length / priming_time);
+    addComment("Priming now");
+    for (int i = 0; i < priming_lines; i++) {
+        if (i % 2 == 0) {
+            generalCommand({'M', 'S', 'E', 'T'},
+                           {true, true, true, true},
+                           {723, prime_rate, priming_pulses_per_line, (double) mCommandToolNumber(tool_number)});
+
+            extrude(std::valarray<double>{0, i * line_separation}, priming_speed);
+            extrude(std::valarray<double>{length, i * line_separation}, priming_speed);
+        } else {
+            generalCommand({'M', 'S', 'E', 'T'},
+                           {true, true, true, true},
+                           {723, prime_rate, priming_pulses_per_line, (double) mCommandToolNumber(tool_number)});
+
+            extrude(std::valarray<double>{length, i * line_separation}, priming_speed);
+            extrude(std::valarray<double>{0, i * line_separation}, priming_speed);
+        }
+    }
+    addBreak();
+    return std::valarray<double>{0, priming_lines * line_separation};
+}
+
+void Hyrel::unprimeNow(double height, double prime_rate, double prime_pulses, int tool_number) {
+    int priming_steps = ceil(prime_pulses / (USHRT_MAX - 1));
+    double priming_pulses_per_line = prime_pulses / priming_steps;
+    double priming_time = priming_pulses_per_line / prime_rate / 60;
+    double priming_speed = std::min((double) print_speed, height / priming_time);
+    addComment("Unpriming now");
+    for (int i = 0; i < priming_steps; i++) {
+        generalCommand({'M', 'S', 'E', 'T'},
+                       {true, true, true, true},
+                       {723, prime_rate, -priming_pulses_per_line, (double) mCommandToolNumber(tool_number)});
+
+        move(positions[0], positions[1], positions[2] + height, priming_speed);
+    }
+}
+
+
+void Hyrel::clean_and_prime(double clean_length, int number_of_lines, double nozzle_width, int height_offset_register,
+                            double layer_height, double prime_rate, double prime_pulses, int tool_number) {
     addComment("Invoking offsets");
-    movePlanar({0, 0});
+    movePlanar({clean_length, 0});
     defineHeightOffset(layer_height, height_offset_register);
     invokeHeightOffset(0, height_offset_register);
     addBreak();
+
+    vald prime_offset = primeNow(clean_length, prime_rate, 2 * nozzle_width, prime_pulses, tool_number);
+
     addComment("Starting cleaning");
     if (clean_length > 0) {
-        printZigZagPattern(clean_length, number_of_lines, 2 * nozzle_width, {0, 0});
+        printZigZagPattern(clean_length, number_of_lines, 2 * nozzle_width, prime_offset);
     }
 }
 
@@ -237,16 +294,16 @@ Hyrel::init(int hotend_temperature, int bed_temperature, double clean_length, do
     setTemperatureBed(bed_temperature);
     addBreak();
 
-    configurePrime(tool_number, prime_rate, prime_pulses, 0, true);
+    disablePriming(tool_number);
     disableUnpriming(tool_number);
     configureFlow(nozzle_width, layer_height, extrusion_coefficient, kra_2_pulses_per_microlitre, tool_number);
 
     selectTool(tool_number);
     addBreak();
-    clean(clean_length, cleaning_lines, nozzle_width, height_offset_register, first_layer_height);
+    clean_and_prime(clean_length, cleaning_lines, nozzle_width, height_offset_register, first_layer_height, prime_rate,
+                    prime_pulses, tool_number);
     addBreak();
 
-    disablePriming(tool_number);
     addBreak();
     addComment("Starting printing");
 }
@@ -290,7 +347,7 @@ void Hyrel::configureUvArray(int print_head_tool_number, int duty_cycle) {
 
 void Hyrel::shutDown(int tool_number, int prime_pulses, int prime_rate) {
     addBreak();
-    configureUnprime(tool_number, prime_rate, prime_pulses, 0, true);
+    unprimeNow(5, prime_rate, prime_pulses, tool_number);
     addBreak();
 
     setTemperatureBed(0);
@@ -410,7 +467,8 @@ void Hyrel::addLocalOffset(std::vector<double> offset) {
 }
 
 void printMultiLayer(Hyrel &hyrel, const std::valarray<double> &initial_pattern_offset, double grid_spacing,
-                     const std::vector<std::vector<std::valarray<double>>> &sorted_paths, int layers, double layer_height,
+                     const std::vector<std::vector<std::valarray<double>>> &sorted_paths, int layers,
+                     double layer_height,
                      bool is_flipping_enabled) {
 
     for (int i = 0; i < layers; i++) {
@@ -419,8 +477,7 @@ void printMultiLayer(Hyrel &hyrel, const std::valarray<double> &initial_pattern_
         if (is_flipping_enabled && i % 2 == 1) {
             auto flipped_pattern = flipPattern(sorted_paths);
             hyrel.printPattern(flipped_pattern, initial_pattern_offset, grid_spacing, true);
-        }
-        else {
+        } else {
             hyrel.printPattern(sorted_paths, initial_pattern_offset, grid_spacing, false);
         }
     }

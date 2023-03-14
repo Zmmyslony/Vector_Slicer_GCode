@@ -71,6 +71,8 @@ private:
 
     void move(double x, double y, double z);
 
+    void move(double x, double y, double z, double speed);
+
     void extrude(const std::valarray<double> &xy);
 
     void

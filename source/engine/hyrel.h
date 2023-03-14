@@ -37,6 +37,8 @@ class Hyrel : public GCodeFile {
 
     void defineToolOffset(int tool_number, const std::vector<double> &xyz);
 
+    void extrude(const std::valarray<double> &xy, double speed);
+
     void extrude(const std::valarray<double> &xy);
 
     void selectTool(unsigned int tool_number);
@@ -99,8 +101,8 @@ public:
     void configureUvArray(int print_head_tool_number, int duty_cycle);
 
     void
-    clean(double clean_length, int number_of_lines, double nozzle_width, int height_offset_register,
-          double layer_height);
+    clean_and_prime(double clean_length, int number_of_lines, double nozzle_width, int height_offset_register,
+                    double layer_height, double prime_rate, double prime_pulses, int tool_number);
 
     std::valarray<double>
     printZigZagPattern(double length, int number_of_lines, double line_separation,
@@ -110,6 +112,14 @@ public:
               double first_layer_height, std::vector<double> &tool_offset);
 
     void disableUnpriming(int tool_number);
+
+    std::valarray<double> printZigZagPattern(double length, int number_of_lines, double line_separation,
+                                             const std::valarray<double> &starting_position, double speed);
+
+    std::valarray<double>
+    primeNow(double length, double prime_rate, double line_separation, double prime_pulses, int tool_number);
+
+    void unprimeNow(double height, double prime_rate, double prime_pulses, int tool_number);
 };
 
 void

@@ -154,14 +154,18 @@ void GCodeFile::moveVerticalRelative(double delta_z) {
     moveVertical(positions[2] + delta_z);
 }
 
-void GCodeFile::move(double x, double y, double z) {
+void GCodeFile::move(double x, double y, double z, double speed) {
     generalCommand({'G', 'X', 'Y', 'Z', 'F'},
                    {true, false, false, false, true},
-                   {0, x, y, z, (double) move_speed});
+                   {0, x, y, z, (double) speed});
 
     std::valarray<double> new_positions = {x, y, z};
-    print_time += norm(new_positions - positions) / move_speed;
+    print_time += norm(new_positions - positions) / speed;
     positions = new_positions;
+}
+
+void GCodeFile::move(double x, double y, double z) {
+    move(x, y, z, move_speed);
 }
 
 void GCodeFile::extrude(const std::valarray<double> &xy) {
