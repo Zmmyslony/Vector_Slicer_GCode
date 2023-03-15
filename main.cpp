@@ -29,28 +29,28 @@ int main() {
     fs::path export_directory = cwd / "gcode";
 
     std::vector<std::string> patterns_to_generate;
-    patterns_to_generate = {"linear_1x05_cm"};
+    patterns_to_generate = {"linear_2x1_cm"};
 
     // All units are in mm
-    ExtrusionConfiguration extrusion_configuration(400, 80, 0.2,
+    ExtrusionConfiguration extrusion_configuration(800, 80, 0.2,
                                                    0.1, 1.0, 20);
 
     PrinterConfiguration printing_configuration(1000, 0, 0,
-                                                23, 20,
-                                                66000, 10000);
+                                                13, 15,
+                                                100000, 10000, 20000);
     // For priming 1297 pulses is a single microlitre, tune this value in order to obtain desirable flow.
     // Single microlitre is 14 mm of "filament" for a nozzle diameter of 300 um.
     // 100 pulses = 1 mm of filament
     // 320k pulses is a single lead screw revolution
     // 10k priming rate corresponds to around 6000 printing speed
 
-    int uv_duty_cycle = 0;
+    int uv_duty_cycle = 50;
     double first_layer_height = extrusion_configuration.getLayerHeight() + 0.02;
 
     double nozzle_diameter_assumed = 0.3; // Nozzle diameter which was assumed for generation of the director pattern
     double grid_spacing_assumed = 0.022; // Spacing which was used for slicing the pattern, can be scaled for different nozzle diameters
     double grid_spacing = grid_spacing_assumed * extrusion_configuration.getDiameter() / nozzle_diameter_assumed;
-    std::vector<double> tool_offset = {45, 85, 0};
+    std::vector<double> tool_offset = {55, 111, 0};
     std::valarray<double> pattern_offset = {0, 2};
 
     std::cout << "\nGenerating GCode for the files contained in" << std::endl << '\t' << paths_directory

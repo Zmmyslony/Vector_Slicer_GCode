@@ -20,10 +20,11 @@
 
 PrinterConfiguration::PrinterConfiguration(int non_printing_speed, int bed_temperature, int print_head_tool_number,
                                            int cleaning_lines, int cleaning_distance, int priming_pulses,
-                                           int priming_rate)
+                                           int priming_rate, int unpriming_rate)
         : non_printing_speed(non_printing_speed), bed_temperature(bed_temperature),
           print_head_tool_number(print_head_tool_number), cleaning_lines(cleaning_lines),
-          clean_distance(cleaning_distance), prime_pulses(priming_pulses), prime_rate(priming_rate) {
+          clean_distance(cleaning_distance), prime_pulses(priming_pulses), prime_rate(priming_rate),
+          unprime_rate(unpriming_rate) {
 }
 
 int PrinterConfiguration::getNonPrintingSpeed() const {
@@ -52,4 +53,8 @@ int PrinterConfiguration::getPrimePulses() const {
 
 int PrinterConfiguration::getPrimeRate() const {
     return prime_rate;
+}
+
+int PrinterConfiguration::getUnprimeRate() const {
+    return unprime_rate;
 }

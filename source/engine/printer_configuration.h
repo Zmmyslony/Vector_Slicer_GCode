@@ -27,11 +27,13 @@ class PrinterConfiguration {
     int clean_distance = 10;
     int prime_pulses = 0;
     int prime_rate = 0;
+    int unprime_rate = 0;
 
 public:
-    PrinterConfiguration(int non_printing_speed, int bed_temperature, int print_head_tool_number, int cleaning_lines,
-                         int cleaning_distance, int priming_pulses, int priming_rate);
 
+    PrinterConfiguration(int non_printing_speed, int bed_temperature, int print_head_tool_number,
+                         int cleaning_lines, int cleaning_distance, int priming_pulses,
+                         int priming_rate, int unpriming_rate);
     [[nodiscard]] int getNonPrintingSpeed() const;
 
     [[nodiscard]] int getBedTemperature() const;
@@ -45,6 +47,8 @@ public:
     [[nodiscard]] int getPrimePulses() const;
 
     [[nodiscard]] int getPrimeRate() const;
+
+    [[nodiscard]] int getUnprimeRate() const;
 };
 
 #endif //GCODEGENERATOR_PRINTER_CONFIGURATION_H

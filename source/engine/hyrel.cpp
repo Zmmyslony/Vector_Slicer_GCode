@@ -92,11 +92,11 @@ void Hyrel::configurePrime(int tool_number, double pulse_rate, double number_of_
     generalCommand({'M', 'T', 'S', 'E', 'P'},
                    {true, true, false, false, false},
                    {722, (double) mCommandToolNumber(tool_number), pulse_rate, number_of_pulses, dwell_time});
-//    if (is_executed_immediately) {
-//        generalCommand({'M', 'T', 'I'},
-//                       {true, true, true},
-//                       {722, (double) mCommandToolNumber(tool_number), (double) is_executed_immediately});
-//    }
+    if (is_executed_immediately) {
+        generalCommand({'M', 'T', 'I'},
+                       {true, true, true},
+                       {722, (double) mCommandToolNumber(tool_number), (double) is_executed_immediately});
+    }
 }
 
 void Hyrel::configureUnprime(int tool_number, double pulse_rate, double number_of_pulses, double dwell_time,
@@ -115,10 +115,6 @@ void Hyrel::configureUnprime(int tool_number, double pulse_rate, double number_o
         generalCommand({'M', 'T', 'I'},
                        {true, true, true},
                        {721, (double) mCommandToolNumber(tool_number), (double) is_executed_immediately});
-        double z_move = 5;
-        move(positions[0], positions[1], positions[2] + z_move, z_move * pulse_rate * 60 / number_of_pulses);
-//        moveVerticalRelative(10);
-//        movePlanar(positions + std::valarray<double>{0, 50, 0});
     }
 }
 
@@ -212,23 +208,19 @@ vald Hyrel::primeNow(double length, double prime_rate, double line_separation, d
     double priming_time = priming_pulses_per_line / prime_rate / 60;
     double priming_speed = std::min((double) print_speed, length / priming_time);
     addComment("Priming now");
-    for (int i = 0; i < priming_lines; i++) {
-        if (i % 2 == 0) {
-            generalCommand({'M', 'S', 'E', 'T'},
-                           {true, true, true, true},
-                           {723, prime_rate, priming_pulses_per_line, (double) mCommandToolNumber(tool_number)});
+    int last_line = (int) (2 * ceil((double)priming_lines / 2));
+    configurePrime(tool_number, prime_rate, priming_pulses_per_line, 0, false);
 
-            extrude(std::valarray<double>{0, i * line_separation}, priming_speed);
+    for (int i = priming_lines % 2; i < last_line; i++) {
+        if (i % 2 == 0) {
+            movePlanar({0, i * line_separation});
             extrude(std::valarray<double>{length, i * line_separation}, priming_speed);
         } else {
-            generalCommand({'M', 'S', 'E', 'T'},
-                           {true, true, true, true},
-                           {723, prime_rate, priming_pulses_per_line, (double) mCommandToolNumber(tool_number)});
-
-            extrude(std::valarray<double>{length, i * line_separation}, priming_speed);
+            movePlanar({length, i * line_separation});
             extrude(std::valarray<double>{0, i * line_separation}, priming_speed);
         }
     }
+    disablePriming(tool_number);
     addBreak();
     return std::valarray<double>{0, priming_lines * line_separation};
 }
@@ -240,12 +232,10 @@ void Hyrel::unprimeNow(double height, double prime_rate, double prime_pulses, in
     double priming_speed = std::min((double) print_speed, height / priming_time);
     addComment("Unpriming now");
     for (int i = 0; i < priming_steps; i++) {
-        generalCommand({'M', 'S', 'E', 'T'},
-                       {true, true, true, true},
-                       {723, prime_rate, -priming_pulses_per_line, (double) mCommandToolNumber(tool_number)});
-
+        configureUnprime(tool_number, prime_rate, priming_pulses_per_line, 0, true);
         move(positions[0], positions[1], positions[2] + height, priming_speed);
     }
+    disableUnpriming(tool_number);
 }
 
 
@@ -345,9 +335,9 @@ void Hyrel::configureUvArray(int print_head_tool_number, int duty_cycle) {
     addBreak();
 }
 
-void Hyrel::shutDown(int tool_number, int prime_pulses, int prime_rate) {
+void Hyrel::shutDown(int tool_number, int prime_pulses, int unprime_rate) {
     addBreak();
-    unprimeNow(5, prime_rate, prime_pulses, tool_number);
+    unprimeNow(5, unprime_rate, prime_pulses, tool_number);
     addBreak();
 
     setTemperatureBed(0);
@@ -364,7 +354,7 @@ void Hyrel::shutDown(int tool_number, int prime_pulses, int prime_rate) {
 
 void Hyrel::shutDown(const PrinterConfiguration &printer_configuration) {
     shutDown(printer_configuration.getPrintHeadToolNumber(), printer_configuration.getPrimePulses(),
-             printer_configuration.getPrimeRate());
+             printer_configuration.getUnprimeRate());
 }
 
 Hyrel::Hyrel(int move_speed, int print_speed, double extrusion_coefficient, double lift_off_distance)

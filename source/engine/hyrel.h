@@ -72,7 +72,7 @@ public:
          double first_layer_height, double layer_height, int tool_number, std::vector<double> &tool_offset,
          int cleaning_lines, double prime_pulses, double prime_rate);
 
-    void shutDown(int tool_number, int prime_pulses, int prime_rate);
+    void shutDown(int tool_number, int prime_pulses, int unprime_rate);
 
     void shutDown(const PrinterConfiguration &printer_configuration);
 
