@@ -93,6 +93,17 @@ void GCodeFile::autoHome() {
     positions = {0, 0, 0};
 }
 
+void GCodeFile::autoHome2D() {
+    addComment("Auto homing");
+    setRelativePositioning();
+    moveVertical(10);
+    setAbsolutePositioning();
+    generalCommand({'G', 'X', 'Y'},
+                   {true, false, false},
+                   {28, 0, 0});
+    positions = {0, 0, positions[2]};
+}
+
 void GCodeFile::levelBed() {
     addComment("Levelling the bed");
     generalCommand('G', 29);

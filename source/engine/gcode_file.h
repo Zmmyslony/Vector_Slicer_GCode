@@ -115,6 +115,8 @@ public:
     void addBreak();
 
     friend class Hyrel;
+
+    void autoHome2D();
 };
 
 void generateGCode(const std::string &base_directory, int temperature, double cleaning_distance,

@@ -106,7 +106,7 @@ public:
 
     std::valarray<double>
     printZigZagPattern(double length, int number_of_lines, double line_separation,
-                       const std::valarray<double> &starting_position);
+                       const std::valarray<double> &starting_position, int initial_index);
 
     void init(const ExtrusionConfiguration &extrusion_configuration, const PrinterConfiguration &printer_configuration,
               double first_layer_height, std::vector<double> &tool_offset);
@@ -114,9 +114,10 @@ public:
     void disableUnpriming(int tool_number);
 
     std::valarray<double> printZigZagPattern(double length, int number_of_lines, double line_separation,
-                                             const std::valarray<double> &starting_position, double speed);
+                                             const std::valarray<double> &starting_position, double speed,
+                                             int initial_index);
 
-    std::valarray<double>
+    int
     primeNow(double length, double prime_rate, double line_separation, double prime_pulses, int tool_number);
 
     void unprimeNow(double height, double prime_rate, double prime_pulses, int tool_number);

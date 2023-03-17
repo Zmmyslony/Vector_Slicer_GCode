@@ -179,12 +179,13 @@ void Hyrel::clearOffsets() {
 }
 
 std::valarray<double> Hyrel::printZigZagPattern(double length, int number_of_lines, double line_separation,
-                                                const std::valarray<double> &starting_position, double speed) {
-    extrude(starting_position, speed);
-    extrude(starting_position + std::valarray<double>{length, 0}, speed);
+                                                const std::valarray<double> &starting_position, double speed,
+                                                int initial_index) {
+//    extrude(starting_position, speed);
+//    extrude(starting_position + std::valarray<double>{length, 0}, speed);
     std::valarray<double> last_coordinate;
 
-    for (int i = 1; i < number_of_lines; i++) {
+    for (int i = initial_index; i < number_of_lines; i++) {
         if (i % 2 == 0) {
             extrude(starting_position + std::valarray<double>{0, i * line_separation}, speed);
             extrude(starting_position + std::valarray<double>{length, i * line_separation}, speed);
@@ -198,20 +199,19 @@ std::valarray<double> Hyrel::printZigZagPattern(double length, int number_of_lin
 }
 
 std::valarray<double> Hyrel::printZigZagPattern(double length, int number_of_lines, double line_separation,
-                                                const std::valarray<double> &starting_position) {
-    return printZigZagPattern(length, number_of_lines, line_separation, starting_position, print_speed);
+                                                const std::valarray<double> &starting_position, int initial_index) {
+    return printZigZagPattern(length, number_of_lines, line_separation, starting_position, print_speed, initial_index);
 }
 
-vald Hyrel::primeNow(double length, double prime_rate, double line_separation, double prime_pulses, int tool_number) {
+int Hyrel::primeNow(double length, double prime_rate, double line_separation, double prime_pulses, int tool_number) {
     int priming_lines = ceil(prime_pulses / (USHRT_MAX - 1));
     double priming_pulses_per_line = prime_pulses / priming_lines;
     double priming_time = priming_pulses_per_line / prime_rate / 60;
     double priming_speed = std::min((double) print_speed, length / priming_time);
     addComment("Priming now");
-    int last_line = (int) (2 * ceil((double)priming_lines / 2));
     configurePrime(tool_number, prime_rate, priming_pulses_per_line, 0, false);
 
-    for (int i = priming_lines % 2; i < last_line; i++) {
+    for (int i = 0; i < priming_lines; i++) {
         if (i % 2 == 0) {
             movePlanar({0, i * line_separation});
             extrude(std::valarray<double>{length, i * line_separation}, priming_speed);
@@ -222,7 +222,7 @@ vald Hyrel::primeNow(double length, double prime_rate, double line_separation, d
     }
     disablePriming(tool_number);
     addBreak();
-    return std::valarray<double>{0, priming_lines * line_separation};
+    return priming_lines;
 }
 
 void Hyrel::unprimeNow(double height, double prime_rate, double prime_pulses, int tool_number) {
@@ -242,16 +242,16 @@ void Hyrel::unprimeNow(double height, double prime_rate, double prime_pulses, in
 void Hyrel::clean_and_prime(double clean_length, int number_of_lines, double nozzle_width, int height_offset_register,
                             double layer_height, double prime_rate, double prime_pulses, int tool_number) {
     addComment("Invoking offsets");
-    movePlanar({clean_length, 0});
+    movePlanar({0, 0});
     defineHeightOffset(layer_height, height_offset_register);
     invokeHeightOffset(0, height_offset_register);
     addBreak();
 
-    vald prime_offset = primeNow(clean_length, prime_rate, 2 * nozzle_width, prime_pulses, tool_number);
+    int primed_lines = primeNow(clean_length, prime_rate, 2 * nozzle_width, prime_pulses, tool_number);
 
     addComment("Starting cleaning");
     if (clean_length > 0) {
-        printZigZagPattern(clean_length, number_of_lines, 2 * nozzle_width, prime_offset);
+        printZigZagPattern(clean_length, number_of_lines, 2 * nozzle_width, {0, 0}, primed_lines);
     }
 }
 
@@ -275,7 +275,7 @@ Hyrel::init(int hotend_temperature, int bed_temperature, double clean_length, do
     clearOffsets();
     addBreak();
 
-    autoHome();
+    autoHome2D();
     addBreak();
     defineToolOffset(tool_number, tool_offset);
     addBreak();
@@ -344,9 +344,9 @@ void Hyrel::shutDown(int tool_number, int prime_pulses, int unprime_rate) {
     GCodeFile::setTemperatureHotend(0);
     addBreak();
 
-    autoHome();
-    move(0, 0, 40); // Hyrel 30M has zero height at the print-bed
-    addBreak();
+    autoHome2D();
+//    move(0, 0, 40); // Hyrel 30M has zero height at the print-bed
+//    addBreak();
 
     turnMotorsOff();
     signalFinishedPrint();
@@ -532,7 +532,7 @@ void tuneLineSeparationBody(Hyrel &hyrel, std::valarray<double> &current_offset,
     for (int j = 0; j < line_separation_steps; j++) {
         current_offset = hyrel.printZigZagPattern(printing_distance, number_of_lines,
                                                   (starting_line_separation + j * line_separation_step) *
-                                                  diameter, current_offset + pattern_spacing);
+                                                  diameter, current_offset + pattern_spacing, 0);
     }
 }
 

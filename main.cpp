@@ -29,13 +29,13 @@ int main() {
     fs::path export_directory = cwd / "gcode";
 
     std::vector<std::string> patterns_to_generate;
-    patterns_to_generate = {"linear_2x1_cm"};
+    patterns_to_generate = {"azimuthal_1_cm", "linear_2x1_cm"};
 
     // All units are in mm
     ExtrusionConfiguration extrusion_configuration(800, 80, 0.2,
-                                                   0.1, 1.0, 20);
+                                                   0.12, 1.0, 20);
 
-    PrinterConfiguration printing_configuration(1000, 0, 0,
+    PrinterConfiguration printing_configuration(1000, 0, 1,
                                                 13, 15,
                                                 100000, 10000, 20000);
     // For priming 1297 pulses is a single microlitre, tune this value in order to obtain desirable flow.
@@ -50,7 +50,7 @@ int main() {
     double nozzle_diameter_assumed = 0.3; // Nozzle diameter which was assumed for generation of the director pattern
     double grid_spacing_assumed = 0.022; // Spacing which was used for slicing the pattern, can be scaled for different nozzle diameters
     double grid_spacing = grid_spacing_assumed * extrusion_configuration.getDiameter() / nozzle_diameter_assumed;
-    std::vector<double> tool_offset = {55, 111, 0};
+    std::vector<double> tool_offset = {180, 93, 0};
     std::valarray<double> pattern_offset = {0, 2};
 
     std::cout << "\nGenerating GCode for the files contained in" << std::endl << '\t' << paths_directory
