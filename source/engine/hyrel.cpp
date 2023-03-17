@@ -435,7 +435,6 @@ void Hyrel::exportToFile(const boost::filesystem::path &results_path, const std:
     char time[26];
     ctime_s(time, sizeof time, &ttime);
     file << std::fixed << std::setprecision(3);
-//    file.precision(2);
     file << "; Generated using GCodeGenerator " << PROJECT_VER << " on " << time;
     file << "; Michal Zmyslony, University of Cambridge, mlz22@cam.ac.uk" << std::endl << std::endl;
     file << "; Estimated print time: " << print_time << " min" << std::endl;
@@ -443,6 +442,7 @@ void Hyrel::exportToFile(const boost::filesystem::path &results_path, const std:
     file << comment;
     file << getText();
     file.close();
+    std::cout << "Exported \"" << filename.stem().string() << "\" successfully." << std::endl;
 }
 
 void Hyrel::exportToFile(const boost::filesystem::path &results_path, const std::string &pattern_name,
