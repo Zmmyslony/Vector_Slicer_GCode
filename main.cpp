@@ -32,12 +32,12 @@ int main() {
     patterns_to_generate = {"azimuthal_1_cm", "linear_2x1_cm"};
 
     // All units are in mm
-    ExtrusionConfiguration extrusion_configuration(800, 80, 0.2,
-                                                   0.12, 1.0, 20);
+    ExtrusionConfiguration extrusion_configuration(400, 80, 0.2,
+                                                   0.10, 1.0, 20);
 
     PrinterConfiguration printing_configuration(1000, 0, 1,
                                                 13, 15,
-                                                100000, 10000, 20000);
+                                                50000, 10000, 20000);
     // For priming 1297 pulses is a single microlitre, tune this value in order to obtain desirable flow.
     // Single microlitre is 14 mm of "filament" for a nozzle diameter of 300 um.
     // 100 pulses = 1 mm of filament
@@ -48,7 +48,7 @@ int main() {
     double first_layer_height = extrusion_configuration.getLayerHeight() + 0.02;
 
     double nozzle_diameter_assumed = 0.3; // Nozzle diameter which was assumed for generation of the director pattern
-    double grid_spacing_assumed = 0.022; // Spacing which was used for slicing the pattern, can be scaled for different nozzle diameters
+    double grid_spacing_assumed = 0.25; // Spacing which was used for slicing the pattern, can be scaled for different nozzle diameters
     double grid_spacing = grid_spacing_assumed * extrusion_configuration.getDiameter() / nozzle_diameter_assumed;
     std::vector<double> tool_offset = {180, 93, 0};
     std::valarray<double> pattern_offset = {0, 2};
