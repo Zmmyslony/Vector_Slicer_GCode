@@ -29,7 +29,10 @@ int main() {
     fs::path export_directory = cwd / "gcode";
 
     std::vector<std::string> patterns_to_generate;
-    patterns_to_generate = {"azimuthal_1_cm", "linear_2x1_cm"};
+    patterns_to_generate = {"fan_asymmetric_negative_3x2_cm", "fan_symmetric_negative_3x2_cm",
+                            "fan_asymmetric_positive_3x2_cm", "fan_symmetric_positive_3x2_cm"};
+
+    patterns_to_generate = {"iris_r_inner_5_mm", "cylinder_r_inner_5_mm", "evertor_r_inner_5_mm", "radial_2_cm"};
 
     // All units are in mm
     ExtrusionConfiguration extrusion_configuration(400, 80, 0.2,
@@ -61,9 +64,9 @@ int main() {
                     tool_offset, uv_duty_cycle, first_layer_height, extrusion_configuration,
                     printing_configuration);
 
-        multiLayer(export_directory, paths_directory / (pattern + ".csv"), grid_spacing, pattern_offset,
-                   tool_offset, uv_duty_cycle, first_layer_height, 2, extrusion_configuration,
-                   printing_configuration, true, 3.14);
+//        multiLayer(export_directory, paths_directory / (pattern + ".csv"), grid_spacing, pattern_offset,
+//                   tool_offset, uv_duty_cycle, first_layer_height, 2, extrusion_configuration,
+//                   printing_configuration, true, 3.14);
     }
 
     double printing_distance = 10;

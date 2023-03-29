@@ -65,8 +65,6 @@ private:
 
     void generalCommand(const char &command, int value);
 
-    void movePlanar(const std::valarray<double> &xy);
-
     void moveVerticalRelative(double delta_z);
 
     void move(double x, double y, double z);
@@ -117,6 +115,8 @@ public:
     friend class Hyrel;
 
     void autoHome2D();
+
+    void movePlanar(const std::valarray<double> &xy);
 };
 
 void generateGCode(const std::string &base_directory, int temperature, double cleaning_distance,

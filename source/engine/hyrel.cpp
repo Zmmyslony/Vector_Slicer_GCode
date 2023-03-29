@@ -530,6 +530,7 @@ void tuneLineSeparationBody(Hyrel &hyrel, std::valarray<double> &current_offset,
                             int line_separation_steps, double printing_distance, int number_of_lines, double diameter) {
     double line_separation_step = (finishing_line_separation - starting_line_separation) / (line_separation_steps - 1);
     for (int j = 0; j < line_separation_steps; j++) {
+        hyrel.movePlanar(current_offset + pattern_spacing);
         current_offset = hyrel.printZigZagPattern(printing_distance, number_of_lines,
                                                   (starting_line_separation + j * line_separation_step) *
                                                   diameter, current_offset + pattern_spacing, 0);
