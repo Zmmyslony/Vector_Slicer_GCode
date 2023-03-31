@@ -32,6 +32,9 @@ int main() {
     patterns_to_generate = {"fan_asymmetric_negative_3x2_cm", "fan_symmetric_negative_3x2_cm",
                             "fan_asymmetric_positive_3x2_cm", "fan_symmetric_positive_3x2_cm"};
 
+    patterns_to_generate = {"fan_asymmetric_negative_15x1_cm", "fan_symmetric_negative_15x1_cm",
+                            "fan_asymmetric_positive_15x1_cm", "fan_symmetric_positive_15x1_cm"};
+
 //    patterns_to_generate = {"iris_r_inner_5_mm", "cylinder_r_inner_5_mm", "evertor_r_inner_5_mm", "radial_2_cm"};
 
     // All units are in mm
