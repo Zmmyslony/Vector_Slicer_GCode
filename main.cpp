@@ -36,7 +36,8 @@ int main() {
 //                            "fan_asymmetric_positive_15x1_cm", "fan_symmetric_positive_15x1_cm"};
 
 //    patterns_to_generate = {"iris_r_inner_5_mm", "cylinder_r_inner_5_mm", "evertor_r_inner_5_mm", "radial_2_cm"};
-    patterns_to_generate = {"fan_asymmetric_negative_5x2_cm"};
+    patterns_to_generate = {"fan_asymmetric_negative_25x1_cm", "fan_asymmetric_positive_25x1_cm",
+                            "fan_symmetric_negative_25x1_cm", "fan_symmetric_positive_25x1_cm"};
 
     // All units are in mm
     ExtrusionConfiguration extrusion_configuration(400, 80, 0.2,
