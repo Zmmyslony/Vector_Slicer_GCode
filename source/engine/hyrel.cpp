@@ -457,18 +457,20 @@ void Hyrel::addLocalOffset(std::vector<double> offset) {
 }
 
 void printMultiLayer(Hyrel &hyrel, const std::valarray<double> &initial_pattern_offset, double grid_spacing,
-                     const std::vector<std::vector<std::valarray<double>>> &sorted_paths, int layers,
+                     const std::vector<std::vector<std::vector<std::valarray<double>>>> &stacked_patterns, int layers,
                      double layer_height,
                      bool is_flipping_enabled) {
 
     for (int i = 0; i < layers; i++) {
+        const auto &current_pattern = stacked_patterns[i % stacked_patterns.size()];
+
         double current_layer_height = i * layer_height;
         hyrel.moveVertical(current_layer_height);
         if (is_flipping_enabled && i % 2 == 1) {
-            auto flipped_pattern = flipPattern(sorted_paths);
+            auto flipped_pattern = flipPattern(current_pattern);
             hyrel.printPattern(flipped_pattern, initial_pattern_offset, grid_spacing, true);
         } else {
-            hyrel.printPattern(sorted_paths, initial_pattern_offset, grid_spacing, false);
+            hyrel.printPattern(current_pattern, initial_pattern_offset, grid_spacing, false);
         }
     }
 }
@@ -502,7 +504,7 @@ multiLayer(const boost::filesystem::path &export_directory, const fs::path &patt
         if (print_resolution != 1) {
             grid_spacing = extrusion_configuration.getDiameter() / print_resolution;
         }
-        std::vector<std::vector<vald>> sorted_paths = read3DVectorFromFileDouble(pattern_path);
+        std::vector<std::vector<std::vector<vald>>> sorted_paths = readPrintList(pattern_path);
         sorted_paths = rotatePattern(sorted_paths, pattern_rotation);
         Hyrel hyrel = standardHyrelInitialisation(extrusion_configuration, printer_configuration,
                                                   tool_offset, curing_duty_cycle, first_layer_height);

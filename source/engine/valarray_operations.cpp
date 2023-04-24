@@ -160,6 +160,14 @@ std::vector<std::vector<vald>> rotatePattern(const std::vector<std::vector<vald>
     return rotatePattern(pattern, angle, pattern_centre);
 }
 
+std::vector<std::vector<std::vector<vald>>> rotatePattern(const std::vector<std::vector<std::vector<vald>>> &pattern_stack, double angle) {
+    std::vector<std::vector<std::vector<vald>>> rotated_stack;
+    for (auto &pattern: pattern_stack) {
+        rotated_stack.emplace_back(rotatePattern(pattern, angle));
+    }
+    return rotated_stack;
+}
+
 std::vector<std::vector<vald>> flipPattern(const std::vector<std::vector<vald>> &pattern) {
     auto flipped_pattern = pattern;
     std::reverse_copy(pattern.begin(), pattern.end(), flipped_pattern.begin());

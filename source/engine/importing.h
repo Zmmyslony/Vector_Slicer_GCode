@@ -29,6 +29,8 @@ namespace fs = boost::filesystem;
 
 double readResolution(const fs::path &filepath);
 
-std::vector<std::vector<std::valarray<double>>> read3DVectorFromFileDouble(const fs::path &path);
+double readVersion(const fs::path &filepath);
+
+std::vector<std::vector<std::vector<std::valarray<double>>>> readPrintList(const fs::path &path);
 
 #endif //GCODEGENERATOR_IMPORTING_H

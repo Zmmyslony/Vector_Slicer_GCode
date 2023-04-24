@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(GCodeGenerator VERSION 0.2.2)
+project(GCodeGenerator VERSION 0.3.0)
 
 set(CMAKE_CXX_STANDARD 17)
 find_package(Boost COMPONENTS system filesystem REQUIRED)

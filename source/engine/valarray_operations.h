@@ -60,7 +60,9 @@ bool isEqual(const std::valarray<bool> &bool_valarray);
 std::vector<std::vector<vald>>
 rotatePattern(std::vector<std::vector<vald>> pattern, double angle, const vald &centre_of_rotation);
 
-std::vector<std::vector<vald>> rotatePattern(const std::vector<std::vector<vald>> &pattern, double angle);
+std::vector<std::vector<vald>> rotatePattern(const std::vector<std::vector<vald>> &pattern, double angle);\
+
+std::vector<std::vector<std::vector<vald>>> rotatePattern(const std::vector<std::vector<std::vector<vald>>> &pattern_stack, double angle);
 
 std::vector<std::vector<vald>> flipPattern(const std::vector<std::vector<vald>> &pattern);
 

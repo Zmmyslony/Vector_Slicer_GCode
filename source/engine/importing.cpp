@@ -23,7 +23,6 @@
 
 #include "importing.h"
 
-
 double readResolution(const fs::path &filepath) {
     std::vector<std::vector<double>> table;
     std::string line;
@@ -49,8 +48,8 @@ double readResolution(const fs::path &filepath) {
     return 1;
 }
 
-std::vector<std::vector<double>> importTableDouble(const fs::path &filename) {
-    std::vector<std::vector<double>> table;
+std::vector<std::vector<std::vector<double>>> importStackedTableDouble(const fs::path &filename) {
+    std::vector<std::vector<std::vector<double>>> stacked_table;
     std::string line;
     std::fstream file(filename.string());
 
@@ -59,8 +58,13 @@ std::vector<std::vector<double>> importTableDouble(const fs::path &filename) {
         throw std::runtime_error("File " + filename.string() + " does not exists.");
     }
 
+    std::vector<std::vector<double>> table;
     while (std::getline(file, line)) {
         if (line[0] == '#') {
+            if (!table.empty()) {
+                stacked_table.emplace_back(table);
+                table.clear();
+            }
             continue;
         }
         std::string element;
@@ -74,12 +78,16 @@ std::vector<std::vector<double>> importTableDouble(const fs::path &filename) {
             table.push_back(row);
         }
     }
-    return table;
+    if (table.size() != stacked_table.end()->size()) {
+        stacked_table.emplace_back(table);
+    }
+
+    return stacked_table;
 }
 
 
-std::vector<std::vector<std::valarray<double>>> importTableValarrayDouble(const fs::path &filename) {
-    std::vector<std::vector<double>> table = importTableDouble(filename);
+std::vector<std::vector<std::valarray<double>>>
+convertVectorSequenceToValarray(const std::vector<std::vector<double>> &table) {
     std::vector<std::vector<std::valarray<double>>> table_valarray;
     for (auto &row: table) {
         std::vector<std::valarray<double>> row_valarray;
@@ -91,6 +99,18 @@ std::vector<std::vector<std::valarray<double>>> importTableValarrayDouble(const 
     return table_valarray;
 }
 
-std::vector<std::vector<std::valarray<double>>> read3DVectorFromFileDouble(const fs::path &path) {
-    return importTableValarrayDouble(path);
+
+std::vector<std::vector<std::vector<std::valarray<double>>>>
+convertVectorSequenceToValarray(const std::vector<std::vector<std::vector<double>>> &stacked_table) {
+    std::vector<std::vector<std::vector<std::valarray<double>>>> stacked_valarray_table;
+    for (auto &table : stacked_table) {
+        stacked_valarray_table.push_back(convertVectorSequenceToValarray(table));
+    }
+    return stacked_valarray_table;
+}
+
+
+std::vector<std::vector<std::vector<std::valarray<double>>>> readPrintList(const fs::path &path) {
+    std::vector<std::vector<std::vector<double>>> stacked_table = importStackedTableDouble(path);
+    return convertVectorSequenceToValarray(stacked_table);
 }
