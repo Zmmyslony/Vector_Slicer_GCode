@@ -78,8 +78,9 @@ std::vector<std::vector<std::vector<double>>> importStackedTableDouble(const fs:
             table.push_back(row);
         }
     }
-    if (table.size() != stacked_table.end()->size()) {
-        stacked_table.emplace_back(table);
+    if (stacked_table.empty()) {
+        throw std::runtime_error(
+                "Error: The read pattern has size zero. Most likely the pattern was sliced with old version of the Vector Slicer");
     }
 
     return stacked_table;
@@ -103,7 +104,7 @@ convertVectorSequenceToValarray(const std::vector<std::vector<double>> &table) {
 std::vector<std::vector<std::vector<std::valarray<double>>>>
 convertVectorSequenceToValarray(const std::vector<std::vector<std::vector<double>>> &stacked_table) {
     std::vector<std::vector<std::vector<std::valarray<double>>>> stacked_valarray_table;
-    for (auto &table : stacked_table) {
+    for (auto &table: stacked_table) {
         stacked_valarray_table.push_back(convertVectorSequenceToValarray(table));
     }
     return stacked_valarray_table;
