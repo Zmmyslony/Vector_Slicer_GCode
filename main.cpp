@@ -64,13 +64,21 @@ int main() {
               << std::endl;
 
     for (auto &pattern: patterns_to_generate) {
-        singleLayer(export_directory, paths_directory / (pattern + ".csv"), grid_spacing, pattern_offset,
-                    tool_offset, uv_duty_cycle, first_layer_height, extrusion_configuration,
-                    printing_configuration);
+//        singleLayer(export_directory, paths_directory / pattern, grid_spacing, pattern_offset,
+//                    tool_offset, uv_duty_cycle, first_layer_height, extrusion_configuration,
+//                    printing_configuration);
 
-        multiLayer(export_directory, paths_directory / (pattern + ".csv"), grid_spacing, pattern_offset,
-                   tool_offset, uv_duty_cycle, first_layer_height, 4, extrusion_configuration,
-                   printing_configuration, false, 0);
+//        multiLayer(export_directory, paths_directory / pattern, pattern_offset,
+//                   tool_offset, uv_duty_cycle, first_layer_height, 4, extrusion_configuration,
+//                   printing_configuration, false, 0);
+        double x_clean_offset = (double) printing_configuration.getCleanDistance() + 3;
+        double y_clean_offset = -(double) printing_configuration.getCleaningLines() * extrusion_configuration.getDiameter() * 2;
+
+        multiPatternMultiLayer(export_directory, {paths_directory / "linear_2x1_cm", paths_directory / pattern}, {
+                                       {x_clean_offset, y_clean_offset},
+                                       pattern_offset},
+                               tool_offset, uv_duty_cycle, first_layer_height, 4, extrusion_configuration,
+                               printing_configuration, false, 0);
     }
 
     double printing_distance = 10;

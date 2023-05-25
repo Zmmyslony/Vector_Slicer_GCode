@@ -480,7 +480,7 @@ singleLayer(const boost::filesystem::path &export_directory, const fs::path &pat
             const std::valarray<double> &pattern_offset, std::vector<double> &tool_offset, int curing_duty_cycle,
             double first_layer_height, ExtrusionConfiguration extrusion_configuration,
             PrinterConfiguration printer_configuration) {
-    multiLayer(export_directory, pattern_path, grid_spacing, pattern_offset, tool_offset, curing_duty_cycle,
+    multiLayer(export_directory, pattern_path, pattern_offset, tool_offset, curing_duty_cycle,
                first_layer_height, 1, extrusion_configuration, printer_configuration, false, 0);
 }
 
@@ -495,36 +495,60 @@ Hyrel standardHyrelInitialisation(const ExtrusionConfiguration &extrusion_config
 }
 
 void
-multiLayer(const boost::filesystem::path &export_directory, const fs::path &pattern_path, double grid_spacing,
-           const std::valarray<double> &pattern_offset, std::vector<double> &tool_offset, int curing_duty_cycle,
-           double first_layer_height, int layers, ExtrusionConfiguration extrusion_configuration,
-           PrinterConfiguration printer_configuration, bool is_flipping_enabled, double pattern_rotation) {
-    if (fs::exists(pattern_path)) {
-        double print_resolution = readResolution(pattern_path);
-        if (print_resolution != 1) {
-            grid_spacing = extrusion_configuration.getDiameter() / print_resolution;
-        }
-        std::vector<std::vector<std::vector<vald>>> sorted_paths = readPrintList(pattern_path);
-        sorted_paths = rotatePattern(sorted_paths, pattern_rotation);
+multiPatternMultiLayer(const boost::filesystem::path &export_directory, std::vector<fs::path> pattern_paths,
+                       const std::vector<vald> &pattern_offsets, std::vector<double> &tool_offset,
+                       int curing_duty_cycle, double first_layer_height, int layers,
+                       ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration,
+                       bool is_flipping_enabled, double pattern_rotation) {
+    for (auto &pattern_path : pattern_paths) {
+        pattern_path.replace_extension("csv");
+    }
+
+    if (std::all_of(pattern_paths.begin(), pattern_paths.end(),
+                    [](const fs::path &pattern_path) { return fs::exists(pattern_path); })) {
         Hyrel hyrel = standardHyrelInitialisation(extrusion_configuration, printer_configuration,
                                                   tool_offset, curing_duty_cycle, first_layer_height);
 
-        std::valarray<double> cleaning_offset = {0,
-                                                 2 * printer_configuration.getCleaningLines() *
-                                                 extrusion_configuration.getDiameter()};
-        printMultiLayer(hyrel, pattern_offset + cleaning_offset, grid_spacing, sorted_paths, layers,
-                        extrusion_configuration.getLayerHeight(), is_flipping_enabled);
+        std::valarray<double> cleaning_offset = {0, 2 * printer_configuration.getCleaningLines() *
+                                                    extrusion_configuration.getDiameter()};
+
+        std::string pattern_name;
+        assert(pattern_paths.size() == pattern_offsets.size());
+
+        for (int i = 0; i < pattern_paths.size(); i++) {
+            double slicing_resolution = readResolution(pattern_paths[i]);
+            double grid_spacing = extrusion_configuration.getDiameter() / slicing_resolution;
+
+            std::vector<std::vector<std::vector<vald>>> stacked_patterns = readPrintList(pattern_paths[i]);
+            stacked_patterns = rotatePattern(stacked_patterns, pattern_rotation);
+            printMultiLayer(hyrel, pattern_offsets[i] + cleaning_offset, grid_spacing, stacked_patterns, layers,
+                            extrusion_configuration.getLayerHeight(), is_flipping_enabled);
+            pattern_name += pattern_paths[i].stem().string() + "_";
+        }
+        pattern_name.pop_back();
+
         hyrel.shutDown(printer_configuration);
 
-        std::ostringstream suffix_stream;
         std::string diameter_suffix = getDiameterString(extrusion_configuration);
         std::string suffix = diameter_suffix + "_" + std::to_string(layers) + "_layers";
         double extruded_amount = extrudedAmount(hyrel, extrusion_configuration);
-        hyrel.exportToFile(export_directory, pattern_path.stem().string(), suffix, extruded_amount);
+        hyrel.exportToFile(export_directory, pattern_name, suffix, extruded_amount);
     } else {
-        std::cout << "ERROR: Directory \"" << pattern_path << "\" does not exist." << std::endl;
+        std::cout << "ERROR: One of the input directories \"" << pattern_paths[0] << "\" does not exist." << std::endl;
     }
 }
+
+void
+multiLayer(const boost::filesystem::path &export_directory, fs::path pattern_path,
+           const std::valarray<double> &pattern_offset, std::vector<double> &tool_offset, int curing_duty_cycle,
+           double first_layer_height, int layers, ExtrusionConfiguration extrusion_configuration,
+           PrinterConfiguration printer_configuration, bool is_flipping_enabled, double pattern_rotation) {
+
+    multiPatternMultiLayer(export_directory, {pattern_path}, {pattern_offset}, tool_offset,
+                           curing_duty_cycle, first_layer_height, layers, extrusion_configuration,
+                           printer_configuration, is_flipping_enabled, pattern_rotation);
+}
+
 
 void tuneLineSeparationBody(Hyrel &hyrel, std::valarray<double> &current_offset,
                             const std::valarray<double> &pattern_spacing,

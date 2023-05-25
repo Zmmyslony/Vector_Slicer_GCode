@@ -21,6 +21,7 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/path.hpp>
+#include <valarray>
 
 #include "gcode_file.h"
 #include "pattern_boundaries.h"
@@ -92,7 +93,7 @@ public:
                       const std::string &suffix, double extruded_amount, const std::string &comment);
 
     void exportToFile(const boost::filesystem::path &results_path, const std::string &pattern_name,
-                             const std::string &suffix, double extruded_amount);
+                      const std::string &suffix, double extruded_amount);
 
     void configureUvPen(int print_head_tool_number, int pen_tool_number, int duty_cycle);
 
@@ -124,13 +125,14 @@ public:
 };
 
 void
-singleLayer(const boost::filesystem::path &export_directory, const boost::filesystem::path &pattern_path, double grid_spacing,
+singleLayer(const boost::filesystem::path &export_directory, const boost::filesystem::path &pattern_path,
+            double grid_spacing,
             const std::valarray<double> &pattern_offset, std::vector<double> &tool_offset, int curing_duty_cycle,
             double first_layer_height, ExtrusionConfiguration extrusion_configuration,
             PrinterConfiguration printer_configuration);
 
 void
-multiLayer(const boost::filesystem::path &export_directory, const fs::path &pattern_path, double grid_spacing,
+multiLayer(const boost::filesystem::path &export_directory, fs::path pattern_path,
            const std::valarray<double> &pattern_offset, std::vector<double> &tool_offset, int curing_duty_cycle,
            double first_layer_height, int layers, ExtrusionConfiguration extrusion_configuration,
            PrinterConfiguration printer_configuration, bool is_flipping_enabled, double pattern_rotation);
@@ -142,22 +144,33 @@ tuneLineSeparation(const boost::filesystem::path &export_directory, double print
                    double starting_line_separation, double finishing_line_separation, int line_separation_steps);
 
 void
-tuneLineSeparationAndHeight(const boost::filesystem::path &export_directory, double printing_distance, int number_of_lines,
+tuneLineSeparationAndHeight(const boost::filesystem::path &export_directory, double printing_distance,
+                            int number_of_lines,
                             std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
                             ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration,
-                            double starting_line_separation, double finishing_line_separation, int line_separation_steps,
+                            double starting_line_separation, double finishing_line_separation,
+                            int line_separation_steps,
                             double starting_height, double finishing_height, int height_steps);
 
 void
-tuneLineSeparationAndSpeed(const boost::filesystem::path &export_directory, double printing_distance, int number_of_lines,
+tuneLineSeparationAndSpeed(const boost::filesystem::path &export_directory, double printing_distance,
+                           int number_of_lines,
                            std::vector<double> &tool_offset, int curing_duty_cycle, double first_layer_height,
                            ExtrusionConfiguration extrusion_configuration,
                            PrinterConfiguration printer_configuration, double starting_line_separation,
-                           double finishing_line_separation, int line_separation_steps, int starting_speed, int finishing_speed,
+                           double finishing_line_separation, int line_separation_steps, int starting_speed,
+                           int finishing_speed,
                            int speed_steps);
 
 Hyrel standardHyrelInitialisation(const ExtrusionConfiguration &extrusion_configuration,
                                   const PrinterConfiguration &printer_configuration, std::vector<double> &tool_offset,
                                   int curing_duty_cycle, double first_layer_height);
+
+void
+multiPatternMultiLayer(const boost::filesystem::path &export_directory, std::vector<fs::path> pattern_paths,
+                       const std::vector<std::valarray<double>> &pattern_offsets, std::vector<double> &tool_offset,
+                       int curing_duty_cycle, double first_layer_height, int layers,
+                       ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration,
+                       bool is_flipping_enabled, double pattern_rotation) ;
 
 #endif //GCODEGENERATOR_HYREL_H

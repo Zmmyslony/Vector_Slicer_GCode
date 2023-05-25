@@ -45,7 +45,7 @@ double readResolution(const fs::path &filepath) {
             return std::stod(row.back());
         }
     }
-    return 1;
+    throw std::runtime_error("File " + filepath.string() + " does not contain Print diameter!");
 }
 
 std::vector<std::vector<std::vector<double>>> importStackedTableDouble(const fs::path &filename) {
