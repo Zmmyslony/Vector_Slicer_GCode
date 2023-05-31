@@ -25,7 +25,7 @@ add_executable(GCodeGenerator
         source/engine/printer_configuration.cpp
         source/engine/auxiliary.h
         source/engine/auxiliary.cpp
-        source/engine/config.h.in source/engine/importing.h source/engine/importing.cpp)
+        source/engine/config.h.in source/engine/importing.h source/engine/importing.cpp source/engine/full_printing_configuration.cpp source/engine/full_printing_configuration.h)
 
 target_link_libraries(GCodeGenerator
         ${Boost_SYSTEM_LIBRARY}

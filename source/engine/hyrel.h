@@ -124,18 +124,6 @@ public:
     void unprimeNow(double height, double prime_rate, double prime_pulses, int tool_number);
 };
 
-void
-singleLayer(const boost::filesystem::path &export_directory, const boost::filesystem::path &pattern_path,
-            double grid_spacing,
-            const std::valarray<double> &pattern_offset, std::vector<double> &tool_offset, int curing_duty_cycle,
-            double first_layer_height, ExtrusionConfiguration extrusion_configuration,
-            PrinterConfiguration printer_configuration);
-
-void
-multiLayer(const boost::filesystem::path &export_directory, fs::path pattern_path,
-           const std::valarray<double> &pattern_offset, std::vector<double> &tool_offset, int curing_duty_cycle,
-           double first_layer_height, int layers, ExtrusionConfiguration extrusion_configuration,
-           PrinterConfiguration printer_configuration, bool is_flipping_enabled, double pattern_rotation);
 
 void
 tuneLineSeparation(const boost::filesystem::path &export_directory, double printing_distance, int number_of_lines,
@@ -162,15 +150,15 @@ tuneLineSeparationAndSpeed(const boost::filesystem::path &export_directory, doub
                            int finishing_speed,
                            int speed_steps);
 
-Hyrel standardHyrelInitialisation(const ExtrusionConfiguration &extrusion_configuration,
-                                  const PrinterConfiguration &printer_configuration, std::vector<double> &tool_offset,
-                                  int curing_duty_cycle, double first_layer_height);
-
 void
 multiPatternMultiLayer(const boost::filesystem::path &export_directory, std::vector<fs::path> pattern_paths,
                        const std::vector<std::valarray<double>> &pattern_offsets, std::vector<double> &tool_offset,
-                       int curing_duty_cycle, double first_layer_height, int layers,
+                       int curing_duty_cycle, double first_layer_height, std::vector<int> layers,
                        ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration,
                        bool is_flipping_enabled, double pattern_rotation) ;
+
+Hyrel standardHyrelInitialisation(const ExtrusionConfiguration &extrusion_configuration,
+                                  const PrinterConfiguration &printer_configuration, std::vector<double> &tool_offset,
+                                  int curing_duty_cycle, double first_layer_height);
 
 #endif //GCODEGENERATOR_HYREL_H
