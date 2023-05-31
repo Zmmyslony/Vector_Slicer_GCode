@@ -162,15 +162,15 @@ tuneLineSeparationAndSpeed(const boost::filesystem::path &export_directory, doub
                            int finishing_speed,
                            int speed_steps);
 
-Hyrel standardHyrelInitialisation(const ExtrusionConfiguration &extrusion_configuration,
-                                  const PrinterConfiguration &printer_configuration, std::vector<double> &tool_offset,
-                                  int curing_duty_cycle, double first_layer_height);
-
 void
 multiPatternMultiLayer(const boost::filesystem::path &export_directory, std::vector<fs::path> pattern_paths,
                        const std::vector<std::valarray<double>> &pattern_offsets, std::vector<double> &tool_offset,
                        int curing_duty_cycle, double first_layer_height, int layers,
                        ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration,
                        bool is_flipping_enabled, double pattern_rotation) ;
+
+Hyrel standardHyrelInitialisation(const ExtrusionConfiguration &extrusion_configuration,
+                                  const PrinterConfiguration &printer_configuration, std::vector<double> &tool_offset,
+                                  int curing_duty_cycle, double first_layer_height);
 
 #endif //GCODEGENERATOR_HYREL_H
