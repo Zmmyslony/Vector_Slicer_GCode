@@ -38,7 +38,7 @@ int main() {
 
 //    patterns_to_generate = {"iris_r_inner_5_mm", "cylinder_r_inner_5_mm", "evertor_r_inner_5_mm", "radial_2_cm"};
     patterns_to_generate = {"iris_r_inner_5_mm", "cylinder_r_inner_5_mm", "evertor_r_inner_5_mm", "radial_2_cm"};
-    patterns_to_generate = {"fan_asymmetric_negative_3_1_cm"};
+    patterns_to_generate = {"radial_10_mm_strong_holes_weak_overlap"};
 
     // All units are in mm
     ExtrusionConfiguration extrusion_configuration(400, 80, 0.2,
@@ -66,31 +66,35 @@ int main() {
               << std::endl;
 
     for (auto &pattern: patterns_to_generate) {
-        printer.singleLayer(paths_directory / pattern, pattern_offset, false, 0);
-//        printer.multiLayer(paths_directory / pattern, pattern_offset, 4, false, 0);
+        try {
+            printer.singleLayer(paths_directory / pattern, pattern_offset, false, 0);
+            printer.multiLayer(paths_directory / pattern, pattern_offset, 4, false, 0);
 
-//        double x_clean_offset = (double) printing_configuration.getCleanDistance() + 3;
-//        double y_clean_offset =
-//                -(double) printing_configuration.getCleaningLines() * extrusion_configuration.getDiameter() * 2;
-//
-//        printer.multiPatternMultiLayer({paths_directory / "linear_2x1_cm", paths_directory / pattern},
-//                                       {{x_clean_offset, y_clean_offset}, pattern_offset},
-//                                       4, false, 0);
+            double x_clean_offset = (double) printing_configuration.getCleanDistance() + 3;
+            double y_clean_offset =
+                    -(double) printing_configuration.getCleaningLines() * extrusion_configuration.getDiameter() * 2;
+
+            printer.multiPatternMultiLayer({paths_directory / "linear_2x1_cm", paths_directory / pattern},
+                                           {{x_clean_offset, y_clean_offset}, pattern_offset},
+                                           {4, 4}, false, 0);
+        }
+        catch (...) {}
+
     }
 
     double printing_distance = 10;
     int number_of_lines = 9;
 
-    printer.tuneLineSeparation(printing_distance, number_of_lines,
-                               1, 0.8, 5);
-
-    printer.tuneLineSeparationAndHeight(printing_distance, number_of_lines,
-                                        1.2, 0.6, 2,
-                                        0.09, 0.15, 5);
-
-    printer.tuneLineSeparationAndSpeed(printing_distance, number_of_lines,
-                                       1.4, 1, 3,
-                                       400, 2000, 5);
+//    printer.tuneLineSeparation(printing_distance, number_of_lines,
+//                               1, 0.8, 5);
+//
+//    printer.tuneLineSeparationAndHeight(printing_distance, number_of_lines,
+//                                        1.2, 0.6, 2,
+//                                        0.09, 0.15, 5);
+//
+//    printer.tuneLineSeparationAndSpeed(printing_distance, number_of_lines,
+//                                       1.4, 1, 3,
+//                                       400, 2000, 5);
 
     std::cout << "Generation complete." << std::endl;
     return 0;
