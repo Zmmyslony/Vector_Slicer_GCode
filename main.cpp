@@ -37,16 +37,16 @@ int main() {
 //                            "fan_asymmetric_positive_15x1_cm", "fan_symmetric_positive_15x1_cm"};
 
 //    patterns_to_generate = {"iris_r_inner_5_mm", "cylinder_r_inner_5_mm", "evertor_r_inner_5_mm", "radial_2_cm"};
-    patterns_to_generate = {"iris_r_inner_5_mm", "cylinder_r_inner_5_mm", "evertor_r_inner_5_mm", "radial_2_cm"};
-    patterns_to_generate = {"radial_10_mm_strong_holes_weak_overlap"};
+    patterns_to_generate = {"evertor_r_inner_10_mm_40", "evertor_r_inner_10_mm_45", "evertor_r_inner_10_mm_50"};
+    patterns_to_generate = {"fan_gripper_12x48mm_TN_first", "fan_gripper_12x48mm_TN_second"};
 
     // All units are in mm
-    ExtrusionConfiguration extrusion_configuration(400, 80, 0.2,
+    ExtrusionConfiguration extrusion_configuration(260, 80, 0.2,
                                                    0.1, 1.0, 20);
 
     PrinterConfiguration printing_configuration(3000, 0, 1,
                                                 13, 15,
-                                                55000, 10000, 20000);
+                                                40000, 10000, 20000);
     // For priming 1297 pulses is a single microlitre, tune this value in order to obtain desirable flow.
     // Single microlitre is 14 mm of "filament" for a nozzle diameter of 300 um.
     // 100 pulses = 1 mm of filament
@@ -56,7 +56,7 @@ int main() {
     int uv_duty_cycle = 50;
     double first_layer_height = extrusion_configuration.getLayerHeight() + 0.02;
 
-    std::vector<double> tool_offset = {115, 90, 0};
+    std::vector<double> tool_offset = {128, 87, 0};
     std::valarray<double> pattern_offset = {0, 2};
 
     FullPrintingConfiguration printer(extrusion_configuration, printing_configuration,
@@ -68,7 +68,7 @@ int main() {
     for (auto &pattern: patterns_to_generate) {
         try {
             printer.singleLayer(paths_directory / pattern, pattern_offset, false, 0);
-            printer.multiLayer(paths_directory / pattern, pattern_offset, 4, false, 0);
+            printer.multiLayer(paths_directory / pattern, pattern_offset, 2, false, 0);
 
             double x_clean_offset = (double) printing_configuration.getCleanDistance() + 3;
             double y_clean_offset =

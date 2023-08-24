@@ -369,30 +369,33 @@ Hyrel::Hyrel(const ExtrusionConfiguration &extrusion_configuration, const Printe
 
 }
 
-bool isInDifferentDirection(const std::valarray<double> &last_position,
-                            const std::valarray<double> &position,
-                            const std::valarray<double> &previous_position,
-                            const std::valarray<double> &previous_connecting_vector) {
-    std::valarray<double> connecting_vector = position - previous_position;
-    double dot_length = dot(previous_connecting_vector, connecting_vector) /
-                        (norm(previous_connecting_vector) * norm(connecting_vector));
-    return dot_length < 1 || isEqual(position == last_position);
+bool isMerged(const std::vector<std::valarray<double>> &path, int index) {
+    // Never merge first and last positions
+    if (index == 0 || index == path.size() - 1) {
+        return false;
+    } else {
+        vald previous_move = normalize(path[index] - path[index - 1]);
+        vald next_move = normalize(path[index + 1] - path[index]);
+        // Check if both the previous and next moves are the same
+        if (dot(previous_move, next_move) == 1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
 
 void Hyrel::printPath(const std::vector<std::valarray<double>> &path, const std::valarray<double> &position_offset,
-                      double grid_distance) {
+                      double grid_spacing) {
     addComment("Starting new path.");
-    std::valarray<double> previous_connecting_vector = {1, 0};
+    std::valarray<double> previous_connecting_vector = {1, 1};
     std::valarray<double> previous_position = {0, 0};
 
-    for (auto &position: path) {
-        // Check if the printing direction differs, and if it doesn't merge the points into a single line to make gcode
-        // clearer. Additionally, if it is a last point print it even if it is in the same direction.
-        if (isInDifferentDirection(path.back(), position, previous_position, previous_connecting_vector)) {
-            previous_connecting_vector = position - previous_position;
-            extrude(position * grid_distance + position_offset);
+    for (int i = 0; i < path.size(); i++) {
+        // Print only points that do not lie on the same line
+        if (!isMerged(path, i)) {
+            extrude(path[i] * grid_spacing + position_offset);
         }
-        previous_position = position;
     }
 }
 
@@ -491,7 +494,7 @@ multiPatternMultiLayer(const boost::filesystem::path &export_directory, std::vec
                        int curing_duty_cycle, double first_layer_height, std::vector<int> layers,
                        ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration,
                        bool is_flipping_enabled, double pattern_rotation) {
-    for (auto &pattern_path : pattern_paths) {
+    for (auto &pattern_path: pattern_paths) {
         pattern_path.replace_extension("csv");
     }
 
