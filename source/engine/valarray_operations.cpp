@@ -155,14 +155,15 @@ rotatePattern(std::vector<std::vector<vald>> pattern, double angle, const vald &
 }
 
 std::vector<std::vector<vald>> rotatePattern(const std::vector<std::vector<vald>> &pattern, double angle) {
-    PatternBoundaries boundaries(pattern);
+    PatternBoundaries boundaries(pattern, 0);
     vald pattern_centre = boundaries.getCentre();
     return rotatePattern(pattern, angle, pattern_centre);
 }
 
 std::vector<std::vector<std::vector<vald>>> rotatePattern(const std::vector<std::vector<std::vector<vald>>> &pattern_stack, double angle) {
     std::vector<std::vector<std::vector<vald>>> rotated_stack;
-    for (auto &pattern: pattern_stack) {
+    rotated_stack.reserve(pattern_stack.size());
+for (auto &pattern: pattern_stack) {
         rotated_stack.emplace_back(rotatePattern(pattern, angle));
     }
     return rotated_stack;

@@ -19,6 +19,7 @@
 #include "full_printing_configuration.h"
 
 #include <utility>
+#include <iostream>
 
 FullPrintingConfiguration::FullPrintingConfiguration(const ExtrusionConfiguration &extrusion_configuration,
                                                      const PrinterConfiguration &printer_configuration,
@@ -29,25 +30,41 @@ FullPrintingConfiguration::FullPrintingConfiguration(const ExtrusionConfiguratio
           tool_offset(std::move(tool_offset)), uv_duty_cycle(uv_duty_cycle), first_layer_height(first_layer_height) {}
 
 
-void FullPrintingConfiguration::multiPatternMultiLayer(const std::vector<fs::path> &pattern_paths,
-                                                       const std::vector<std::valarray<double>> &pattern_offsets,
-                                                       std::vector<int> layers, bool is_flipping_enabled, double pattern_rotation) {
-    ::multiPatternMultiLayer(export_directory, pattern_paths, pattern_offsets, tool_offset, uv_duty_cycle,
-                             first_layer_height, layers, extrusion_configuration, printer_configuration,
+void
+FullPrintingConfiguration::multiPatternMultiLayer(const std::vector<fs::path> &pattern_paths, std::vector<int> layers,
+                                                  double pattern_offsets, bool is_flipping_enabled,
+                                                  double pattern_rotation) {
+    ::multiPatternMultiLayer(export_directory, pattern_paths, layers, pattern_offsets, tool_offset, uv_duty_cycle,
+                             first_layer_height, extrusion_configuration, printer_configuration,
                              is_flipping_enabled, pattern_rotation);
 }
 
-
-void
-FullPrintingConfiguration::multiLayer(const fs::path &pattern_path, std::valarray<double> pattern_offset, int layers,
-                                      bool is_flipping_enabled, double pattern_rotation) {
-    multiPatternMultiLayer({pattern_path}, {std::move(pattern_offset)}, {layers}, is_flipping_enabled, pattern_rotation);
+void FullPrintingConfiguration::printPatternGrid(const std::vector<std::vector<fs::path>> &path_grid,
+                                                 const std::vector<std::vector<int>> &layers_grid,
+                                                 double offsets, bool is_flipping_enabled, double pattern_rotation
+) {
+    try {
+        ::printPatternGrid(export_directory, path_grid, layers_grid, offsets, tool_offset, uv_duty_cycle,
+                           first_layer_height, extrusion_configuration, printer_configuration,
+                           is_flipping_enabled, pattern_rotation);
+    }
+    catch (std::runtime_error &err) {
+        std::cout << err.what() << std::endl;
+    }
 }
 
 
-void FullPrintingConfiguration::singleLayer(const fs::path &pattern_path, std::valarray<double> pattern_offset,
+
+void
+FullPrintingConfiguration::multiLayer(const fs::path &pattern_path, double pattern_offset, int layers,
+                                      bool is_flipping_enabled, double pattern_rotation) {
+    multiPatternMultiLayer({pattern_path}, {layers}, pattern_offset, is_flipping_enabled, pattern_rotation);
+}
+
+
+void FullPrintingConfiguration::singleLayer(const fs::path &pattern_path, double pattern_offset,
                                             bool is_flipping_enabled, double pattern_rotation) {
-    multiLayer(pattern_path, std::move(pattern_offset), 1, is_flipping_enabled, pattern_rotation);
+    multiLayer(pattern_path, pattern_offset, 1, is_flipping_enabled, pattern_rotation);
 }
 
 

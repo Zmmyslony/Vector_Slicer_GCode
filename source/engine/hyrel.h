@@ -31,6 +31,7 @@
 namespace fs = boost::filesystem;
 
 class Hyrel : public GCodeFile {
+    unsigned int current_tool = 0;
 
     void defineHeightOffset(double height, unsigned int register_number);
 
@@ -90,10 +91,11 @@ public:
                                    bool is_flipped);
 
     void exportToFile(const boost::filesystem::path &results_path, const std::string &pattern_name,
-                      const std::string &suffix, double extruded_amount, const std::string &comment);
+                      const std::string &suffix, double extruded_amount, const PatternBoundaries boundaries,
+                      const std::string &comment);
 
     void exportToFile(const boost::filesystem::path &results_path, const std::string &pattern_name,
-                      const std::string &suffix, double extruded_amount);
+                      const std::string &suffix, PatternBoundaries boundaries, double extruded_amount);
 
     void configureUvPen(int print_head_tool_number, int pen_tool_number, int duty_cycle);
 
@@ -102,8 +104,8 @@ public:
     void configureUvArray(int print_head_tool_number, int duty_cycle);
 
     void
-    clean_and_prime(double clean_length, int number_of_lines, double nozzle_width, int height_offset_register,
-                    double layer_height, double prime_rate, double prime_pulses, int tool_number);
+    cleanAndPrime(double clean_length, int number_of_lines, double nozzle_width, int height_offset_register,
+                  double layer_height, double prime_rate, double prime_pulses, int tool_number);
 
     std::valarray<double>
     printZigZagPattern(double length, int number_of_lines, double line_separation,
@@ -152,13 +154,21 @@ tuneLineSeparationAndSpeed(const boost::filesystem::path &export_directory, doub
 
 void
 multiPatternMultiLayer(const boost::filesystem::path &export_directory, std::vector<fs::path> pattern_paths,
-                       const std::vector<std::valarray<double>> &pattern_offsets, std::vector<double> &tool_offset,
-                       int curing_duty_cycle, double first_layer_height, std::vector<int> layers,
+                       std::vector<int> layers, double pattern_offsets, std::vector<double> &tool_offset,
+                       int curing_duty_cycle, double first_layer_height,
                        ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration,
-                       bool is_flipping_enabled, double pattern_rotation) ;
+                       bool is_flipping_enabled, double pattern_rotation);
 
 Hyrel standardHyrelInitialisation(const ExtrusionConfiguration &extrusion_configuration,
                                   const PrinterConfiguration &printer_configuration, std::vector<double> &tool_offset,
                                   int curing_duty_cycle, double first_layer_height);
+
+void printPatternGrid(const boost::filesystem::path &export_directory,
+                      std::vector<std::vector<fs::path>> path_grid,
+                      std::vector<std::vector<int>> layers_grid,
+                      double patterns_offset, std::vector<double> &tool_offset,
+                      int curing_duty_cycle, double first_layer_height,
+                      ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration,
+                      bool is_flipping_enabled, double pattern_rotation);
 
 #endif //GCODEGENERATOR_HYREL_H

@@ -20,7 +20,8 @@
 
 #include "pattern_boundaries.h"
 
-PatternBoundaries::PatternBoundaries(const std::vector<std::vector<std::valarray<double>>> &sequence_of_paths) {
+PatternBoundaries::PatternBoundaries(
+        const std::vector<std::vector<std::valarray<double>>> &sequence_of_paths, double grid_spacing) {
     for (auto &path: sequence_of_paths) {
         for (auto &point: path) {
             if (x_max < point[0]) { x_max = point[0]; }
@@ -29,10 +30,15 @@ PatternBoundaries::PatternBoundaries(const std::vector<std::vector<std::valarray
             if (y_min > point[1]) { y_min = point[1]; }
         }
     }
-    x_max -= x_min;
-    x_min -= x_min;
-    y_max -= y_min;
-    y_min -= y_min;
+//    x_max -= x_min;
+//    x_min -= x_min;
+//    y_max -= y_min;
+//    y_min -= y_min;
+
+    x_max *= grid_spacing;
+    x_min *= grid_spacing;
+    y_max *= grid_spacing;
+    y_min *= grid_spacing;
 }
 
 double PatternBoundaries::getXMin() const {
@@ -96,6 +102,31 @@ PatternBoundaries::PatternBoundaries(const PatternBoundaries &one, const Pattern
         x_max(fmax(one.x_max, two.x_max)),
         y_max(fmax(one.y_max, two.y_max)) {}
 
-void PatternBoundaries::joinBoundaries(const PatternBoundaries &other) {
+void PatternBoundaries::join(const PatternBoundaries &other) {
     *this = PatternBoundaries(*this, other);
 }
+
+PatternBoundaries
+PatternBoundaries::joinRelativeX(const PatternBoundaries &one, const PatternBoundaries &two, double x_offset) {
+    return {fmin(one.x_min, two.x_min), fmin(one.y_min, two.y_min), one.x_max + two.x_max + x_offset, fmax(one.y_max, two.y_max)};
+};
+
+PatternBoundaries
+PatternBoundaries::joinRelativeY(const PatternBoundaries &one, const PatternBoundaries &two, double y_offset) {
+    return {fmin(one.x_min, two.x_min), fmin(one.y_min, two.y_min), fmax(one.x_max, two.x_max), one.y_max + two.y_max + y_offset};
+}
+
+void PatternBoundaries::joinRelativeX(const PatternBoundaries &other, double x_offset) {
+    *this = joinRelativeX(*this, other, x_offset);
+}
+
+void PatternBoundaries::joinRelativeY(const PatternBoundaries &other, double y_offset) {
+    *this = joinRelativeY(*this, other, y_offset);
+}
+
+PatternBoundaries::PatternBoundaries(double x_min, double y_min, double x_max, double y_max) :
+        x_min(x_min),
+        y_min(y_min),
+        x_max(x_max),
+        y_max(y_max) {}
+

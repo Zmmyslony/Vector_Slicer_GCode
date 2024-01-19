@@ -29,19 +29,8 @@ int main() {
     fs::path paths_directory = cwd / "paths";
     fs::path export_directory = cwd / "gcode";
 
-    std::vector<std::string> patterns_to_generate;
-//    patterns_to_generate = {"fan_asymmetric_negative_3x2_cm", "fan_symmetric_negative_3x2_cm",
-//                            "fan_asymmetric_positive_3x2_cm", "fan_symmetric_positive_3x2_cm"};
-
-//    patterns_to_generate = {"fan_asymmetric_negative_15x1_cm", "fan_symmetric_negative_15x1_cm",
-//                            "fan_asymmetric_positive_15x1_cm", "fan_symmetric_positive_15x1_cm"};
-
-//    patterns_to_generate = {"iris_r_inner_5_mm", "cylinder_r_inner_5_mm", "evertor_r_inner_5_mm", "radial_2_cm"};
-    patterns_to_generate = {"evertor_r_inner_10_mm_40", "evertor_r_inner_10_mm_45", "evertor_r_inner_10_mm_50"};
-    patterns_to_generate = {"fan_gripper_12x48mm_TN_first", "fan_gripper_12x48mm_TN_second"};
-
     // All units are in mm
-    ExtrusionConfiguration extrusion_configuration(260, 80, 0.2,
+    ExtrusionConfiguration extrusion_configuration(200, 80, 0.2,
                                                    0.1, 1.0, 20);
 
     PrinterConfiguration printing_configuration(3000, 0, 1,
@@ -54,10 +43,10 @@ int main() {
     // 10k priming rate corresponds to around 6000 printing speed
 
     int uv_duty_cycle = 50;
-    double first_layer_height = extrusion_configuration.getLayerHeight() + 0.02;
+    double first_layer_height = extrusion_configuration.getLayerHeight() + 0.025;
 
-    std::vector<double> tool_offset = {128, 87, 0};
-    std::valarray<double> pattern_offset = {0, 2};
+    std::vector<double> tool_offset = {101, 86, 0};
+    double pattern_offset = 3;
 
     FullPrintingConfiguration printer(extrusion_configuration, printing_configuration,
                                       export_directory, tool_offset, uv_duty_cycle, first_layer_height);
@@ -65,36 +54,44 @@ int main() {
     std::cout << "\nGenerating GCode for the files contained in" << std::endl << '\t' << paths_directory
               << std::endl;
 
-    for (auto &pattern: patterns_to_generate) {
-        try {
-            printer.singleLayer(paths_directory / pattern, pattern_offset, false, 0);
-            printer.multiLayer(paths_directory / pattern, pattern_offset, 2, false, 0);
+    printer.printPatternGrid({{paths_directory / "longitudinal_20_10_mm"},
+                              {paths_directory / "evertor_10_mm_0"}},
+                             {{4, 6}},
+                             pattern_offset, false, 0);
 
-            double x_clean_offset = (double) printing_configuration.getCleanDistance() + 3;
-            double y_clean_offset =
-                    -(double) printing_configuration.getCleaningLines() * extrusion_configuration.getDiameter() * 2;
+    printer.printPatternGrid({{paths_directory / "longitudinal_20_10_mm"},
+                              {paths_directory / "iris_5_mm_0", paths_directory / "cylinder_5_mm_0"}},
+                             {{4}},
+                             pattern_offset, false, 0);
 
-            printer.multiPatternMultiLayer({paths_directory / "linear_2x1_cm", paths_directory / pattern},
-                                           {{x_clean_offset, y_clean_offset}, pattern_offset},
-                                           {4, 4}, false, 0);
-        }
-        catch (...) {}
-
+    for (int i = 1; i < 5; i++) {
+        printer.printPatternGrid({{paths_directory / "longitudinal_20_10_mm"},
+                                  {paths_directory / "radial_10_mm_SHWO", paths_directory / "radial_10_mm_MHMO",
+                                          paths_directory / "radial_10_mm_WHSO"}},
+                                 {{1, i}},
+                                 pattern_offset, false, 0);
     }
 
+    printer.printPatternGrid({{},
+                              {paths_directory / "three_charge_blob"}},
+                             {{1}},
+                             pattern_offset, false, 0);
+
     double printing_distance = 10;
-    int number_of_lines = 9;
+    int number_of_lines = 15;
 
 //    printer.tuneLineSeparation(printing_distance, number_of_lines,
 //                               1, 0.8, 5);
+
+    printer.tuneLineSeparationAndSpeed(printing_distance, number_of_lines,
+                                       0.8, 1.2, 3,
+                                       200, 300, 5);
+
 //
 //    printer.tuneLineSeparationAndHeight(printing_distance, number_of_lines,
 //                                        1.2, 0.6, 2,
 //                                        0.09, 0.15, 5);
 //
-//    printer.tuneLineSeparationAndSpeed(printing_distance, number_of_lines,
-//                                       1.4, 1, 3,
-//                                       400, 2000, 5);
 
     std::cout << "Generation complete." << std::endl;
     return 0;

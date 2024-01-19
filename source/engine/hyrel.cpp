@@ -31,8 +31,6 @@
 #include "config.h"
 #include "importing.h"
 
-const std::string version = "0.2a";
-
 int mCommandToolNumber(int tool_number) {
     return tool_number + 11;
 }
@@ -42,6 +40,7 @@ void Hyrel::selectTool(unsigned int tool_number) {
     if (tool_number < number_of_tools) {
         addComment("Selecting tool");
         generalCommand('T', (int) tool_number);
+        current_tool = tool_number;
     }
 }
 
@@ -239,8 +238,8 @@ void Hyrel::unprimeNow(double height, double prime_rate, double prime_pulses, in
 }
 
 
-void Hyrel::clean_and_prime(double clean_length, int number_of_lines, double nozzle_width, int height_offset_register,
-                            double layer_height, double prime_rate, double prime_pulses, int tool_number) {
+void Hyrel::cleanAndPrime(double clean_length, int number_of_lines, double nozzle_width, int height_offset_register,
+                          double layer_height, double prime_rate, double prime_pulses, int tool_number) {
     addComment("Invoking offsets");
     movePlanar({0, 0});
     defineHeightOffset(layer_height, height_offset_register);
@@ -290,8 +289,8 @@ Hyrel::init(int hotend_temperature, int bed_temperature, double clean_length, do
 
     selectTool(tool_number);
     addBreak();
-    clean_and_prime(clean_length, cleaning_lines, nozzle_width, height_offset_register, first_layer_height, prime_rate,
-                    prime_pulses, tool_number);
+    cleanAndPrime(clean_length, cleaning_lines, nozzle_width, height_offset_register, first_layer_height, prime_rate,
+                  prime_pulses, tool_number);
     addBreak();
 
     addBreak();
@@ -402,7 +401,7 @@ void Hyrel::printPath(const std::vector<std::valarray<double>> &path, const std:
 PatternBoundaries Hyrel::printPattern(const std::vector<std::vector<std::valarray<double>>> &sorted_sequence_of_paths,
                                       const std::valarray<double> &position_offset, double grid_spacing,
                                       bool is_flipped) {
-    PatternBoundaries pattern_boundaries(sorted_sequence_of_paths);
+    PatternBoundaries pattern_boundaries(sorted_sequence_of_paths, grid_spacing);
     pattern_boundaries.scale(grid_spacing);
     pattern_boundaries.move(position_offset);
     for (auto &path: sorted_sequence_of_paths) {
@@ -412,12 +411,12 @@ PatternBoundaries Hyrel::printPattern(const std::vector<std::vector<std::valarra
         printPath(path, position_offset, grid_spacing);
     }
     addComment("Pattern completed.");
-//    pattern_boundaries.print();
     return pattern_boundaries;
 }
 
 void Hyrel::exportToFile(const boost::filesystem::path &results_path, const std::string &pattern_name,
-                         const std::string &suffix, double extruded_amount, const std::string &comment) {
+                         const std::string &suffix, double extruded_amount, const PatternBoundaries boundaries,
+                         const std::string &comment) {
     if (!is_directory(results_path)) {
         std::cout << "GCode directory \"" << results_path.string() << "\" does not exist. Attempting to create it."
                   << std::endl;
@@ -442,15 +441,16 @@ void Hyrel::exportToFile(const boost::filesystem::path &results_path, const std:
     file << "; Michal Zmyslony, University of Cambridge, mlz22@cam.ac.uk" << std::endl << std::endl;
     file << "; Estimated print time: " << print_time << " min" << std::endl;
     file << "; Estimated amount of extruded material: " << extruded_amount << " ul" << std::endl;
-    file << comment;
+    file << "; Pattern size: x-" << boundaries.getXMax() << " mm, y-" << boundaries.getYMax() << " mm" << std::endl;
+    file << "; " << comment;
     file << getText();
     file.close();
     std::cout << "Exported \"" << filename.stem().string() << "\" successfully." << std::endl;
 }
 
 void Hyrel::exportToFile(const boost::filesystem::path &results_path, const std::string &pattern_name,
-                         const std::string &suffix, double extruded_amount) {
-    exportToFile(results_path, pattern_name, suffix, extruded_amount, "");
+                         const std::string &suffix, PatternBoundaries boundaries, double extruded_amount) {
+    exportToFile(results_path, pattern_name, suffix, extruded_amount, boundaries, "");
 }
 
 void Hyrel::addLocalOffset(std::vector<double> offset) {
@@ -488,47 +488,96 @@ Hyrel standardHyrelInitialisation(const ExtrusionConfiguration &extrusion_config
     return hyrel;
 }
 
+
+int layerSelection(const std::vector<std::vector<int>> &layers_grid, int i, int j) {
+    if (i > layers_grid.size() - 1) {
+        return layers_grid.back().back();
+    } else {
+        if (j > layers_grid[i].size() - 1) {
+            return layers_grid[i].back();
+        } else {
+            return layers_grid[i][j];
+        }
+    }
+}
+
 void
-multiPatternMultiLayer(const boost::filesystem::path &export_directory, std::vector<fs::path> pattern_paths,
-                       const std::vector<vald> &pattern_offsets, std::vector<double> &tool_offset,
-                       int curing_duty_cycle, double first_layer_height, std::vector<int> layers,
-                       ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration,
-                       bool is_flipping_enabled, double pattern_rotation) {
-    for (auto &pattern_path: pattern_paths) {
-        pattern_path.replace_extension("csv");
+printPatternGrid(const boost::filesystem::path &export_directory,
+                 std::vector<std::vector<fs::path>> path_grid,
+                 std::vector<std::vector<int>> layers_grid,
+                 double patterns_offset, std::vector<double> &tool_offset,
+                 int curing_duty_cycle, double first_layer_height,
+                 ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration,
+                 bool is_flipping_enabled, double pattern_rotation) {
+    for (auto &path_row: path_grid) {
+        for (auto &path: path_row) {
+            path.replace_extension("csv");
+            if (!fs::exists(path)) {
+                throw std::runtime_error(
+                        "ERROR: At least one of pattern paths is invalid. Check " + path.stem().string());
+            }
+        }
     }
 
-    if (std::all_of(pattern_paths.begin(), pattern_paths.end(),
-                    [](const fs::path &pattern_path) { return fs::exists(pattern_path); })) {
-        Hyrel hyrel = standardHyrelInitialisation(extrusion_configuration, printer_configuration,
-                                                  tool_offset, curing_duty_cycle, first_layer_height);
+    Hyrel hyrel = standardHyrelInitialisation(extrusion_configuration, printer_configuration,
+                                              tool_offset, curing_duty_cycle, first_layer_height);
 
-        std::valarray<double> cleaning_offset = {0, 2 * printer_configuration.getCleaningLines() *
-                                                    extrusion_configuration.getDiameter()};
+    std::valarray<double> cleaning_offset = {double(printer_configuration.getCleanDistance()),
+                                             2 * printer_configuration.getCleaningLines() *
+                                             extrusion_configuration.getDiameter()};
+    PatternBoundaries previous_row_boundaries(0, 0, 0, 0);
+    PatternBoundaries current_row_relative_boundaries(0, 0, cleaning_offset[0] + patterns_offset, cleaning_offset[1]);
 
-        std::string pattern_name;
-        assert(pattern_paths.size() == pattern_offsets.size());
+    std::string pattern_name;
 
-        for (int i = 0; i < pattern_paths.size(); i++) {
-            double slicing_resolution = readResolution(pattern_paths[i]);
+//    if (path_grid.size() != layers_grid.size()) {
+//        throw std::runtime_error("Uneven size of path grid and layers grid.");
+//    }
+    for (int i = 0; i < path_grid.size(); i++) {
+//        if (path_grid[i].size() != layers_grid[i].size()) {
+//            throw std::runtime_error("Uneven size of path grid and layers grid.");
+//        }
+        double y_offset = previous_row_boundaries.getYMax();
+        for (int j = 0; j < path_grid[i].size(); j++) {
+            fs::path path = path_grid[i][j];
+            int layers = layerSelection(layers_grid, i, j);
+            double slicing_resolution = readResolution(path);
             double grid_spacing = extrusion_configuration.getDiameter() / slicing_resolution;
 
-            std::vector<std::vector<std::vector<vald>>> stacked_patterns = readPrintList(pattern_paths[i]);
+            std::vector<std::vector<std::vector<vald>>> stacked_patterns = readPrintList(path);
+
+            double x_offset = current_row_relative_boundaries.getXMax();
+            PatternBoundaries pattern_boundaries(stacked_patterns.front(), grid_spacing);
+            current_row_relative_boundaries.joinRelativeX(pattern_boundaries, patterns_offset);
             stacked_patterns = rotatePattern(stacked_patterns, pattern_rotation);
-            printMultiLayer(hyrel, pattern_offsets[i] + cleaning_offset, grid_spacing, stacked_patterns, layers[i],
+
+            printMultiLayer(hyrel, {x_offset, y_offset}, grid_spacing, stacked_patterns, layers,
                             extrusion_configuration.getLayerHeight(), is_flipping_enabled);
-            pattern_name += pattern_paths[i].stem().string() + "_" + std::to_string(layers[i]) + "_layers_";
+            pattern_name += std::to_string(layers) + "x_" + path.stem().string() + "_";
         }
-        pattern_name.pop_back();
-
-        hyrel.shutDown(printer_configuration);
-
-        std::string diameter_suffix = getDiameterString(extrusion_configuration);
-        double extruded_amount = extrudedAmount(hyrel, extrusion_configuration);
-        hyrel.exportToFile(export_directory, pattern_name, diameter_suffix, extruded_amount);
-    } else {
-        std::cout << "ERROR: One of the input directories \"" << pattern_paths[0] << "\" does not exist." << std::endl;
+        previous_row_boundaries.joinRelativeY(current_row_relative_boundaries, patterns_offset);
+        current_row_relative_boundaries = {0, 0, 0, 0};
     }
+    pattern_name.pop_back();
+
+    hyrel.shutDown(printer_configuration);
+
+    std::string diameter_suffix = getDiameterString(extrusion_configuration);
+    double extruded_amount = extrudedAmount(hyrel, extrusion_configuration);
+    hyrel.exportToFile(export_directory, pattern_name, diameter_suffix, previous_row_boundaries, extruded_amount);
+}
+
+void
+multiPatternMultiLayer(const boost::filesystem::path &export_directory, std::vector<fs::path> pattern_paths,
+                       std::vector<int> layers, double pattern_offsets, std::vector<double> &tool_offset,
+                       int curing_duty_cycle, double first_layer_height,
+                       ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration,
+                       bool is_flipping_enabled, double pattern_rotation) {
+    std::vector<std::vector<fs::path>> paths_grid({{}, pattern_paths});
+    std::vector<std::vector<int>> layers_grid({{}, layers});
+    printPatternGrid(export_directory, paths_grid, layers_grid, pattern_offsets, tool_offset, curing_duty_cycle,
+                     first_layer_height, extrusion_configuration, printer_configuration, is_flipping_enabled,
+                     pattern_rotation);
 }
 
 
@@ -537,6 +586,9 @@ void tuneLineSeparationBody(Hyrel &hyrel, std::valarray<double> &current_offset,
                             double finishing_line_separation, double starting_line_separation,
                             int line_separation_steps, double printing_distance, int number_of_lines, double diameter) {
     double line_separation_step = (finishing_line_separation - starting_line_separation) / (line_separation_steps - 1);
+    if (line_separation_steps == 1) {
+        line_separation_step = 0;
+    }
     for (int j = 0; j < line_separation_steps; j++) {
         hyrel.movePlanar(current_offset + pattern_spacing);
         current_offset = hyrel.printZigZagPattern(printing_distance, number_of_lines,
@@ -566,6 +618,7 @@ tuneLineSeparation(const boost::filesystem::path &export_directory, double print
     std::string tuning_description = getParameterListString("relative_line_spacing", starting_line_separation,
                                                             finishing_line_separation, line_separation_steps);
     hyrel.exportToFile(export_directory, "line_spacing", diameter_suffix, extruded_amount,
+                       PatternBoundaries(0, 0, 0, 0),
                        tuning_description);
 }
 
@@ -604,7 +657,7 @@ tuneLineSeparationAndHeight(const boost::filesystem::path &export_directory, dou
                                                                           finishing_line_separation,
                                                                           line_separation_steps);
     hyrel.exportToFile(export_directory, "height_and_line_spacing", diameter_suffix,
-                       extruded_amount, tuning_description);
+                       extruded_amount, PatternBoundaries(0, 0, 0, 0), tuning_description);
 }
 
 void
@@ -642,5 +695,5 @@ tuneLineSeparationAndSpeed(const boost::filesystem::path &export_directory, doub
                                                                           finishing_line_separation,
                                                                           line_separation_steps);
     hyrel.exportToFile(export_directory, "speed_and_line_spacing", diameter_suffix,
-                       extruded_amount, tuning_description);
+                       extruded_amount, PatternBoundaries(0, 0, 0, 0), tuning_description);
 }

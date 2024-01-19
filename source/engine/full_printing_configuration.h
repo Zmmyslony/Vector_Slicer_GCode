@@ -46,14 +46,14 @@ public:
                               int uv_duty_cycle, double first_layer_height);
 
 
-    void multiPatternMultiLayer(const std::vector<fs::path> &pattern_paths,
-                                const std::vector<std::valarray<double>> &pattern_offsets,
-                                std::vector<int> layers, bool is_flipping_enabled, double pattern_rotation);
+    void multiPatternMultiLayer(const std::vector<fs::path> &pattern_paths, std::vector<int> layers,
+                                double pattern_offsets, bool is_flipping_enabled,
+                                double pattern_rotation);
 
-    void multiLayer(const fs::path &pattern_path, std::valarray<double> pattern_offset, int layers,
+    void multiLayer(const fs::path &pattern_path, double pattern_offset, int layers,
                     bool is_flipping_enabled, double pattern_rotation);
 
-    void singleLayer(const fs::path &pattern_path, std::valarray<double> pattern_offset,
+    void singleLayer(const fs::path &pattern_path, double pattern_offset,
                      bool is_flipping_enabled, double pattern_rotation);
 
     void tuneLineSeparation(double printing_distance, int number_of_lines,
@@ -69,6 +69,11 @@ public:
                                     double starting_line_separation, double finishing_line_separation,
                                     int line_separation_steps,
                                     int starting_speed, int finishing_speed, int speed_steps);
+
+    void
+    printPatternGrid(const std::vector<std::vector<fs::path>> &path_grid,
+                     const std::vector<std::vector<int>> &layers_grid,
+                     double offsets, bool is_flipping_enabled, double pattern_rotation);
 };
 
 #endif //GCODEGENERATOR_FULL_PRINTING_CONFIGURATION_H

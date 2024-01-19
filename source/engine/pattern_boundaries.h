@@ -38,11 +38,22 @@ public:
 
     [[nodiscard]] double getYMax() const;
 
-    explicit PatternBoundaries(const std::vector<std::vector<std::valarray<double>>> &sequence_of_paths);
+    explicit PatternBoundaries(
+            const std::vector<std::vector<std::valarray<double>>> &sequence_of_paths, double grid_spacing);
 
     PatternBoundaries(const PatternBoundaries &one, const PatternBoundaries &two);
 
-    void joinBoundaries(const PatternBoundaries &other);
+    PatternBoundaries(double x_min, double y_min, double x_max, double y_max);
+
+    void join(const PatternBoundaries &other);
+
+    static PatternBoundaries joinRelativeX(const PatternBoundaries &one, const PatternBoundaries &two, double x_offset);
+
+    static PatternBoundaries joinRelativeY(const PatternBoundaries &one, const PatternBoundaries &two, double y_offset);
+
+    void joinRelativeX(const PatternBoundaries &other, double x_offset);
+
+    void joinRelativeY(const PatternBoundaries &other, double y_offset);
 
     void scale(double multiplier);
 
@@ -60,6 +71,5 @@ public:
 
     void print() const;
 };
-
 
 #endif //GCODEGENERATOR_PATTERN_BOUNDARIES_H

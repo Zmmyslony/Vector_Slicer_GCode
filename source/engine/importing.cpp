@@ -104,7 +104,8 @@ convertVectorSequenceToValarray(const std::vector<std::vector<double>> &table) {
 std::vector<std::vector<std::vector<std::valarray<double>>>>
 convertVectorSequenceToValarray(const std::vector<std::vector<std::vector<double>>> &stacked_table) {
     std::vector<std::vector<std::vector<std::valarray<double>>>> stacked_valarray_table;
-    for (auto &table: stacked_table) {
+    stacked_valarray_table.reserve(stacked_table.size());
+for (auto &table: stacked_table) {
         stacked_valarray_table.push_back(convertVectorSequenceToValarray(table));
     }
     return stacked_valarray_table;
