@@ -30,19 +30,94 @@ FullPrintingConfiguration::FullPrintingConfiguration(const ExtrusionConfiguratio
           tool_offset(std::move(tool_offset)), uv_duty_cycle(uv_duty_cycle), first_layer_height(first_layer_height) {}
 
 
-void
-FullPrintingConfiguration::multiPatternMultiLayer(const std::vector<fs::path> &pattern_paths, std::vector<int> layers,
-                                                  double pattern_offsets, bool is_flipping_enabled,
-                                                  double pattern_rotation) {
-    ::multiPatternMultiLayer(export_directory, pattern_paths, layers, pattern_offsets, tool_offset, uv_duty_cycle,
-                             first_layer_height, extrusion_configuration, printer_configuration,
-                             is_flipping_enabled, pattern_rotation);
+void FullPrintingConfiguration::printPatternColumn(const std::vector<fs::path> &pattern_paths,
+                                                   const std::vector<int> &layers,
+                                                   double offsets, bool is_flipping_enabled,
+                                                   double pattern_rotation)
+/***
+ * Prints patterns in a column-like manner (y-axis)
+ * @param pattern_paths
+ * @param layers if not all patterns have specified layer count, it uses the last specified value for further patterns.
+ * @param offsets distance between patterns in y-direction.
+ * @param is_flipping_enabled are patterns mirrored between the layers.
+ * @param pattern_rotation are patterns rotated.
+ */
+{
+    std::vector<std::vector<fs::path>> path_grid = {{}};
+    std::vector<std::vector<int>> layers_grid = {{}};
+    for (const auto &pattern_path: pattern_paths) {
+        path_grid.emplace_back(std::vector<fs::path>{pattern_path});
+    }
+    for (const int &layer: layers) {
+        layers_grid.emplace_back(std::vector<int>{layer});
+    }
+
+    printPatternGrid(path_grid, layers_grid, offsets, is_flipping_enabled, pattern_rotation);
+}
+
+void FullPrintingConfiguration::printPatternColumn(const fs::path &pattern_paths,
+                                                   const int &layers,
+                                                   double offsets, bool is_flipping_enabled,
+                                                   double pattern_rotation)
+/***
+ * Prints patterns in a column-like manner (y-axis)
+ * @param pattern_paths
+ * @param layers if not all patterns have specified layer count, it uses the last specified value for further patterns.
+ * @param offsets distance between patterns in y-direction.
+ * @param is_flipping_enabled are patterns mirrored between the layers.
+ * @param pattern_rotation are patterns rotated.
+ */
+{
+    printPatternColumn(std::vector<fs::path>{pattern_paths}, std::vector<int>{layers}, offsets, is_flipping_enabled, pattern_rotation);
+}
+
+void FullPrintingConfiguration::printPatternRow(const std::vector<fs::path> &pattern_paths,
+                                                const std::vector<int> &layers,
+                                                double offsets, bool is_flipping_enabled,
+                                                double pattern_rotation)
+/***
+ * Prints patterns in a row-like manner (x-axis)
+ * @param pattern_paths
+ * @param layers if not all patterns have specified layer count, it uses the last specified value for further patterns.
+ * @param offsets distance between patterns in x-direction.
+ * @param is_flipping_enabled are patterns mirrored between the layers.
+ * @param pattern_rotation are patterns rotated.
+ */
+{
+    printPatternGrid({pattern_paths}, {layers}, offsets, is_flipping_enabled, pattern_rotation);
+}
+
+void FullPrintingConfiguration::printPatternRow(const fs::path &pattern_paths,
+                                                const int &layers,
+                                                double offsets, bool is_flipping_enabled,
+                                                double pattern_rotation)
+/***
+ * Prints patterns in a row-like manner (x-axis)
+ * @param pattern_paths
+ * @param layers if not all patterns have specified layer count, it uses the last specified value for further patterns.
+ * @param offsets distance between patterns in x-direction.
+ * @param is_flipping_enabled are patterns mirrored between the layers.
+ * @param pattern_rotation are patterns rotated.
+ */
+{
+    printPatternRow(std::vector<fs::path>{pattern_paths}, std::vector<int>{layers}, offsets, is_flipping_enabled, pattern_rotation);
 }
 
 void FullPrintingConfiguration::printPatternGrid(const std::vector<std::vector<fs::path>> &path_grid,
                                                  const std::vector<std::vector<int>> &layers_grid,
-                                                 double offsets, bool is_flipping_enabled, double pattern_rotation
-) {
+                                                 double offsets, bool is_flipping_enabled, double pattern_rotation)
+/***
+* Prints provided patterns in a grid, where the first dimension goes in the x-direction and the 2nd in the y-direction.
+*
+* @param path_grid grid of patterns to print - note [0, 0] pattern is automatically the cleaning pattern.
+* @param layers_grid layers corresponding to each pattern. If the there are too few rows (1st dim), the following rows
+* will have the same number of layers as the last pattern in the last existing row. If there are too few entries in the
+* row, it repeats the last value.
+* @param offsets mm distance between patterns in each row, and between the rows.
+* @param is_flipping_enabled - are patterns flipped between the layers.
+* @param pattern_rotation - are all patterns rotated.
+*/
+{
     try {
         ::printPatternGrid(export_directory, path_grid, layers_grid, offsets, tool_offset, uv_duty_cycle,
                            first_layer_height, extrusion_configuration, printer_configuration,
@@ -51,20 +126,6 @@ void FullPrintingConfiguration::printPatternGrid(const std::vector<std::vector<f
     catch (std::runtime_error &err) {
         std::cout << err.what() << std::endl;
     }
-}
-
-
-
-void
-FullPrintingConfiguration::multiLayer(const fs::path &pattern_path, double pattern_offset, int layers,
-                                      bool is_flipping_enabled, double pattern_rotation) {
-    multiPatternMultiLayer({pattern_path}, {layers}, pattern_offset, is_flipping_enabled, pattern_rotation);
-}
-
-
-void FullPrintingConfiguration::singleLayer(const fs::path &pattern_path, double pattern_offset,
-                                            bool is_flipping_enabled, double pattern_rotation) {
-    multiLayer(pattern_path, pattern_offset, 1, is_flipping_enabled, pattern_rotation);
 }
 
 
@@ -100,6 +161,14 @@ void FullPrintingConfiguration::tuneLineSeparationAndSpeed(double printing_dista
                                  starting_line_separation, finishing_line_separation, line_separation_steps,
                                  starting_speed, finishing_speed, speed_steps);
 
+}
+
+const ExtrusionConfiguration &FullPrintingConfiguration::getExtrusionConfiguration() const {
+    return extrusion_configuration;
+}
+
+const PrinterConfiguration &FullPrintingConfiguration::getPrinterConfiguration() const {
+    return printer_configuration;
 }
 
 

@@ -22,13 +22,16 @@
 #include <iostream>
 
 #include "extrusion_configuration.h"
+#include "full_printing_configuration.h"
 #include "hyrel.h"
 
 std::string getDiameterString(const ExtrusionConfiguration &extrusion_configuration);
 
-double extrudedAmount(double length, double width, double height, double extrusion_multiplier);
+double extrudedVolume(double length, double width, double height, double extrusion_multiplier);
 
-double extrudedAmount(const Hyrel &hyrel, const ExtrusionConfiguration &extrusion_configuration);
+double extrudedVolume(const Hyrel &hyrel, const ExtrusionConfiguration &extrusion_configuration);
+
+int extrudedPulses(const Hyrel &hyrel, const ExtrusionConfiguration &extrusion_configuration);
 
 std::string getParameterListString(const std::string &parameter_name, double minimum, double maximum, int steps);
 

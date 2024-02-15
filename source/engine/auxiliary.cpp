@@ -28,15 +28,21 @@ std::string getDiameterString(const ExtrusionConfiguration &extrusion_configurat
     return suffix_stream.str();
 }
 
-double extrudedAmount(double length, double width, double height, double extrusion_multiplier) {
+double extrudedVolume(double length, double width, double height, double extrusion_multiplier) {
     return length * width * height * extrusion_multiplier;
 }
 
-double extrudedAmount(const Hyrel &hyrel, const ExtrusionConfiguration &extrusion_configuration) {
-    return extrudedAmount(hyrel.getExtrusionValue(), extrusion_configuration.getDiameter(),
+double extrudedVolume(const Hyrel &hyrel, const ExtrusionConfiguration &extrusion_configuration) {
+    return extrudedVolume(hyrel.getExtrusionValue(), extrusion_configuration.getDiameter(),
                           extrusion_configuration.getLayerHeight(),
                           extrusion_configuration.getExtrusionMultiplier());
 }
+
+int extrudedPulses(const Hyrel &hyrel, const ExtrusionConfiguration &extrusion_configuration) {
+    double extruded_volume = extrudedVolume(hyrel, extrusion_configuration);
+    return int(extruded_volume * 1297);
+}
+
 
 std::string getParameterListString(const std::string &parameter_name, double minimum, double maximum, int steps) {
     std::ostringstream parameter_list_string;

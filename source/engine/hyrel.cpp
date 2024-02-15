@@ -20,7 +20,7 @@
 #include <fstream>
 #include <ctime>
 #include <algorithm>
-#include <math.h>
+#include <cmath>
 
 #include "hyrel.h"
 #include "valarray_operations.h"
@@ -38,8 +38,8 @@ int mCommandToolNumber(int tool_number) {
 void Hyrel::selectTool(unsigned int tool_number) {
     const unsigned int number_of_tools = 4;
     if (tool_number < number_of_tools) {
-        addComment("Selecting tool");
-        generalCommand('T', (int) tool_number);
+        comment("Selecting tool");
+        command('T', (int) tool_number);
         current_tool = tool_number;
     }
 }
@@ -47,19 +47,18 @@ void Hyrel::selectTool(unsigned int tool_number) {
 void Hyrel::defineHeightOffset(double height, unsigned int register_number) {
     const double max_height = 120;
     if (0 > height || height > max_height) {
-        std::cout << "Gcode writing -> defineHeightOffset -> tool height: max value "
-                  << max_height << ", used value " << height << "\n";
+        throw std::runtime_error("Incorrect height offset.");
     } else {
-        generalCommand({'M', 'H', 'Z'},
-                       {true, true, false},
-                       {660, (double) register_number, height});
+        command({'M', 'H', 'Z'},
+                {true, true, false},
+                {660, (double) register_number, height});
     }
 }
 
 void Hyrel::invokeHeightOffset(double height, unsigned int register_number) {
-    generalCommand({'G', 'Z', 'H'},
-                   {true, false, true},
-                   {0, height, (double) register_number});
+    command({'G', 'Z', 'H'},
+            {true, false, true},
+            {0, height, (double) register_number});
 }
 
 void
@@ -68,17 +67,14 @@ Hyrel::defineToolOffset(int tool_number, const std::vector<double> &xyz) {
     const double y_max = 200;
     const double z_max = 120;
     if (0 > xyz[0] || xyz[0] > x_max) {
-        std::cout << "Gcode writing -> defineToolOffset -> tool x coordinate: max value "
-                  << x_max << ", used value " << xyz[0] << "\n";
+        throw std::runtime_error("Incorrect x-offset.");
     } else if (0 > xyz[1] || xyz[1] > y_max) {
-        std::cout << "Gcode writing -> defineToolOffset -> tool y coordinate: max value "
-                  << y_max << ", used value " << xyz[1] << "\n";
+        throw std::runtime_error("Incorrect y-offset.");
     } else if (0 > xyz[2] || xyz[2] > z_max) {
-        std::cout << "Gcode writing -> defineToolOffset -> tool z coordinate: max value "
-                  << z_max << ", used value " << xyz[2] << "\n";
+        throw std::runtime_error("Incorrect z-offset.");
     } else {
-        addComment("Defining tool offset");
-        generalCommand(
+        comment("Defining tool offset");
+        command(
                 {'M', 'T', 'O', 'X', 'Y', 'Z'},
                 {true, true, true, false, false, false},
                 {6, (double) mCommandToolNumber(tool_number), (double) (tool_number + 1), xyz[0], xyz[1], xyz[2]});
@@ -87,33 +83,33 @@ Hyrel::defineToolOffset(int tool_number, const std::vector<double> &xyz) {
 
 void Hyrel::configurePrime(int tool_number, double pulse_rate, double number_of_pulses, double dwell_time,
                            bool is_executed_immediately) {
-    addComment("Configure priming");
-    generalCommand({'M', 'T', 'S', 'E', 'P'},
-                   {true, true, false, false, false},
-                   {722, (double) mCommandToolNumber(tool_number), pulse_rate, number_of_pulses, dwell_time});
+    comment("Configure priming");
+    command({'M', 'T', 'S', 'E', 'P'},
+            {true, true, false, false, false},
+            {722, (double) mCommandToolNumber(tool_number), pulse_rate, number_of_pulses, dwell_time});
     if (is_executed_immediately) {
-        generalCommand({'M', 'T', 'I'},
-                       {true, true, true},
-                       {722, (double) mCommandToolNumber(tool_number), (double) is_executed_immediately});
+        command({'M', 'T', 'I'},
+                {true, true, true},
+                {722, (double) mCommandToolNumber(tool_number), (double) is_executed_immediately});
     }
 }
 
 void Hyrel::configureUnprime(int tool_number, double pulse_rate, double number_of_pulses, double dwell_time,
                              bool is_executed_immediately) {
-    addComment("Configure unpriming");
+    comment("Configure unpriming");
     if (number_of_pulses > 0) {
         dwell_time = -number_of_pulses / pulse_rate * 1000;
         dwell_time = 0;
     } else {
         dwell_time = 0;
     }
-    generalCommand({'M', 'T', 'S', 'E', 'P'},
-                   {true, true, false, false, false},
-                   {721, (double) mCommandToolNumber(tool_number), pulse_rate, number_of_pulses, dwell_time});
+    command({'M', 'T', 'S', 'E', 'P'},
+            {true, true, false, false, false},
+            {721, (double) mCommandToolNumber(tool_number), pulse_rate, number_of_pulses, dwell_time});
     if (is_executed_immediately) {
-        generalCommand({'M', 'T', 'I'},
-                       {true, true, true},
-                       {721, (double) mCommandToolNumber(tool_number), (double) is_executed_immediately});
+        command({'M', 'T', 'I'},
+                {true, true, true},
+                {721, (double) mCommandToolNumber(tool_number), (double) is_executed_immediately});
     }
 }
 
@@ -132,9 +128,9 @@ void Hyrel::extrude(const std::valarray<double> &xy, double speed) {
     extrusion_value += extrusion_length;
     print_time += extrusion_length / speed;
     positions = new_positions;
-    generalCommand({'G', 'X', 'Y', 'F', 'E'},
-                   {true, false, false, true, true},
-                   {1, xy[0], xy[1], (double) speed, 1});
+    command({'G', 'X', 'Y', 'F', 'E'},
+            {true, false, false, true, true},
+            {1, xy[0], xy[1], (double) speed, 1});
 }
 
 
@@ -144,37 +140,37 @@ void Hyrel::extrude(const std::valarray<double> &xy) {
 
 
 void Hyrel::configureFlow(double nozzle_width, double layer_height, double flow_multiplier, int pulses, int tool) {
-    addComment("Configuring flow");
-    generalCommand({'M', 'T', 'W', 'Z', 'S', 'P'},
-                   {true, true, false, false, false, true},
-                   {221, (double) mCommandToolNumber(tool), nozzle_width, layer_height, flow_multiplier,
-                    (double) pulses});
+    comment("Configuring flow");
+    command({'M', 'T', 'W', 'Z', 'S', 'P'},
+            {true, true, false, false, false, true},
+            {221, (double) mCommandToolNumber(tool), nozzle_width, layer_height, flow_multiplier,
+             (double) pulses});
 }
 
 void Hyrel::setTemperatureHotend(int temperature, int tool_number) {
-    addComment("Setting hotend temperature");
-    generalCommand({'M', 'T', 'S'}, {true, true, true},
-                   {109, (double) mCommandToolNumber(tool_number), (double) temperature});
+    comment("Setting hotend temperature");
+    command({'M', 'T', 'S'}, {true, true, true},
+            {109, (double) mCommandToolNumber(tool_number), (double) temperature});
 }
 
 void Hyrel::setUnitsToMillimetres() {
-    addComment("Setting units to millimetres");
-    generalCommand('G', 21);
+    comment("Setting units to millimetres");
+    command('G', 21);
 }
 
 void Hyrel::turnMotorsOff() {
-    addComment("Turning motors off");
-    generalCommand('M', 18);
+    comment("Turning motors off");
+    command('M', 18);
 }
 
 void Hyrel::signalFinishedPrint() {
-    addComment("Signaling finished print");
-    generalCommand('M', 30);
+    comment("Signaling finished print");
+    command('M', 30);
 }
 
 void Hyrel::clearOffsets() {
-    addComment("Clearing offsets");
-    generalCommand('G', 53);
+    comment("Clearing offsets");
+    command('G', 53);
 }
 
 std::valarray<double> Hyrel::printZigZagPattern(double length, int number_of_lines, double line_separation,
@@ -186,9 +182,11 @@ std::valarray<double> Hyrel::printZigZagPattern(double length, int number_of_lin
 
     for (int i = initial_index; i < number_of_lines; i++) {
         if (i % 2 == 0) {
+            // For odd lines move in positive x-direction and then in positive y-direction.
             extrude(starting_position + std::valarray<double>{0, i * line_separation}, speed);
             extrude(starting_position + std::valarray<double>{length, i * line_separation}, speed);
         } else {
+            // For even lines move in negative x-direction and in positive y-direction.
             extrude(starting_position + std::valarray<double>{length, i * line_separation}, speed);
             extrude(starting_position + std::valarray<double>{0, i * line_separation}, speed);
         }
@@ -203,11 +201,14 @@ std::valarray<double> Hyrel::printZigZagPattern(double length, int number_of_lin
 }
 
 int Hyrel::primeNow(double length, double prime_rate, double line_separation, double prime_pulses, int tool_number) {
+    // Due to implementation of priming in Hyrel printers, the priming pulses can only go up to
+    // unsigned short (65535), so for priming with higher number of pulses it needs to be divided
+    // into a few sub-steps.
     int priming_lines = ceil(prime_pulses / (USHRT_MAX - 1));
     double priming_pulses_per_line = prime_pulses / priming_lines;
     double priming_time = priming_pulses_per_line / prime_rate / 60;
     double priming_speed = std::min((double) print_speed, length / priming_time);
-    addComment("Priming now");
+    comment("Priming now");
     configurePrime(tool_number, prime_rate, priming_pulses_per_line, 0, false);
 
     for (int i = 0; i < priming_lines; i++) {
@@ -225,11 +226,14 @@ int Hyrel::primeNow(double length, double prime_rate, double line_separation, do
 }
 
 void Hyrel::unprimeNow(double height, double prime_rate, double prime_pulses, int tool_number) {
+    // Due to implementation of priming in Hyrel printers, the priming pulses can only go up to
+    // unsigned short (65535), so for priming with higher number of pulses it needs to be divided
+    // into a few sub-steps.
     int priming_steps = ceil(prime_pulses / (USHRT_MAX - 1));
     double priming_pulses_per_line = prime_pulses / priming_steps;
     double priming_time = priming_pulses_per_line / prime_rate / 60;
     double priming_speed = std::min((double) print_speed, height / priming_time);
-    addComment("Unpriming now");
+    comment("Unpriming now");
     for (int i = 0; i < priming_steps; i++) {
         configureUnprime(tool_number, prime_rate, priming_pulses_per_line, 0, true);
         move(positions[0], positions[1], positions[2] + height, priming_speed);
@@ -240,7 +244,7 @@ void Hyrel::unprimeNow(double height, double prime_rate, double prime_pulses, in
 
 void Hyrel::cleanAndPrime(double clean_length, int number_of_lines, double nozzle_width, int height_offset_register,
                           double layer_height, double prime_rate, double prime_pulses, int tool_number) {
-    addComment("Invoking offsets");
+    comment("Invoking offsets");
     movePlanar({0, 0});
     defineHeightOffset(layer_height, height_offset_register);
     invokeHeightOffset(0, height_offset_register);
@@ -248,7 +252,7 @@ void Hyrel::cleanAndPrime(double clean_length, int number_of_lines, double nozzl
 
     int primed_lines = primeNow(clean_length, prime_rate, 2 * nozzle_width, prime_pulses, tool_number);
 
-    addComment("Starting cleaning");
+    comment("Starting cleaning");
     if (clean_length > 0) {
         printZigZagPattern(clean_length, number_of_lines, 2 * nozzle_width, {0, 0}, primed_lines);
     }
@@ -262,12 +266,12 @@ Hyrel::init(int hotend_temperature, int bed_temperature, double clean_length, do
     const int kra_2_pulses_per_microlitre = 1297;
 
     addBreak();
-    addComment(
+    comment(
             "Tool selected: T" + std::to_string(tool_number) + " / T" +
             std::to_string(mCommandToolNumber(tool_number)));
-    addComment("Nozzle diameter: " + std::to_string(nozzle_width) + " mm");
-    addComment("First layer height: " + std::to_string(first_layer_height) + " mm");
-    addComment("Layer height: " + std::to_string(layer_height) + " mm");
+    comment("Nozzle diameter: " + std::to_string(nozzle_width) + " mm");
+    comment("First layer height: " + std::to_string(first_layer_height) + " mm");
+    comment("Layer height: " + std::to_string(layer_height) + " mm");
     addBreak();
 
     setUnitsToMillimetres();
@@ -294,7 +298,7 @@ Hyrel::init(int hotend_temperature, int bed_temperature, double clean_length, do
     addBreak();
 
     addBreak();
-    addComment("Starting printing");
+    comment("Starting printing");
 }
 
 void
@@ -309,27 +313,27 @@ Hyrel::init(const ExtrusionConfiguration &extrusion_configuration, const Printer
 
 void Hyrel::configureUvPen(int print_head_tool_number, int pen_tool_number, int duty_cycle) {
     if (duty_cycle >= 0 && duty_cycle <= 100) {
-        addComment("Linking pen to activate with the printing moves ");
-        generalCommand({'M', 'T', 'S'},
-                       {true, true, true},
-                       {703, (double) mCommandToolNumber(pen_tool_number),
-                        (double) mCommandToolNumber(print_head_tool_number)});
-        generalCommand({'M', 'T', 'E'},
-                       {true, true, true},
-                       {620, (double) mCommandToolNumber(pen_tool_number), 1});
-        generalCommand({'M', 'T', 'P'},
-                       {true, true, true},
-                       {621, (double) mCommandToolNumber(pen_tool_number), (double) duty_cycle});
+        comment("Linking pen to activate with the printing moves ");
+        command({'M', 'T', 'S'},
+                {true, true, true},
+                {703, (double) mCommandToolNumber(pen_tool_number),
+                 (double) mCommandToolNumber(print_head_tool_number)});
+        command({'M', 'T', 'E'},
+                {true, true, true},
+                {620, (double) mCommandToolNumber(pen_tool_number), 1});
+        command({'M', 'T', 'P'},
+                {true, true, true},
+                {621, (double) mCommandToolNumber(pen_tool_number), (double) duty_cycle});
     }
 }
 
 void Hyrel::configureUvArray(int print_head_tool_number, int duty_cycle) {
     if (duty_cycle >= 0 && duty_cycle <= 100) {
-        addComment("Setting UV array duty cycle ");
-        generalCommand({'M', 'T', 'P'},
-                       {true, true, true},
-                       {106, (double) mCommandToolNumber(print_head_tool_number),
-                        (double) duty_cycle});
+        comment("Setting UV array duty cycle ");
+        command({'M', 'T', 'P'},
+                {true, true, true},
+                {106, (double) mCommandToolNumber(print_head_tool_number),
+                 (double) duty_cycle});
     }
     addBreak();
 }
@@ -386,7 +390,7 @@ bool isMerged(const std::vector<std::valarray<double>> &path, int index) {
 
 void Hyrel::printPath(const std::vector<std::valarray<double>> &path, const std::valarray<double> &position_offset,
                       double grid_spacing) {
-    addComment("Starting new path.");
+    comment("Starting new path.");
     std::valarray<double> previous_connecting_vector = {1, 1};
     std::valarray<double> previous_position = {0, 0};
 
@@ -399,24 +403,23 @@ void Hyrel::printPath(const std::vector<std::valarray<double>> &path, const std:
 }
 
 PatternBoundaries Hyrel::printPattern(const std::vector<std::vector<std::valarray<double>>> &sorted_sequence_of_paths,
-                                      const std::valarray<double> &position_offset, double grid_spacing,
-                                      bool is_flipped) {
+                                      const std::valarray<double> &position_offset, double grid_spacing) {
     PatternBoundaries pattern_boundaries(sorted_sequence_of_paths, grid_spacing);
     pattern_boundaries.scale(grid_spacing);
     pattern_boundaries.move(position_offset);
     for (auto &path: sorted_sequence_of_paths) {
-        addComment("Moving to new path.");
+        comment("Moving to new path.");
         movePlanar(path[0] * grid_spacing + position_offset);
 
         printPath(path, position_offset, grid_spacing);
     }
-    addComment("Pattern completed.");
+    comment("Pattern completed.");
     return pattern_boundaries;
 }
 
 void Hyrel::exportToFile(const boost::filesystem::path &results_path, const std::string &pattern_name,
-                         const std::string &suffix, double extruded_amount, const PatternBoundaries boundaries,
-                         const std::string &comment) {
+                         const std::string &suffix, double extruded_volume, int extruded_pulses,
+                         const PatternBoundaries boundaries, const std::string &comment) {
     if (!is_directory(results_path)) {
         std::cout << "GCode directory \"" << results_path.string() << "\" does not exist. Attempting to create it."
                   << std::endl;
@@ -440,7 +443,7 @@ void Hyrel::exportToFile(const boost::filesystem::path &results_path, const std:
     file << "; Generated using GCodeGenerator " << PROJECT_VER << " on " << time;
     file << "; Michal Zmyslony, University of Cambridge, mlz22@cam.ac.uk" << std::endl << std::endl;
     file << "; Estimated print time: " << print_time << " min" << std::endl;
-    file << "; Estimated amount of extruded material: " << extruded_amount << " ul" << std::endl;
+    file << "; Extruded volume: " << extruded_volume << " ul (" << extruded_pulses << " pulses)" << std::endl;
     file << "; Pattern size: x-" << boundaries.getXMax() << " mm, y-" << boundaries.getYMax() << " mm" << std::endl;
     file << "; " << comment;
     file << getText();
@@ -449,14 +452,15 @@ void Hyrel::exportToFile(const boost::filesystem::path &results_path, const std:
 }
 
 void Hyrel::exportToFile(const boost::filesystem::path &results_path, const std::string &pattern_name,
-                         const std::string &suffix, PatternBoundaries boundaries, double extruded_amount) {
-    exportToFile(results_path, pattern_name, suffix, extruded_amount, boundaries, "");
+                         const std::string &suffix, PatternBoundaries boundaries, double extruded_volume,
+                         int extruded_pulses) {
+    exportToFile(results_path, pattern_name, suffix, extruded_volume, extruded_pulses, boundaries, "");
 }
 
 void Hyrel::addLocalOffset(std::vector<double> offset) {
-    generalCommand({'G', 'X', 'Y', 'Z'},
-                   {true, false, false, false},
-                   {54, offset[0], offset[1], offset[2]});
+    command({'G', 'X', 'Y', 'Z'},
+            {true, false, false, false},
+            {54, offset[0], offset[1], offset[2]});
 }
 
 void printMultiLayer(Hyrel &hyrel, const std::valarray<double> &initial_pattern_offset, double grid_spacing,
@@ -471,9 +475,9 @@ void printMultiLayer(Hyrel &hyrel, const std::valarray<double> &initial_pattern_
         hyrel.moveVertical(current_layer_height);
         if (is_flipping_enabled && i % 2 == 1) {
             auto flipped_pattern = flipPattern(current_pattern);
-            hyrel.printPattern(flipped_pattern, initial_pattern_offset, grid_spacing, true);
+            hyrel.printPattern(flipped_pattern, initial_pattern_offset, grid_spacing);
         } else {
-            hyrel.printPattern(current_pattern, initial_pattern_offset, grid_spacing, false);
+            hyrel.printPattern(current_pattern, initial_pattern_offset, grid_spacing);
         }
     }
 }
@@ -504,7 +508,7 @@ int layerSelection(const std::vector<std::vector<int>> &layers_grid, int i, int 
 void
 printPatternGrid(const boost::filesystem::path &export_directory,
                  std::vector<std::vector<fs::path>> path_grid,
-                 std::vector<std::vector<int>> layers_grid,
+                 const std::vector<std::vector<int>> &layers_grid,
                  double patterns_offset, std::vector<double> &tool_offset,
                  int curing_duty_cycle, double first_layer_height,
                  ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration,
@@ -530,13 +534,7 @@ printPatternGrid(const boost::filesystem::path &export_directory,
 
     std::string pattern_name;
 
-//    if (path_grid.size() != layers_grid.size()) {
-//        throw std::runtime_error("Uneven size of path grid and layers grid.");
-//    }
     for (int i = 0; i < path_grid.size(); i++) {
-//        if (path_grid[i].size() != layers_grid[i].size()) {
-//            throw std::runtime_error("Uneven size of path grid and layers grid.");
-//        }
         double y_offset = previous_row_boundaries.getYMax();
         for (int j = 0; j < path_grid[i].size(); j++) {
             fs::path path = path_grid[i][j];
@@ -563,21 +561,10 @@ printPatternGrid(const boost::filesystem::path &export_directory,
     hyrel.shutDown(printer_configuration);
 
     std::string diameter_suffix = getDiameterString(extrusion_configuration);
-    double extruded_amount = extrudedAmount(hyrel, extrusion_configuration);
-    hyrel.exportToFile(export_directory, pattern_name, diameter_suffix, previous_row_boundaries, extruded_amount);
-}
-
-void
-multiPatternMultiLayer(const boost::filesystem::path &export_directory, std::vector<fs::path> pattern_paths,
-                       std::vector<int> layers, double pattern_offsets, std::vector<double> &tool_offset,
-                       int curing_duty_cycle, double first_layer_height,
-                       ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration,
-                       bool is_flipping_enabled, double pattern_rotation) {
-    std::vector<std::vector<fs::path>> paths_grid({{}, pattern_paths});
-    std::vector<std::vector<int>> layers_grid({{}, layers});
-    printPatternGrid(export_directory, paths_grid, layers_grid, pattern_offsets, tool_offset, curing_duty_cycle,
-                     first_layer_height, extrusion_configuration, printer_configuration, is_flipping_enabled,
-                     pattern_rotation);
+    double extruded_volume = extrudedVolume(hyrel, extrusion_configuration);
+    int extruded_pulses = extrudedPulses(hyrel, extrusion_configuration);
+    hyrel.exportToFile(export_directory, pattern_name, diameter_suffix, previous_row_boundaries, extruded_volume,
+                       extruded_pulses);
 }
 
 
@@ -614,10 +601,11 @@ tuneLineSeparation(const boost::filesystem::path &export_directory, double print
     hyrel.shutDown(printer_configuration);
 
     std::string diameter_suffix = getDiameterString(extrusion_configuration);
-    double extruded_amount = extrudedAmount(hyrel, extrusion_configuration);
     std::string tuning_description = getParameterListString("relative_line_spacing", starting_line_separation,
                                                             finishing_line_separation, line_separation_steps);
-    hyrel.exportToFile(export_directory, "line_spacing", diameter_suffix, extruded_amount,
+    double extruded_volume = extrudedVolume(hyrel, extrusion_configuration);
+    int extruded_pulses = extrudedPulses(hyrel, extrusion_configuration);
+    hyrel.exportToFile(export_directory, "line_spacing", diameter_suffix, extruded_volume, extruded_pulses,
                        PatternBoundaries(0, 0, 0, 0),
                        tuning_description);
 }
@@ -650,14 +638,15 @@ tuneLineSeparationAndHeight(const boost::filesystem::path &export_directory, dou
     hyrel.shutDown(printer_configuration);
 
     std::string diameter_suffix = getDiameterString(extrusion_configuration);
-    double extruded_amount = extrudedAmount(hyrel, extrusion_configuration);
+    double extruded_volume = extrudedVolume(hyrel, extrusion_configuration);
+    int extruded_pulses = extrudedPulses(hyrel, extrusion_configuration);
     std::string tuning_description = getParameterListStringTwoDimensional("height", starting_height, finishing_height,
                                                                           height_steps, "relative_line_spacing",
                                                                           starting_line_separation,
                                                                           finishing_line_separation,
                                                                           line_separation_steps);
     hyrel.exportToFile(export_directory, "height_and_line_spacing", diameter_suffix,
-                       extruded_amount, PatternBoundaries(0, 0, 0, 0), tuning_description);
+                       extruded_volume, extruded_pulses, PatternBoundaries(0, 0, 0, 0), tuning_description);
 }
 
 void
@@ -688,12 +677,13 @@ tuneLineSeparationAndSpeed(const boost::filesystem::path &export_directory, doub
     hyrel.shutDown(printer_configuration);
 
     std::string diameter_suffix = getDiameterString(extrusion_configuration);
-    double extruded_amount = extrudedAmount(hyrel, extrusion_configuration);
+    double extruded_volume = extrudedVolume(hyrel, extrusion_configuration);
+    int extruded_pulses = extrudedPulses(hyrel, extrusion_configuration);
     std::string tuning_description = getParameterListStringTwoDimensional("speed", starting_speed, finishing_speed,
                                                                           speed_steps, "relative_line_spacing",
                                                                           starting_line_separation,
                                                                           finishing_line_separation,
                                                                           line_separation_steps);
     hyrel.exportToFile(export_directory, "speed_and_line_spacing", diameter_suffix,
-                       extruded_amount, PatternBoundaries(0, 0, 0, 0), tuning_description);
+                       extruded_volume, extruded_pulses, PatternBoundaries(0, 0, 0, 0), tuning_description);
 }

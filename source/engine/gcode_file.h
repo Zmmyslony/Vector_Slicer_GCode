@@ -58,12 +58,12 @@ private:
 
     void resetPositionOfFilament();
 
-    void generalCommand(const std::vector<char> &commands, const std::vector<bool> &is_int,
-                        const std::vector<double> &values);
+    void command(const std::vector<char> &commands, const std::vector<bool> &is_int,
+                 const std::vector<double> &values);
 
     void generalCommand(const char &command, double value);
 
-    void generalCommand(const char &command, int value);
+    void command(const char &command, int value);
 
     void moveVerticalRelative(double delta_z);
 
@@ -106,7 +106,7 @@ public:
 
     void exportToFile(const std::string &path);
 
-    void addComment(const std::string &comment);
+    void comment(const std::string &comment);
 
     void setCurrentCoordinatesToZero();
 

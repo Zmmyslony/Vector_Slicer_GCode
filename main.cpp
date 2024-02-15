@@ -30,12 +30,12 @@ int main() {
     fs::path export_directory = cwd / "gcode";
 
     // All units are in mm
-    ExtrusionConfiguration extrusion_configuration(200, 80, 0.2,
+    ExtrusionConfiguration extrusion_configuration(240, 80, 0.2,
                                                    0.1, 1.0, 20);
 
     PrinterConfiguration printing_configuration(3000, 0, 1,
                                                 13, 15,
-                                                40000, 10000, 20000);
+                                                60000, 10000, 20000);
     // For priming 1297 pulses is a single microlitre, tune this value in order to obtain desirable flow.
     // Single microlitre is 14 mm of "filament" for a nozzle diameter of 300 um.
     // 100 pulses = 1 mm of filament
@@ -72,10 +72,9 @@ int main() {
                                  pattern_offset, false, 0);
     }
 
-    printer.printPatternGrid({{},
-                              {paths_directory / "three_charge_blob"}},
-                             {{1}},
-                             pattern_offset, false, 0);
+    printer.printPatternColumn(paths_directory / "three_charge_blob", 1, pattern_offset, false, 0);
+    printer.printPatternColumn(paths_directory / "star_shape", 1, pattern_offset, false, 0);
+    printer.printPatternColumn(paths_directory / "longitudinal_20_10_mm", 6, pattern_offset, false, 0);
 
     double printing_distance = 10;
     int number_of_lines = 15;
@@ -83,14 +82,14 @@ int main() {
 //    printer.tuneLineSeparation(printing_distance, number_of_lines,
 //                               1, 0.8, 5);
 
-    printer.tuneLineSeparationAndSpeed(printing_distance, number_of_lines,
-                                       0.8, 1.2, 3,
-                                       200, 300, 5);
+//    printer.tuneLineSeparationAndSpeed(printing_distance, number_of_lines,
+//                                       0.8, 1.2, 3,
+//                                       200, 300, 5);
 
 //
-//    printer.tuneLineSeparationAndHeight(printing_distance, number_of_lines,
-//                                        1.2, 0.6, 2,
-//                                        0.09, 0.15, 5);
+    printer.tuneLineSeparationAndHeight(printing_distance, number_of_lines,
+                                        1.5, 1.0, 3,
+                                        0.145, 0.105, 3);
 //
 
     std::cout << "Generation complete." << std::endl;

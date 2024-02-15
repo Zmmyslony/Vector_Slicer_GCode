@@ -87,15 +87,15 @@ public:
               double grid_spacing);
 
     PatternBoundaries printPattern(const std::vector<std::vector<std::valarray<double>>> &sorted_sequence_of_paths,
-                                   const std::valarray<double> &position_offset, double grid_spacing,
-                                   bool is_flipped);
+                                   const std::valarray<double> &position_offset, double grid_spacing);
 
     void exportToFile(const boost::filesystem::path &results_path, const std::string &pattern_name,
-                      const std::string &suffix, double extruded_amount, const PatternBoundaries boundaries,
-                      const std::string &comment);
+                      const std::string &suffix, double extruded_volume, int extruded_pulses,
+                      const PatternBoundaries boundaries, const std::string &comment);
 
     void exportToFile(const boost::filesystem::path &results_path, const std::string &pattern_name,
-                      const std::string &suffix, PatternBoundaries boundaries, double extruded_amount);
+                      const std::string &suffix,
+                      PatternBoundaries boundaries, double extruded_volume, int extruded_pulses);
 
     void configureUvPen(int print_head_tool_number, int pen_tool_number, int duty_cycle);
 
@@ -165,7 +165,7 @@ Hyrel standardHyrelInitialisation(const ExtrusionConfiguration &extrusion_config
 
 void printPatternGrid(const boost::filesystem::path &export_directory,
                       std::vector<std::vector<fs::path>> path_grid,
-                      std::vector<std::vector<int>> layers_grid,
+                      const std::vector<std::vector<int>>& layers_grid,
                       double patterns_offset, std::vector<double> &tool_offset,
                       int curing_duty_cycle, double first_layer_height,
                       ExtrusionConfiguration extrusion_configuration, PrinterConfiguration printer_configuration,

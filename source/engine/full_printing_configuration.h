@@ -45,16 +45,13 @@ public:
                               fs::path export_directory, std::vector<double> tool_offset,
                               int uv_duty_cycle, double first_layer_height);
 
+    const ExtrusionConfiguration &getExtrusionConfiguration() const;
 
-    void multiPatternMultiLayer(const std::vector<fs::path> &pattern_paths, std::vector<int> layers,
-                                double pattern_offsets, bool is_flipping_enabled,
-                                double pattern_rotation);
+    const PrinterConfiguration &getPrinterConfiguration() const;
 
-    void multiLayer(const fs::path &pattern_path, double pattern_offset, int layers,
-                    bool is_flipping_enabled, double pattern_rotation);
-
-    void singleLayer(const fs::path &pattern_path, double pattern_offset,
-                     bool is_flipping_enabled, double pattern_rotation);
+    void printPatternColumn(const std::vector<fs::path> &pattern_paths, const std::vector<int>& layers,
+                            double offsets, bool is_flipping_enabled,
+                            double pattern_rotation);
 
     void tuneLineSeparation(double printing_distance, int number_of_lines,
                             double starting_line_separation, double finishing_line_separation,
@@ -74,6 +71,15 @@ public:
     printPatternGrid(const std::vector<std::vector<fs::path>> &path_grid,
                      const std::vector<std::vector<int>> &layers_grid,
                      double offsets, bool is_flipping_enabled, double pattern_rotation);
+
+    void printPatternColumn(const fs::path &pattern_paths, const int &layers, double offsets, bool is_flipping_enabled,
+                            double pattern_rotation);
+
+    void printPatternRow(const std::vector<fs::path> &pattern_paths, const std::vector<int> &layers, double offsets,
+                         bool is_flipping_enabled, double pattern_rotation);
+
+    void printPatternRow(const fs::path &pattern_paths, const int &layers, double offsets, bool is_flipping_enabled,
+                         double pattern_rotation);
 };
 
 #endif //GCODEGENERATOR_FULL_PRINTING_CONFIGURATION_H
