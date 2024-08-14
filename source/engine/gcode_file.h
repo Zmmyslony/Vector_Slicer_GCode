@@ -61,9 +61,9 @@ private:
     void command(const std::vector<char> &commands, const std::vector<bool> &is_int,
                  const std::vector<double> &values);
 
-    void generalCommand(const char &command, double value);
+    void command(const char &command_letter, double value);
 
-    void command(const char &command, int value);
+    void command(const char &command_letter, int value);
 
     void moveVerticalRelative(double delta_z);
 

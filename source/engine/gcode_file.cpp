@@ -62,14 +62,14 @@ void GCodeFile::generalCommand(const std::vector<char> &commands, const std::vec
     }
 }
 
-void GCodeFile::generalCommand(const char &command, double value) {
-    command({command},
+void GCodeFile::command(const char &command_letter, double value) {
+    command({command_letter},
             {false},
             {value});
 }
 
-void GCodeFile::command(const char &command, int value) {
-    command({command},
+void GCodeFile::command(const char &command_letter, int value) {
+    command({command_letter},
             {true},
             {(double) value});
 }
