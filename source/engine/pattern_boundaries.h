@@ -20,6 +20,8 @@
 #define GCODEGENERATOR_PATTERN_BOUNDARIES_H
 
 #include <climits>
+#include <cfloat>
+
 #include <vector>
 #include <valarray>
 
