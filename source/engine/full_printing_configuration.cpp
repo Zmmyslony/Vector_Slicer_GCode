@@ -128,6 +128,22 @@ void FullPrintingConfiguration::printPatternGrid(const std::vector<std::vector<f
     }
 }
 
+void FullPrintingConfiguration::printPatternGrid(const std::vector<std::vector<fs::path>> &path_grid,
+                                                 const std::vector<std::vector<int>> &layers_grid,
+                                                 double offsets)
+/***
+* Prints provided patterns in a grid, where the first dimension goes in the x-direction and the 2nd in the y-direction.
+*
+* @param path_grid grid of patterns to print - note [0, 0] pattern is automatically the cleaning pattern.
+* @param layers_grid layers corresponding to each pattern. If the there are too few rows (1st dim), the following rows
+* will have the same number of layers as the last pattern in the last existing row. If there are too few entries in the
+* row, it repeats the last value.
+* @param offsets mm distance between patterns in each row, and between the rows.
+*/
+{
+    printPatternGrid(path_grid, layers_grid, offsets, false, 0);
+}
+
 
 void FullPrintingConfiguration::tuneLineSeparation(double printing_distance, int number_of_lines,
                                                    double starting_line_separation, double finishing_line_separation,

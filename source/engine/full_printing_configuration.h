@@ -49,7 +49,7 @@ public:
 
     const PrinterConfiguration &getPrinterConfiguration() const;
 
-    void printPatternColumn(const std::vector<fs::path> &pattern_paths, const std::vector<int>& layers,
+    void printPatternColumn(const std::vector<fs::path> &pattern_paths, const std::vector<int> &layers,
                             double offsets, bool is_flipping_enabled,
                             double pattern_rotation);
 
@@ -67,10 +67,13 @@ public:
                                     int line_separation_steps,
                                     int starting_speed, int finishing_speed, int speed_steps);
 
-    void
-    printPatternGrid(const std::vector<std::vector<fs::path>> &path_grid,
-                     const std::vector<std::vector<int>> &layers_grid,
-                     double offsets, bool is_flipping_enabled, double pattern_rotation);
+    void printPatternGrid(const std::vector<std::vector<fs::path>> &path_grid,
+                          const std::vector<std::vector<int>> &layers_grid,
+                          double offsets, bool is_flipping_enabled, double pattern_rotation);
+
+    void printPatternGrid(const std::vector<std::vector<fs::path>> &path_grid,
+                          const std::vector<std::vector<int>> &layers_grid,
+                          double offsets);
 
     void printPatternColumn(const fs::path &pattern_paths, const int &layers, double offsets, bool is_flipping_enabled,
                             double pattern_rotation);
