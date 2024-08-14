@@ -26,7 +26,13 @@ namespace fs = boost::filesystem;
 
 int main() {
     fs::path cwd = boost::dll::program_location().parent_path().parent_path();
-    fs::path paths_directory = cwd / "paths";
+    fs::path paths_directory = cwd.parent_path() / "vector_slicer" / "output" / "paths";
+    if (!fs::exists(paths_directory)) {
+        paths_directory = cwd.parent_path() / "paths";
+    }
+    if (!fs::exists(paths_directory)) {
+        throw std::runtime_error("Paths directory does not exist.");
+    }
     fs::path export_directory = cwd / "gcode";
 
     // All units are in mm
