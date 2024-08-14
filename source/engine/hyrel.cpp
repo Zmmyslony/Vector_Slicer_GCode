@@ -515,7 +515,7 @@ printPatternGrid(const boost::filesystem::path &export_directory,
                  bool is_flipping_enabled, double pattern_rotation) {
     for (auto &path_row: path_grid) {
         for (auto &path: path_row) {
-            path.replace_extension("csv");
+            path += ".csv";
             if (!fs::exists(path)) {
                 throw std::runtime_error(
                         "ERROR: At least one of pattern paths is invalid. Check " + path.stem().string());
