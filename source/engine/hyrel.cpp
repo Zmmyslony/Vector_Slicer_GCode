@@ -438,7 +438,12 @@ void Hyrel::exportToFile(const boost::filesystem::path &results_path, const std:
     time_t ttime = time(nullptr);
 
     char time[26];
+#if defined(_WIN32) || defined(_WIN64)
     ctime_s(time, sizeof time, &ttime);
+#endif
+#if defined(__linux__) || defined(__APPLE__)
+    ctime_r(&ttime, time);
+#endif
     file << std::fixed << std::setprecision(3);
     file << "; Generated using GCodeGenerator " << PROJECT_VER << " on " << time;
     file << "; Michal Zmyslony, University of Cambridge, mlz22@cam.ac.uk" << std::endl << std::endl;
@@ -669,7 +674,7 @@ tuneLineSeparationAndSpeed(const boost::filesystem::path &export_directory, doub
     for (int i = 0; i < speed_steps; i++) {
         hyrel.setPrintSpeed(starting_speed + speed_step * i);
         current_offset = base_offset;
-        base_offset += {printing_distance + 1, 0};
+        base_offset += vald{printing_distance + 1, 0};
         tuneLineSeparationBody(hyrel, current_offset, std::valarray<double>{0, 1}, finishing_line_separation,
                                starting_line_separation, line_separation_steps, printing_distance, number_of_lines,
                                extrusion_configuration.getDiameter());
