@@ -629,7 +629,7 @@ tuneLineSeparationAndHeight(const boost::filesystem::path &export_directory, dou
     for (int i = 0; i < height_steps; i++) {
         hyrel.moveVertical(starting_height + i * height_step - first_layer_height);
         current_offset = base_offset;
-        base_offset += {printing_distance + 1, 0};
+        base_offset += vald{printing_distance + 1, 0};
         tuneLineSeparationBody(hyrel, current_offset, std::valarray<double>{0, 1}, finishing_line_separation,
                                starting_line_separation, line_separation_steps, printing_distance, number_of_lines,
                                extrusion_configuration.getDiameter());
