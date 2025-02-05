@@ -1,6 +1,6 @@
 # gCode Generator for Vector Slicer
 
-## Warning: this code is unmaintained
+## Warning: this code is deprecated
 This package was superseded by https://github.com/Zmmyslony/VectorSlicerGCode, and is no longer maintained. 
 ### Description
 
