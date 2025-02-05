@@ -1,5 +1,7 @@
 # gCode Generator for Vector Slicer
 
+## Warning: this code is unmaintained
+This package was superseded by https://github.com/Zmmyslony/VectorSlicerGCode, and is no longer maintained. 
 ### Description
 
 This program is meant to be used together with Vector Slicer
@@ -22,3 +24,4 @@ operating system, although it was only tested on Windows 10 and Ubuntu 20.04.5 L
 
 Software is published without any guarantee or promise of maintenance. It is
 developed for internal use, and is published without extensive documentation.
+
